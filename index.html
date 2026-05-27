@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Manager, Performer & Scroller</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent-color: #16a34a;
+            --accent-hover: #15803d;
+            --purple-color: #7c3aed;
+            --purple-hover: #6d28d9;
+            --background-color: #f8fafc;
+            --surface-color: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+            --chord-bg: #67e8f9;
+            --chord-text: #0e7490;
+            --radius: 8px;
+            --perf-font-size: 1.25rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 6rem;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--background-color);
+            padding-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            color: var(--text-color);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .library-selector-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        select {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background-color: var(--surface-color);
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .search-box-container {
+            background: #f1f5f9;
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            border: 1px dashed #94a3b8;
+        }
+
+        .search-inputs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+            align-items: end;
+        }
+
+        .search-inputs-grid input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .mode-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #e2e8f0;
+            padding: 0.25rem;
+            border-radius: 30px;
+        }
+
+        .mode-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #64748b;
+        }
+
+        .mode-btn.active {
+            background: var(--surface-color);
+            color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .form-three-column {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 220px;
+            font-family: monospace;
+        }
+
+        .section-divider {
+            margin: 2rem 0 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sub-heading {
+            font-size: 1.1rem;
+            color: #475569;
+            margin-bottom: 0.75rem;
+        }
+
+        .actions-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-success {
+            background-color: var(--accent-color);
+        }
+
+        .btn-success:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-purple {
+            background-color: var(--purple-color);
+        }
+
+        .btn-purple:hover {
+            background-color: var(--purple-hover);
+        }
+
+        .btn-secondary {
+            background-color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        #performanceView {
+            display: none;
+        }
+
+        .perf-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .perf-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .perf-meta {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-cluster {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .perf-badge {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .perf-structure {
+            font-size: 0.95rem;
+            font-style: italic;
+            color: var(--primary-color);
+            background: #eff6ff;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .perf-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .perf-section-heading {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #475569;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 0.5rem;
+        }
+
+        .song-line {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .chord-row {
+            display: block;
+            height: 1.4rem;
+            position: relative;
+            white-space: pre;
+            font-family: monospace;
+            font-size: calc(var(--perf-font-size) * 0.8);
+            font-weight: bold;
+        }
+
+        .chord-wrapper {
+            position: absolute;
+            background-color: var(--chord-bg);
+            color: var(--chord-text);
+            padding: 0 4px;
+            border-radius: 4px;
+            line-height: 1.2;
+        }
+
+        .lyric-row {
+            display: block;
+            font-size: var(--perf-font-size);
+            white-space: pre-wrap;
+            color: var(--text-color);
+            min-height: 1.2rem;
+        }
+
+        .scroll-control-dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            display: none;
+        }
+
+        .dock-cluster {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1 id="appTitle">Song Editor</h1>
+        <div class="header-controls">
+            <div class="library-selector-group">
+                <label for="songLibrarySelect" style="margin-bottom: 0;">Open Song:</label>
+                <select id="songLibrarySelect">
+                    <option value="">-- Select a Saved Song --</option>
+                </select>
+            </div>
+            <div class="mode-toggle-container">
+                <button class="mode-btn active" id="editModeBtn">Edit View</button>
+                <button class="mode-btn" id="perfModeBtn">Performance Mode</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="editorView">
+            
+            <div class="search-box-container">
+                <label style="color: var(--primary-color);">Cloud Lyric & Metadata Auto-Fetcher</label>
+                <div class="hint">Specify an exact artist and song title to fetch the full text lyrics directly from the web catalog.</div>
+                <div class="search-inputs-grid">
+                    <div>
+                        <label for="searchArtist" style="font-size: 0.8rem; margin-bottom: 0.2rem;">Artist Name</label>
+                        <input type="text" id="searchArtist" placeholder="e.g., Adele">
+                    </div>
+                    <div>
+                        <label for="searchTitle" style="font-size: 0.8rem; margin-bottom: 0.2rem;">Song Title</label>
+                        <input type="text" id="searchTitle" placeholder="e.g., Hello">
+                    </div>
+                    <button type="button" id="apiSearchBtn" class="btn" style="padding: 0.55rem 1.25rem;">Fetch & Import</button>
+                </div>
+            </div>
+
+            <form id="songForm">
+                <div class="form-three-column">
+                    <div class="form-group">
+                        <label for="songTitle">Song Title</label>
+                        <input type="text" id="songTitle" required placeholder="e.g., You Saved Me">
+                    </div>
+                    <div class="form-group">
+                        <label for="songKey">Key Signature</label>
+                        <input type="text" id="songKey" placeholder="e.g., E">
+                    </div>
+                    <div class="form-group">
+                        <label for="songTempo">Tempo (BPM)</label>
+                        <input type="number" id="songTempo" min="30" max="300" value="80">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="songArtist">Artist / Author</label>
+                    <input type="text" id="songArtist" placeholder="e.g., Tanyan Lukesh">
+                </div>
+
+                <div class="form-group">
+                    <label for="songStructure">Song Structure</label>
+                    <input type="text" id="songStructure" placeholder="e.g., Verse 1, Chorus, Verse 2, Chorus">
+                </div>
+
+                <div class="form-group">
+                    <label for="songLyrics">Lyrics & Chords (ChordPro Format)</label>
+                    <textarea id="songLyrics" placeholder="[Verse 1]&#10;[E(C)] You are a hiding [B(G)] place for me..."></textarea>
+                </div>
+
+                <div class="sub-heading">Current Track Actions</div>
+                <div class="actions-tabs">
+                    <button type="button" id="saveLocalBtn" class="btn btn-success">Save to Library</button>
+                    <button type="button" id="exportBtn" class="btn">Export Single Song (.json)</button>
+                    
+                    <div class="file-input-wrapper">
+                        <button type="button" class="btn btn-secondary">Import Single Song (.json)</button>
+                        <input type="file" id="importFile" accept=".json">
+                    </div>
+
+                    <button type="button" id="deleteLocalBtn" class="btn btn-secondary" style="background-color: #ef4444;">Delete From Library</button>
+                    <button type="button" id="clearBtn" class="btn btn-secondary">Clear Form</button>
+                </div>
+
+                <div class="section-divider"></div>
+                <div class="sub-heading" style="color: var(--purple-color);">Set List Backup Engine</div>
+                <div class="hint" style="margin-bottom: 0.5rem;">Package every single saved song in your library into one file to share your complete set list with bandmates instantly.</div>
+                <div class="actions-tabs">
+                    <button type="button" id="exportSetListBtn" class="btn btn-purple">Export Complete Set List (.json)</button>
+                    
+                    <div class="file-input-wrapper">
+                        <button type="button" class="btn btn-secondary">Import Set List (.json)</button>
+                        <input type="file" id="importSetListFile" accept=".json">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div id="performanceView">
+            <div class="perf-header">
+                <div>
+                    <div class="perf-title" id="renderTitle">Song Title</div>
+                    <div class="perf-meta" id="renderArtist">Artist Name</div>
+                </div>
+                <div class="badge-cluster">
+                    <div class="perf-badge" id="renderKey">Key: C</div>
+                    <div class="perf-badge" id="renderTempo">80 BPM</div>
+                </div>
+            </div>
+            
+            <div id="renderStructureWrapper">
+                <div class="perf-structure" id="renderStructure">Structure</div>
+            </div>
+            
+            <div id="perfContent"></div>
+        </div>
+    </main>
+</div>
+
+<div class="scroll-control-dock" id="scrollDock">
+    <div class="dock-cluster">
+        <button type="button" id="playScrollBtn" class="btn btn-success">Play Auto-Scroll</button>
+        <button type="button" id="resetScrollBtn" class="btn btn-secondary">Reset Top</button>
+    </div>
+    
+    <div class="dock-cluster">
+        <div class="slider-group">
+            <label for="fontSizeSlider">Font Size:</label>
+            <input type="range" id="fontSizeSlider" min="14" max="36" value="20">
+            <span id="fontSizeDisplay">20px</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editorView = document.getElementById('editorView');
+        const performanceView = document.getElementById('performanceView');
+        const editModeBtn = document.getElementById('editModeBtn');
+        const perfModeBtn = document.getElementById('perfModeBtn');
+        const appTitle = document.getElementById('appTitle');
+        const scrollDock = document.getElementById('scrollDock');
+        const librarySelect = document.getElementById('songLibrarySelect');
+
+        const searchArtist = document.getElementById('searchArtist');
+        const searchTitle = document.getElementById('searchTitle');
+        const apiSearchBtn = document.getElementById('apiSearchBtn');
+
+        const songForm = document.getElementById('songForm');
+        const saveLocalBtn = document.getElementById('saveLocalBtn');
+        const deleteLocalBtn = document.getElementById('deleteLocalBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importFile = document.getElementById('importFile');
+        const clearBtn = document.getElementById('clearBtn');
+
+        const exportSetListBtn = document.getElementById('exportSetListBtn');
+        const importSetListFile = document.getElementById('importSetListFile');
+
+        const formFields = {
+            title: document.getElementById('songTitle'),
+            key: document.getElementById('songKey'),
+            tempo: document.getElementById('songTempo'),
+            artist: document.getElementById('songArtist'),
+            structure: document.getElementById('songStructure'),
+            lyrics: document.getElementById('songLyrics')
+        };
+
+        const renderFields = {
+            title: document.getElementById('renderTitle'),
+            artist: document.getElementById('renderArtist'),
+            key: document.getElementById('renderKey'),
+            tempo: document.getElementById('renderTempo'),
+            structure: document.getElementById('renderStructure'),
+            structureWrapper: document.getElementById('renderStructureWrapper'),
+            content: document.getElementById('perfContent')
+        };
+
+        const playScrollBtn = document.getElementById('playScrollBtn');
+        const resetScrollBtn = document.getElementById('resetScrollBtn');
+        const fontSizeSlider = document.getElementById('fontSizeSlider');
+        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+        
+        let isScrolling = false;
+        let animationFrameId = null;
+        let lastTimestamp = 0;
+        let currentScrollY = 0;
+
+        updateLibraryDropdown();
+
+        fontSizeSlider.addEventListener('input', (e) => {
+            const size = e.target.value;
+            fontSizeDisplay.textContent = `${size}px`;
+            document.documentElement.style.setProperty('--perf-font-size', `${size}px`);
+        });
+
+        function getLibrary() {
+            return JSON.parse(localStorage.getItem('song_manager_library')) || {};
+        }
+
+        function updateLibraryDropdown() {
+            const library = getLibrary();
+            const currentSelected = librarySelect.value;
+            
+            librarySelect.innerHTML = '<option value="">-- Select a Saved Song --</option>';
+            Object.keys(library).sort().forEach(title => {
+                const option = document.createElement('option');
+                option.value = title;
+                option.textContent = title;
+                librarySelect.appendChild(option);
+            });
+
+            if (library[currentSelected]) {
+                librarySelect.value = currentSelected;
+            }
+        }
+
+        exportSetListBtn.addEventListener('click', () => {
+            const library = getLibrary();
+            if (Object.keys(library).length === 0) {
+                alert('Your local library is currently empty. Add and save songs before exporting a set list.');
+                return;
+            }
+
+            const packageData = {
+                type: "SET_LIST_EXPORT",
+                version: "1.0",
+                exportedAt: new Date().toISOString(),
+                songs: library
+            };
+
+            const blob = new Blob([JSON.stringify(packageData, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString().split('T')[0];
+            link.download = `band_setlist_${timestamp}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        });
+
+        // REWRITTEN AND ROBUST SET LIST IMPORT PROCESSING LOGIC
+        importSetListFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const parsedData = JSON.parse(evt.target.result);
+                    let incomingSongs = null;
+
+                    // Fallback Auto-Detection: Did they load a dedicated Set List file or a Single Song file?
+                    if (parsedData.type === "SET_LIST_EXPORT" && parsedData.songs) {
+                        incomingSongs = parsedData.songs;
+                    } else if (parsedData.title && parsedData.lyrics) {
+                        // The user fed a single song JSON file into the set list engine. Adapt on the fly!
+                        incomingSongs = {};
+                        incomingSongs[parsedData.title] = parsedData;
+                    } else {
+                        throw new Error("JSON structure does not match a single song schema or package set list mapping keys.");
+                    }
+
+                    const songCount = Object.keys(incomingSongs).length;
+                    if (songCount === 0) {
+                        throw new Error("No valid song data blocks found inside this file.");
+                    }
+
+                    if (confirm(`Found ${songCount} song(s) in this file. Merge them into your library now?`)) {
+                        const currentLibrary = getLibrary();
+                        const mergedLibrary = { ...currentLibrary, ...incomingSongs };
+                        
+                        localStorage.setItem('song_manager_library', JSON.stringify(mergedLibrary));
+                        updateLibraryDropdown();
+                        alert(`Success! Imported ${songCount} song(s) into your local catalog.`);
+                    }
+                } catch (err) {
+                    console.error("Internal Parser Trace:", err);
+                    alert('Import Failure: ' + err.message + '\nCheck the browser developer console for file diagnostics.');
+                } finally {
+                    e.target.value = ''; // Always clear file inputs to allow re-uploads
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // API Fetch Engine
+        apiSearchBtn.addEventListener('click', async () => {
+            const artistQuery = searchArtist.value.trim();
+            const titleQuery = searchTitle.value.trim();
+
+            if (!artistQuery || !titleQuery) {
+                alert('Please provide both the Artist Name and Song Title to execute a lyrics sync.');
+                return;
+            }
+
+            apiSearchBtn.textContent = 'Fetching Lyrics...';
+            apiSearchBtn.disabled = true;
+
+            try {
+                const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artistQuery)}/${encodeURIComponent(titleQuery)}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Song not found or connection timed out.');
+                const data = await response.json();
+                if (!data.lyrics) throw new Error('Lyrics response container returned empty content.');
+
+                let rawLyrics = data.lyrics;
+                if (!rawLyrics.trim().startsWith('[')) rawLyrics = `[Song Text]\n` + rawLyrics;
+
+                formFields.title.value = titleQuery;
+                formFields.artist.value = artistQuery;
+                formFields.lyrics.value = rawLyrics.trim();
+                formFields.key.value = 'C'; 
+                formFields.tempo.value = 85; 
+                formFields.structure.value = 'Verse 1, Chorus';
+
+                searchArtist.value = '';
+                searchTitle.value = '';
+                alert(`Successfully grabbed lyrics for "${titleQuery}"! Save it to your library below.`);
+            } catch (error) {
+                alert('Fetch Failure: ' + error.message);
+            } finally {
+                apiSearchBtn.textContent = 'Fetch & Import';
+                apiSearchBtn.disabled = false;
+            }
+        });
+
+        // Form Actions
+        saveLocalBtn.addEventListener('click', () => {
+            const title = formFields.title.value.trim();
+            if (!title) return alert('A valid song title is required.');
+
+            const library = getLibrary();
+            library[title] = {
+                title: title,
+                key: formFields.key.value.trim() || 'C',
+                tempo: parseInt(formFields.tempo.value, 10) || 80,
+                artist: formFields.artist.value.trim(),
+                structure: formFields.structure.value.trim(),
+                lyrics: formFields.lyrics.value.trim(),
+                updatedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('song_manager_library', JSON.stringify(library));
+            updateLibraryDropdown();
+            librarySelect.value = title;
+            alert(`"${title}" saved successfully.`);
+        });
+
+        deleteLocalBtn.addEventListener('click', () => {
+            const title = librarySelect.value;
+            if (!title) return alert('Select an active song to clear.');
+            if (confirm(`Remove "${title}"?`)) {
+                const library = getLibrary();
+                delete library[title];
+                localStorage.setItem('song_manager_library', JSON.stringify(library));
+                updateLibraryDropdown();
+                songForm.reset();
+                editModeBtn.click();
+            }
+        });
+
+        librarySelect.addEventListener('change', (e) => {
+            const selectedTitle = e.target.value;
+            if (!selectedTitle) return;
+            const library = getLibrary();
+            const songData = library[selectedTitle];
+            if (songData) {
+                formFields.title.value = songData.title || '';
+                formFields.key.value = songData.key || 'C';
+                formFields.tempo.value = songData.tempo || '80';
+                formFields.artist.value = songData.artist || '';
+                formFields.structure.value = songData.structure || '';
+                formFields.lyrics.value = songData.lyrics || '';
+                if (perfModeBtn.classList.contains('active')) renderPerformanceView();
+            }
+        });
+
+        editModeBtn.addEventListener('click', () => {
+            stopAutoScroll();
+            editModeBtn.classList.add('active');
+            perfModeBtn.classList.remove('active');
+            performanceView.style.display = 'none';
+            scrollDock.style.display = 'none';
+            editorView.style.display = 'block';
+            appTitle.textContent = "Song Editor";
+        });
+
+        perfModeBtn.addEventListener('click', () => {
+            if (!formFields.title.value.trim()) return alert('Populate staging data first.');
+            editModeBtn.classList.remove('active');
+            perfModeBtn.classList.add('active');
+            editorView.style.display = 'none';
+            performanceView.style.display = 'block';
+            scrollDock.style.display = 'flex';
+            appTitle.textContent = "Performance Mode";
+            renderPerformanceView();
+        });
+
+        function renderPerformanceView() {
+            renderFields.title.textContent = formFields.title.value.trim();
+            renderFields.tempo.textContent = `${parseInt(formFields.tempo.value, 10) || 80} BPM`;
+            renderFields.key.textContent = `Key: ${formFields.key.value.trim() || 'C'}`;
+            renderFields.artist.textContent = formFields.artist.value.trim() || '';
+            renderFields.artist.style.display = formFields.artist.value.trim() ? 'block' : 'none';
+
+            if (formFields.structure.value.trim()) {
+                renderFields.structure.textContent = `Structure: ${formFields.structure.value.trim()}`;
+                renderFields.structureWrapper.style.display = 'block';
+            } else {
+                renderFields.structureWrapper.style.display = 'none';
+            }
+
+            renderFields.content.innerHTML = '';
+            const rawLines = formFields.lyrics.value.split('\n');
+            let currentSectionDiv = null;
+
+            rawLines.forEach(line => {
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('[') && trimmedLine.endsWith(']') && !trimmedLine.includes(' ')) {
+                    currentSectionDiv = document.createElement('div');
+                    currentSectionDiv.className = 'perf-section';
+                    const heading = document.createElement('div');
+                    heading.className = 'perf-section-heading';
+                    heading.textContent = trimmedLine.slice(1, -1);
+                    currentSectionDiv.appendChild(heading);
+                    renderFields.content.appendChild(currentSectionDiv);
+                    return;
+                }
+                if (!currentSectionDiv) {
+                    currentSectionDiv = document.createElement('div');
+                    currentSectionDiv.className = 'perf-section';
+                    renderFields.content.appendChild(currentSectionDiv);
+                }
+                currentSectionDiv.appendChild(parseChordLine(line));
+            });
+            currentScrollY = window.scrollY;
+        }
+
+        function parseChordLine(line) {
+            const lineContainer = document.createElement('div');
+            lineContainer.className = 'song-line';
+            const chordRow = document.createElement('div');
+            chordRow.className = 'chord-row';
+            const lyricRow = document.createElement('div');
+            lyricRow.className = 'lyric-row';
+
+            const regex = /\[([^\]]+)\]/g;
+            let match, lastIndex = 0, pureLyrics = '', chordsArray = [];
+
+            while ((match = regex.exec(line)) !== null) {
+                pureLyrics += line.substring(lastIndex, match.index);
+                chordsArray.push({ chordText: match[1], charPosition: pureLyrics.length });
+                lastIndex = regex.lastIndex;
+            }
+            pureLyrics += line.substring(lastIndex);
+            lyricRow.textContent = pureLyrics || ' ';
+
+            if (chordsArray.length > 0) {
+                chordsArray.forEach(ch => {
+                    const chordSpan = document.createElement('span');
+                    chordSpan.className = 'chord-wrapper';
+                    chordSpan.textContent = ch.chordText;
+                    chordSpan.style.left = `${ch.charPosition * 0.58}em`;
+                    chordRow.appendChild(chordSpan);
+                });
+                lineContainer.appendChild(chordRow);
+            }
+            lineContainer.appendChild(lyricRow);
+            return lineContainer;
+        }
+
+        function scrollLoop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const delta = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+            const bpm = parseInt(formFields.tempo.value, 10) || 80;
+            currentScrollY += delta * ((bpm / 60) * 0.015);
+            window.scrollTo(0, currentScrollY);
+            if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight) return stopAutoScroll();
+            if (isScrolling) animationFrameId = requestAnimationFrame(scrollLoop);
+        }
+
+        function startAutoScroll() {
+            isScrolling = true;
+            lastTimestamp = 0;
+            currentScrollY = window.scrollY;
+            playScrollBtn.textContent = "Pause Auto-Scroll";
+            playScrollBtn.className = "btn btn-secondary";
+            animationFrameId = requestAnimationFrame(scrollLoop);
+        }
+
+        function stopAutoScroll() {
+            isScrolling = false;
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            playScrollBtn.textContent = "Play Auto-Scroll";
+            playScrollBtn.className = "btn btn-success";
+        }
+
+        playScrollBtn.addEventListener('click', () => isScrolling ? stopAutoScroll() : startAutoScroll());
+        resetScrollBtn.addEventListener('click', () => { stopAutoScroll(); currentScrollY = 0; window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+        exportBtn.addEventListener('click', () => {
+            if (!formFields.title.value.trim()) return alert('Enter a song title.');
+            const songData = {
+                title: formFields.title.value.trim(),
+                key: formFields.key.value.trim() || 'C',
+                tempo: parseInt(formFields.tempo.value, 10) || 80,
+                artist: formFields.artist.value.trim(),
+                structure: formFields.structure.value.trim(),
+                lyrics: formFields.lyrics.value.trim(),
+                version: "1.6"
+            };
+            const blob = new Blob([JSON.stringify(songData, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${songData.title.toLowerCase().replace(/[^a-z0-9]/gi, '_')}_song.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        importFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const songData = JSON.parse(evt.target.result);
+                    formFields.title.value = songData.title || '';
+                    formFields.key.value = songData.key || 'C';
+                    formFields.tempo.value = songData.tempo || '80';
+                    formFields.artist.value = songData.artist || '';
+                    formFields.structure.value = songData.structure || '';
+                    formFields.lyrics.value = songData.lyrics || '';
+                    alert('Import successful.');
+                } catch (err) { alert('Invalid layout format.'); }
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Clear workspace inputs?')) {
+                stopAutoScroll();
+                songForm.reset();
+                librarySelect.value = "";
+                editModeBtn.click();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
