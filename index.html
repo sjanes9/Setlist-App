@@ -1,521 +1,334 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song Manager, Performer & Scroller</title>
+    <title>Song Manager, Performer &amp; Scroller</title>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --accent-color: #16a34a;
-            --accent-hover: #15803d;
-            --purple-color: #7c3aed;
-            --purple-hover: #6d28d9;
-            --background-color: #f8fafc;
-            --surface-color: #ffffff;
-            --text-color: #1e293b;
-            --border-color: #cbd5e1;
-            --chord-bg: #67e8f9;
-            --chord-text: #0e7490;
-            --radius: 8px;
-            --perf-font-size: 1.25rem;
+            --primary:#2563eb; --primary-hover:#1d4ed8;
+            --accent:#16a34a;  --accent-hover:#15803d;
+            --danger:#ef4444;  --danger-hover:#dc2626;
+            --purple:#7c3aed;  --purple-hover:#6d28d9;
+            --secondary:#64748b; --secondary-hover:#475569;
+            --bg:#f8fafc; --surface:#ffffff; --surface-2:#f1f5f9;
+            --border:#cbd5e1; --border-subtle:#e2e8f0;
+            --text:#1e293b; --text-muted:#64748b; --text-faint:#94a3b8;
+            --chord-bg:#cffafe; --chord-text:#0e7490;
+            --perf-structure-bg:#eff6ff; --perf-structure-text:#2563eb;
+            --perf-heading-border:#2563eb; --perf-heading-text:#475569;
+            --dock-bg:rgba(255,255,255,0.93);
+            --shadow-card:0 4px 16px rgba(0,0,0,0.08),0 2px 6px rgba(0,0,0,0.04);
+            --shadow-dock:0 -4px 16px rgba(0,0,0,0.06);
+            --sl-bg:#f0f9ff; --sl-border:#bae6fd;
+            --sl-item-bg:#ffffff; --sl-item-hover:#e0f2fe;
+            --sl-active-bg:#2563eb; --sl-active-text:#ffffff;
+            --sl-panel-w:260px;
+            --radius:8px; --radius-lg:12px;
+            --perf-font-size:1.25rem; --transition:0.2s ease;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        [data-theme="dark"] {
+            --bg:#0f172a; --surface:#1e293b; --surface-2:#273449;
+            --border:#334155; --border-subtle:#2d3e55;
+            --text:#e2e8f0; --text-muted:#94a3b8; --text-faint:#64748b;
+            --chord-bg:#164e63; --chord-text:#67e8f9;
+            --perf-structure-bg:#1e3a5f; --perf-structure-text:#93c5fd;
+            --perf-heading-border:#3b82f6; --perf-heading-text:#94a3b8;
+            --dock-bg:rgba(15,23,42,0.95);
+            --shadow-card:0 4px 24px rgba(0,0,0,0.4);
+            --shadow-dock:0 -4px 24px rgba(0,0,0,0.4);
+            --sl-bg:#0f2337; --sl-border:#1e4060;
+            --sl-item-bg:#1e293b; --sl-item-hover:#1e3a5f;
+            --sl-active-bg:#3b82f6; --sl-active-text:#ffffff;
         }
-
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.5;
-            padding: 2rem;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: var(--surface-color);
-            padding: 2rem;
-            border-radius: var(--radius);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            margin-bottom: 6rem;
-        }
-
-        header {
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--background-color);
-            padding-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        h1 {
-            font-size: 1.75rem;
-            color: var(--text-color);
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .library-selector-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        select {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            background-color: var(--surface-color);
-            font-family: inherit;
-            font-size: 0.9rem;
-            color: var(--text-color);
-            cursor: pointer;
-        }
-
-        .search-box-container {
-            background: #f1f5f9;
-            padding: 1.25rem;
-            border-radius: var(--radius);
-            margin-bottom: 1.5rem;
-            border: 1px dashed #94a3b8;
-        }
-
-        .search-inputs-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 0.75rem;
-            margin-top: 0.5rem;
-            align-items: end;
-        }
-
-        .search-inputs-grid input {
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            width: 100%;
-        }
-
-        .mode-toggle-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #e2e8f0;
-            padding: 0.25rem;
-            border-radius: 30px;
-        }
-
-        .mode-btn {
-            background: none;
-            border: none;
-            padding: 0.5rem 1.25rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #64748b;
-        }
-
-        .mode-btn.active {
-            background: var(--surface-color);
-            color: var(--primary-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .form-three-column {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            font-family: inherit;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 220px;
-            font-family: monospace;
-        }
-
-        .section-divider {
-            margin: 2rem 0 1rem 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sub-heading {
-            font-size: 1.1rem;
-            color: #475569;
-            margin-bottom: 0.75rem;
-        }
-
-        .actions-tabs {
-            display: flex;
-            gap: 1rem;
-            margin-top: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-success {
-            background-color: var(--accent-color);
-        }
-
-        .btn-success:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .btn-purple {
-            background-color: var(--purple-color);
-        }
-
-        .btn-purple:hover {
-            background-color: var(--purple-hover);
-        }
-
-        .btn-secondary {
-            background-color: #64748b;
-        }
-
-        .btn-secondary:hover {
-            background-color: #475569;
-        }
-
-        .hint {
-            font-size: 0.8rem;
-            color: #64748b;
-            margin-top: 0.25rem;
-        }
-
-        #performanceView {
-            display: none;
-        }
-
-        .perf-header {
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .perf-title {
-            font-size: 2.25rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .perf-meta {
-            font-size: 1.1rem;
-            color: #64748b;
-            margin-bottom: 0.5rem;
-        }
-
-        .badge-cluster {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .perf-badge {
-            background: #f1f5f9;
-            border: 1px solid var(--border-color);
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .perf-structure {
-            font-size: 0.95rem;
-            font-style: italic;
-            color: var(--primary-color);
-            background: #eff6ff;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            display: inline-block;
-            margin-bottom: 1.5rem;
-        }
-
-        .perf-section {
-            margin-bottom: 2.5rem;
-        }
-
-        .perf-section-heading {
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #475569;
-            margin-bottom: 1rem;
-            border-left: 4px solid var(--primary-color);
-            padding-left: 0.5rem;
-        }
-
-        .song-line {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 1.25rem;
-            position: relative;
-        }
-
-        .chord-row {
-            display: block;
-            height: 1.4rem;
-            position: relative;
-            white-space: pre;
-            font-family: monospace;
-            font-size: calc(var(--perf-font-size) * 0.8);
-            font-weight: bold;
-        }
-
-        .chord-wrapper {
-            position: absolute;
-            background-color: var(--chord-bg);
-            color: var(--chord-text);
-            padding: 0 4px;
-            border-radius: 4px;
-            line-height: 1.2;
-        }
-
-        .lyric-row {
-            display: block;
-            font-size: var(--perf-font-size);
-            white-space: pre-wrap;
-            color: var(--text-color);
-            min-height: 1.2rem;
-        }
-
-        .scroll-control-dock {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            border-top: 1px solid var(--border-color);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-            display: none;
-        }
-
-        .dock-cluster {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .file-input-wrapper input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            cursor: pointer;
-            height: 100%;
-            width: 100%;
-        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Georgia','Times New Roman',serif;background-color:var(--bg);color:var(--text);line-height:1.6;padding:2rem;transition:background-color var(--transition),color var(--transition);}
+        .container{max-width:900px;margin:0 auto 7rem;background:var(--surface);padding:2rem;border-radius:var(--radius-lg);box-shadow:var(--shadow-card);transition:background-color var(--transition);}
+        header{margin-bottom:2rem;border-bottom:2px solid var(--border-subtle);padding-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+        h1{font-size:1.75rem;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
+        .header-controls{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
+        .lib-group{display:flex;align-items:center;gap:0.5rem;}
+        .lib-group label{font-weight:600;font-size:0.85rem;white-space:nowrap;margin-bottom:0;}
+        .theme-toggle{background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:50px;padding:0.4rem 0.9rem;font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:0.4rem;transition:background-color var(--transition),border-color var(--transition),color var(--transition);white-space:nowrap;}
+        .theme-toggle:hover{background:var(--border-subtle);}
+        select,input[type="text"],input[type="number"],textarea{width:100%;padding:0.65rem 0.85rem;border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:1rem;color:var(--text);background:var(--surface);transition:border-color var(--transition),background-color var(--transition),color var(--transition);}
+        select{width:auto;padding:0.5rem 1rem;font-size:0.9rem;cursor:pointer;}
+        input[type="text"]:focus,input[type="number"]:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,0.15);}
+        textarea{resize:vertical;min-height:220px;font-family:'Courier New',Courier,monospace;}
+        label{display:block;font-weight:600;margin-bottom:0.45rem;font-size:0.875rem;color:var(--text);}
+        .form-group{margin-bottom:1.25rem;}
+        .form-3col{display:grid;grid-template-columns:2fr 1fr 1fr;gap:1rem;}
+        .mode-toggle-container{display:flex;align-items:center;gap:0.25rem;background:var(--surface-2);padding:0.25rem;border-radius:50px;border:1px solid var(--border);transition:background-color var(--transition),border-color var(--transition);}
+        .mode-btn{background:none;border:none;padding:0.45rem 1.1rem;font-size:0.875rem;font-weight:600;border-radius:50px;cursor:pointer;transition:all var(--transition);color:var(--text-muted);white-space:nowrap;}
+        .mode-btn.active{background:var(--surface);color:var(--primary);box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+        [data-theme="dark"] .mode-btn.active{box-shadow:0 2px 6px rgba(0,0,0,0.4);}
+        .fetch-box{background:var(--surface-2);padding:1.25rem;border-radius:var(--radius);margin-bottom:1.5rem;border:1px dashed var(--border);transition:background-color var(--transition),border-color var(--transition);}
+        .fetch-box>label{color:var(--primary);font-size:0.9rem;margin-bottom:0.25rem;}
+        .fetch-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:0.75rem;margin-top:0.5rem;align-items:end;}
+        .fetch-grid input{padding:0.5rem 0.75rem;font-size:0.9rem;}
+        .notes-box{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--purple);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;transition:background-color var(--transition),border-color var(--transition);}
+        .notes-box label{color:var(--purple);font-size:0.875rem;}
+        .notes-box textarea{min-height:80px;font-family:inherit;font-size:0.95rem;border-color:var(--border-subtle);margin-top:0.25rem;resize:vertical;}
+        .section-divider{margin:1.75rem 0 1rem;border:none;border-top:1px solid var(--border-subtle);}
+        .sub-heading{font-size:1rem;font-weight:700;color:var(--text-muted);margin-bottom:0.75rem;}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:0.35em;border:none;padding:0.65rem 1.35rem;font-family:inherit;font-size:0.9rem;font-weight:600;border-radius:var(--radius);cursor:pointer;transition:background-color var(--transition),transform 0.1s ease;color:#fff;background-color:var(--primary);white-space:nowrap;}
+        .btn:hover{background-color:var(--primary-hover);} .btn:active{transform:scale(0.975);}
+        .btn-success{background-color:var(--accent);} .btn-success:hover{background-color:var(--accent-hover);}
+        .btn-purple{background-color:var(--purple);}  .btn-purple:hover{background-color:var(--purple-hover);}
+        .btn-secondary{background-color:var(--secondary);} .btn-secondary:hover{background-color:var(--secondary-hover);}
+        .btn-danger{background-color:var(--danger);}  .btn-danger:hover{background-color:var(--danger-hover);}
+        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);} .btn-outline:hover{background:var(--surface-2);color:var(--text);}
+        .action-row{display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;}
+        .file-wrap{position:relative;overflow:hidden;display:inline-block;}
+        .file-wrap input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+        .hint{font-size:0.8rem;color:var(--text-faint);margin-top:0.2rem;line-height:1.4;}
+        #performanceView{display:none;}
+        .perf-layout{display:flex;gap:0;transition:gap var(--transition);}
+        .perf-layout.panel-open{gap:1.5rem;}
+        #perfContent-wrap{flex:1;min-width:0;}
+        .perf-header{margin-bottom:2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+        .perf-title{font-size:2.25rem;font-weight:700;color:var(--text);line-height:1.2;}
+        .perf-meta{font-size:1.1rem;color:var(--text-muted);margin-top:0.25rem;}
+        .badge-cluster{display:flex;gap:0.5rem;flex-wrap:wrap;}
+        .perf-badge{background:var(--surface-2);border:1px solid var(--border);padding:0.5rem 1rem;border-radius:var(--radius);font-weight:700;font-size:1rem;color:var(--text);transition:background-color var(--transition),border-color var(--transition),color var(--transition);}
+        .perf-notes{font-size:0.95rem;background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--purple);border-radius:var(--radius);padding:0.75rem 1rem;color:var(--text);margin-bottom:1.25rem;white-space:pre-wrap;transition:background-color var(--transition),border-color var(--transition),color var(--transition);}
+        .perf-structure{font-size:0.95rem;font-style:italic;color:var(--perf-structure-text);background:var(--perf-structure-bg);padding:0.5rem 1rem;border-radius:var(--radius);display:inline-block;margin-bottom:1.5rem;transition:color var(--transition),background-color var(--transition);}
+        .perf-section{margin-bottom:2.5rem;}
+        .perf-section-heading{font-weight:700;font-size:1.15rem;color:var(--perf-heading-text);margin-bottom:1rem;border-left:4px solid var(--perf-heading-border);padding-left:0.6rem;transition:color var(--transition),border-color var(--transition);}
+        .song-line{display:flex;flex-direction:column;margin-bottom:1.25rem;position:relative;}
+        .chord-row{display:block;height:1.5rem;position:relative;white-space:pre;font-family:'Courier New',Courier,monospace;font-size:calc(var(--perf-font-size)*0.8);font-weight:700;}
+        .chord-wrapper{position:absolute;background-color:var(--chord-bg);color:var(--chord-text);padding:0 5px;border-radius:4px;line-height:1.3;transition:background-color var(--transition),color var(--transition);}
+        .lyric-row{display:block;font-size:var(--perf-font-size);white-space:pre-wrap;color:var(--text);min-height:1.4rem;transition:color var(--transition);}
+        .sl-panel{width:0;overflow:hidden;flex-shrink:0;transition:width 0.3s ease;}
+        .sl-panel.open{width:var(--sl-panel-w);}
+        .sl-panel-inner{width:var(--sl-panel-w);background:var(--sl-bg);border:1px solid var(--sl-border);border-radius:var(--radius-lg);padding:1rem;position:sticky;top:1.5rem;max-height:calc(100vh - 10rem);overflow-y:auto;transition:background-color var(--transition),border-color var(--transition);}
+        .sl-panel-hdr{font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;display:flex;justify-content:space-between;align-items:center;}
+        .sl-list{list-style:none;display:flex;flex-direction:column;gap:0.35rem;}
+        .sl-item{display:flex;align-items:center;gap:0.5rem;padding:0.55rem 0.65rem;border-radius:var(--radius);cursor:pointer;transition:background-color var(--transition);border:1px solid transparent;}
+        .sl-item:hover{background:var(--sl-item-hover);}
+        .sl-item.active{background:var(--sl-active-bg);color:var(--sl-active-text);}
+        .sl-item.done{opacity:0.5;} .sl-item.done .sl-title{text-decoration:line-through;}
+        .sl-num{font-size:0.7rem;font-weight:700;color:inherit;opacity:0.6;flex-shrink:0;min-width:1rem;}
+        .sl-info{min-width:0;flex:1;}
+        .sl-title{font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:inherit;}
+        .sl-meta{font-size:0.7rem;color:inherit;opacity:0.7;}
+        .sl-tick{font-size:0.75rem;flex-shrink:0;opacity:0.8;}
+        .sl-builder{background:var(--sl-bg);border:1px solid var(--sl-border);border-radius:var(--radius-lg);padding:1.25rem;transition:background-color var(--transition),border-color var(--transition);}
+        .sl-builder-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:0.5rem;flex-wrap:wrap;}
+        .sl-builder-hdr h3{font-size:1rem;font-weight:700;color:var(--primary);}
+        .sl-add-row{display:flex;gap:0.5rem;margin-bottom:1rem;align-items:center;}
+        .sl-add-row select{flex:1;min-width:0;font-size:0.875rem;padding:0.5rem 0.75rem;}
+        .sl-queue{list-style:none;display:flex;flex-direction:column;gap:0.4rem;min-height:3rem;}
+        .sl-queue-item{display:flex;align-items:center;gap:0.5rem;background:var(--sl-item-bg);border:1px solid var(--border);border-radius:var(--radius);padding:0.5rem 0.75rem;cursor:grab;user-select:none;transition:background-color var(--transition),border-color var(--transition),box-shadow 0.15s ease;}
+        .sl-queue-item:active{cursor:grabbing;}
+        .sl-queue-item.drag-over{border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,0.2);}
+        .sl-queue-item.dragging{opacity:0.4;}
+        .drag-handle{color:var(--text-faint);font-size:1rem;flex-shrink:0;cursor:grab;}
+        .q-num{font-size:0.75rem;font-weight:700;color:var(--text-faint);min-width:1.25rem;text-align:right;flex-shrink:0;}
+        .q-info{flex:1;min-width:0;}
+        .q-title{font-weight:600;font-size:0.9rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .q-meta{font-size:0.75rem;color:var(--text-muted);}
+        .q-remove{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:1rem;line-height:1;padding:0.1rem 0.3rem;border-radius:4px;transition:color var(--transition),background-color var(--transition);flex-shrink:0;}
+        .q-remove:hover{color:var(--danger);background:rgba(239,68,68,0.1);}
+        .sl-empty{text-align:center;color:var(--text-faint);font-size:0.85rem;padding:1rem 0;font-style:italic;}
+        .scroll-control-dock{position:fixed;bottom:0;left:0;right:0;background:var(--dock-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:0.85rem 2rem;display:none;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:var(--shadow-dock);z-index:1000;transition:background-color var(--transition),border-color var(--transition);}
+        .dock-cluster{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+        .slider-group{display:flex;align-items:center;gap:0.5rem;font-weight:600;font-size:0.875rem;color:var(--text);}
+        .slider-group label{margin-bottom:0;color:var(--text-muted);}
+        .speed-group{display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:var(--text-muted);font-weight:600;}
+        .speed-group label{margin-bottom:0;white-space:nowrap;}
+        input[type="range"]{accent-color:var(--primary);cursor:pointer;}
+        .scroll-status{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.8rem;font-weight:600;padding:0.25rem 0.65rem;border-radius:50px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);transition:all var(--transition);user-select:none;}
+        .scroll-status.active{background:#dcfce7;border-color:#86efac;color:#15803d;}
+        [data-theme="dark"] .scroll-status.active{background:#14532d;border-color:#166534;color:#4ade80;}
+        .scroll-status .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+        .scroll-status.active .dot{animation:pulse-dot 1.2s ease-in-out infinite;}
+        @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.75);}}
     </style>
 </head>
 <body>
-
 <div class="container">
     <header>
         <h1 id="appTitle">Song Editor</h1>
         <div class="header-controls">
-            <div class="library-selector-group">
-                <label for="songLibrarySelect" style="margin-bottom: 0;">Open Song:</label>
+            <button class="theme-toggle" id="themeToggleBtn">
+                <span id="themeIcon">&#9728;&#65039;</span>
+                <span id="themeLabel">Light Mode</span>
+            </button>
+            <div class="lib-group">
+                <label for="songLibrarySelect" style="margin-bottom:0;">Open:</label>
                 <select id="songLibrarySelect">
-                    <option value="">-- Select a Saved Song --</option>
+                    <option value="">-- Songs &amp; Set Lists --</option>
                 </select>
             </div>
-            <div class="mode-toggle-container">
-                <button class="mode-btn active" id="editModeBtn">Edit View</button>
-                <button class="mode-btn" id="perfModeBtn">Performance Mode</button>
+            <div class="mode-toggle-container" role="tablist">
+                <button class="mode-btn active" id="editModeBtn" role="tab" aria-selected="true">Edit View</button>
+                <button class="mode-btn" id="perfModeBtn" role="tab" aria-selected="false">Performance Mode</button>
             </div>
         </div>
     </header>
-
     <main>
+        <!-- EDITOR -->
         <div id="editorView">
-            
-            <div class="search-box-container">
-                <label style="color: var(--primary-color);">Cloud Lyric & Metadata Auto-Fetcher</label>
-                <div class="hint">Specify an exact artist and song title to fetch the full text lyrics directly from the web catalog.</div>
-                <div class="search-inputs-grid">
+            <div class="fetch-box">
+                <label>&#9729;&#65039; Cloud Lyric &amp; Metadata Auto-Fetcher</label>
+                <div class="hint">Enter an exact artist and song title to fetch lyrics from the web.</div>
+                <div class="fetch-grid">
                     <div>
-                        <label for="searchArtist" style="font-size: 0.8rem; margin-bottom: 0.2rem;">Artist Name</label>
-                        <input type="text" id="searchArtist" placeholder="e.g., Adele">
+                        <label for="searchArtist" style="font-size:0.8rem;margin-bottom:0.2rem;">Artist</label>
+                        <input type="text" id="searchArtist" placeholder="e.g., Adele" autocomplete="off">
                     </div>
                     <div>
-                        <label for="searchTitle" style="font-size: 0.8rem; margin-bottom: 0.2rem;">Song Title</label>
-                        <input type="text" id="searchTitle" placeholder="e.g., Hello">
+                        <label for="searchTitle" style="font-size:0.8rem;margin-bottom:0.2rem;">Song Title</label>
+                        <input type="text" id="searchTitle" placeholder="e.g., Hello" autocomplete="off">
                     </div>
-                    <button type="button" id="apiSearchBtn" class="btn" style="padding: 0.55rem 1.25rem;">Fetch & Import</button>
+                    <button type="button" id="apiSearchBtn" class="btn" style="padding:0.55rem 1.25rem;">Fetch &amp; Import</button>
                 </div>
             </div>
-
-            <form id="songForm">
-                <div class="form-three-column">
+            <form id="songForm" novalidate>
+                <div class="form-3col">
                     <div class="form-group">
                         <label for="songTitle">Song Title</label>
-                        <input type="text" id="songTitle" required placeholder="e.g., You Saved Me">
+                        <input type="text" id="songTitle" placeholder="e.g., Amazing Grace" required autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="songKey">Key Signature</label>
-                        <input type="text" id="songKey" placeholder="e.g., E">
+                        <input type="text" id="songKey" placeholder="e.g., E" autocomplete="off">
                     </div>
                     <div class="form-group">
                         <label for="songTempo">Tempo (BPM)</label>
                         <input type="number" id="songTempo" min="30" max="300" value="80">
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label for="songArtist">Artist / Author</label>
-                    <input type="text" id="songArtist" placeholder="e.g., Tanyan Lukesh">
+                    <input type="text" id="songArtist" placeholder="e.g., John Newton" autocomplete="off">
                 </div>
-
+                <div class="notes-box">
+                    <label for="songNotes">&#128221; Notes (capo, cues, reminders&#8230;)</label>
+                    <textarea id="songNotes" placeholder="e.g., Capo 2 &#8226; Watch bridge tempo &#8226; Fade out on last chorus"></textarea>
+                </div>
                 <div class="form-group">
                     <label for="songStructure">Song Structure</label>
-                    <input type="text" id="songStructure" placeholder="e.g., Verse 1, Chorus, Verse 2, Chorus">
+                    <input type="text" id="songStructure" placeholder="e.g., Verse 1, Chorus, Verse 2, Chorus, Bridge, Outro">
                 </div>
-
                 <div class="form-group">
-                    <label for="songLyrics">Lyrics & Chords (ChordPro Format)</label>
-                    <textarea id="songLyrics" placeholder="[Verse 1]&#10;[E(C)] You are a hiding [B(G)] place for me..."></textarea>
+                    <label for="songLyrics">Lyrics &amp; Chords (ChordPro Format)</label>
+                    <textarea id="songLyrics" placeholder="[Verse 1]&#10;[E] Amazing [A] grace how [E] sweet the sound..."></textarea>
                 </div>
 
                 <div class="sub-heading">Current Track Actions</div>
-                <div class="actions-tabs">
-                    <button type="button" id="saveLocalBtn" class="btn btn-success">Save to Library</button>
-                    <button type="button" id="exportBtn" class="btn">Export Single Song (.json)</button>
-                    
-                    <div class="file-input-wrapper">
-                        <button type="button" class="btn btn-secondary">Import Single Song (.json)</button>
+                <div class="action-row">
+                    <button type="button" id="saveLocalBtn" class="btn btn-success">&#128190; Save to Library</button>
+                    <button type="button" id="exportBtn" class="btn">&#11015;&#65039; Export Song (.json)</button>
+                    <div class="file-wrap">
+                        <button type="button" class="btn btn-secondary">&#11014;&#65039; Import Song (.json)</button>
                         <input type="file" id="importFile" accept=".json">
                     </div>
-
-                    <button type="button" id="deleteLocalBtn" class="btn btn-secondary" style="background-color: #ef4444;">Delete From Library</button>
-                    <button type="button" id="clearBtn" class="btn btn-secondary">Clear Form</button>
+                    <button type="button" id="deleteLocalBtn" class="btn btn-danger">&#128465;&#65039; Delete From Library</button>
+                    <button type="button" id="clearBtn" class="btn btn-secondary">&#10005; Clear Form</button>
                 </div>
 
-                <div class="section-divider"></div>
-                <div class="sub-heading" style="color: var(--purple-color);">Set List Backup Engine</div>
-                <div class="hint" style="margin-bottom: 0.5rem;">Package every single saved song in your library into one file to share your complete set list with bandmates instantly.</div>
-                <div class="actions-tabs">
-                    <button type="button" id="exportSetListBtn" class="btn btn-purple">Export Complete Set List (.json)</button>
-                    
-                    <div class="file-input-wrapper">
-                        <button type="button" class="btn btn-secondary">Import Set List (.json)</button>
+                <hr class="section-divider">
+                <div class="sub-heading" style="color:var(--purple);">Library Backup Engine</div>
+                <div class="hint" style="margin-bottom:0.75rem;">Package every saved song into one file to share with bandmates.</div>
+                <div class="action-row">
+                    <button type="button" id="exportSetListBtn" class="btn btn-purple">&#128230; Export Full Library (.json)</button>
+                    <div class="file-wrap">
+                        <button type="button" class="btn btn-secondary">&#128229; Import Library (.json)</button>
                         <input type="file" id="importSetListFile" accept=".json">
                     </div>
+                </div>
+
+                <hr class="section-divider">
+
+                <!-- SET LIST BUILDER -->
+                <div class="sl-builder">
+                    <div class="sl-builder-hdr">
+                        <h3>&#127925; Show Set List Builder</h3>
+                        <button type="button" id="deleteSetListBtn" class="btn btn-danger" style="padding:0.4rem 0.85rem;font-size:0.8rem;">&#128465; Delete Set List</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="activeSetlistSelect" style="font-size:0.8rem;color:var(--text-muted);">Active Set List</label>
+                        <select id="activeSetlistSelect" style="width:100%;font-size:0.875rem;padding:0.45rem 0.75rem;"></select>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.85rem;flex-wrap:wrap;">
+                        <input type="text" id="setlistNameInput" placeholder="Type a name, then + Create or Rename&#8230;" autocomplete="off" style="flex:1;min-width:140px;padding:0.45rem 0.75rem;font-size:0.875rem;">
+                        <button type="button" id="newSetListBtn" class="btn btn-success" style="padding:0.45rem 0.85rem;font-size:0.8rem;">+ Create</button>
+                        <button type="button" id="renameSetListBtn" class="btn btn-secondary" style="padding:0.45rem 0.85rem;font-size:0.8rem;">Rename</button>
+                    </div>
+                    <div class="hint" style="margin-bottom:0.85rem;">Drag rows to reorder. In Performance Mode, use the Set List panel to jump between songs.</div>
+                    <div class="sl-add-row">
+                        <select id="setlistAddSelect"></select>
+                        <button type="button" id="setlistAddBtn" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">+ Add</button>
+                    </div>
+                    <ul class="sl-queue" id="setlistQueue">
+                        <li class="sl-empty" id="setlistEmptyHint">No songs in this set list yet.</li>
+                    </ul>
                 </div>
             </form>
         </div>
 
+        <!-- PERFORMANCE VIEW -->
         <div id="performanceView">
-            <div class="perf-header">
-                <div>
-                    <div class="perf-title" id="renderTitle">Song Title</div>
-                    <div class="perf-meta" id="renderArtist">Artist Name</div>
+            <div class="perf-layout" id="perfLayout">
+                <div class="sl-panel" id="setlistPanel">
+                    <div class="sl-panel-inner">
+                        <div class="sl-panel-hdr">
+                            <span id="setlistPanelName">&#127925; Set List</span>
+                            <span id="setlistProgress" style="font-weight:400;font-size:0.75rem;color:var(--text-faint);">0 / 0</span>
+                        </div>
+                        <ul class="sl-list" id="setlistPanelList"></ul>
+                    </div>
                 </div>
-                <div class="badge-cluster">
-                    <div class="perf-badge" id="renderKey">Key: C</div>
-                    <div class="perf-badge" id="renderTempo">80 BPM</div>
+                <div id="perfContent-wrap">
+                    <div class="perf-header">
+                        <div>
+                            <div class="perf-title" id="renderTitle"></div>
+                            <div class="perf-meta" id="renderArtist"></div>
+                        </div>
+                        <div class="badge-cluster">
+                            <div class="perf-badge" id="renderKey">Key: C</div>
+                            <div class="perf-badge" id="renderTempo">80 BPM</div>
+                        </div>
+                    </div>
+                    <div id="renderNotesWrapper" style="display:none;">
+                        <div class="perf-notes" id="renderNotes"></div>
+                    </div>
+                    <div id="renderStructureWrapper" style="display:none;">
+                        <div class="perf-structure" id="renderStructure"></div>
+                    </div>
+                    <div id="perfContent"></div>
                 </div>
             </div>
-            
-            <div id="renderStructureWrapper">
-                <div class="perf-structure" id="renderStructure">Structure</div>
-            </div>
-            
-            <div id="perfContent"></div>
         </div>
     </main>
 </div>
 
+<!-- DOCK -->
 <div class="scroll-control-dock" id="scrollDock">
     <div class="dock-cluster">
-        <button type="button" id="playScrollBtn" class="btn btn-success">Play Auto-Scroll</button>
-        <button type="button" id="resetScrollBtn" class="btn btn-secondary">Reset Top</button>
+        <button type="button" id="playScrollBtn" class="btn btn-success">&#9654; Play Auto-Scroll</button>
+        <button type="button" id="resetScrollBtn" class="btn btn-secondary">&#8679; Reset Top</button>
+        <div class="scroll-status" id="scrollStatus">
+            <span class="dot"></span>
+            <span id="scrollStatusText">Paused</span>
+        </div>
     </div>
-    
+    <div class="dock-cluster" id="setlistNavCluster" style="display:none;">
+        <button type="button" id="prevSongBtn" class="btn btn-outline">&#8592; Prev</button>
+        <span id="setlistNavLabel" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;"></span>
+        <button type="button" id="nextSongBtn" class="btn btn-outline">Next &#8594;</button>
+        <button type="button" id="toggleSetlistPanelBtn" class="btn btn-outline">&#127925; Set List</button>
+    </div>
     <div class="dock-cluster">
+        <div class="speed-group">
+            <label for="scrollSpeedSlider">Scroll Speed:</label>
+            <input type="range" id="scrollSpeedSlider" min="10" max="300" value="100">
+            <span id="scrollSpeedDisplay">100%</span>
+        </div>
         <div class="slider-group">
-            <label for="fontSizeSlider">Font Size:</label>
+            <label for="fontSizeSlider">Font:</label>
             <input type="range" id="fontSizeSlider" min="14" max="36" value="20">
             <span id="fontSizeDisplay">20px</span>
         </div>
@@ -523,423 +336,560 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const editorView = document.getElementById('editorView');
-        const performanceView = document.getElementById('performanceView');
-        const editModeBtn = document.getElementById('editModeBtn');
-        const perfModeBtn = document.getElementById('perfModeBtn');
-        const appTitle = document.getElementById('appTitle');
-        const scrollDock = document.getElementById('scrollDock');
-        const librarySelect = document.getElementById('songLibrarySelect');
+document.addEventListener('DOMContentLoaded', function() {
 
-        const searchArtist = document.getElementById('searchArtist');
-        const searchTitle = document.getElementById('searchTitle');
-        const apiSearchBtn = document.getElementById('apiSearchBtn');
+    /* ---- STORAGE KEYS ---- */
+    var K_LIB   = 'song_manager_library';
+    var K_SLS   = 'song_manager_setlists';
+    var K_ACTSL = 'song_manager_active_sl';
+    var K_THEME = 'song_manager_theme';
 
-        const songForm = document.getElementById('songForm');
-        const saveLocalBtn = document.getElementById('saveLocalBtn');
-        const deleteLocalBtn = document.getElementById('deleteLocalBtn');
-        const exportBtn = document.getElementById('exportBtn');
-        const importFile = document.getElementById('importFile');
-        const clearBtn = document.getElementById('clearBtn');
+    /* ---- STORAGE HELPERS ---- */
+    function getLib()  { try { return JSON.parse(localStorage.getItem(K_LIB))  || {}; } catch(e) { return {}; } }
+    function saveLib(o){ localStorage.setItem(K_LIB, JSON.stringify(o)); }
+    function getAllSL() { try { return JSON.parse(localStorage.getItem(K_SLS))  || {}; } catch(e) { return {}; } }
+    function saveAllSL(o){ localStorage.setItem(K_SLS, JSON.stringify(o)); }
+    function getActSLName() { return localStorage.getItem(K_ACTSL) || ''; }
+    function setActSLName(n){ localStorage.setItem(K_ACTSL, n); }
+    function getActSL() { var n=getActSLName(); return n ? (getAllSL()[n]||[]) : []; }
+    function saveActSL(arr) {
+        var n=getActSLName(); if(!n) return;
+        var all=getAllSL(); all[n]=arr; saveAllSL(all);
+    }
 
-        const exportSetListBtn = document.getElementById('exportSetListBtn');
-        const importSetListFile = document.getElementById('importSetListFile');
+    /* ---- UTILITY ---- */
+    function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function loadSong(song){
+        flds.title.value     = song.title     || '';
+        flds.key.value       = song.key       || 'C';
+        flds.tempo.value     = song.tempo     || '80';
+        flds.artist.value    = song.artist    || '';
+        flds.notes.value     = song.notes     || '';
+        flds.structure.value = song.structure || '';
+        flds.lyrics.value    = song.lyrics    || '';
+    }
 
-        const formFields = {
-            title: document.getElementById('songTitle'),
-            key: document.getElementById('songKey'),
-            tempo: document.getElementById('songTempo'),
-            artist: document.getElementById('songArtist'),
-            structure: document.getElementById('songStructure'),
-            lyrics: document.getElementById('songLyrics')
-        };
+    /* ---- DOM REFS ---- */
+    var editorView   = document.getElementById('editorView');
+    var perfView     = document.getElementById('performanceView');
+    var editBtn      = document.getElementById('editModeBtn');
+    var perfBtn      = document.getElementById('perfModeBtn');
+    var appTitle     = document.getElementById('appTitle');
+    var scrollDock   = document.getElementById('scrollDock');
+    var libSelect    = document.getElementById('songLibrarySelect');
+    var themeBtn     = document.getElementById('themeToggleBtn');
+    var themeIcon    = document.getElementById('themeIcon');
+    var themeLabel   = document.getElementById('themeLabel');
+    var srchArtist   = document.getElementById('searchArtist');
+    var srchTitle    = document.getElementById('searchTitle');
+    var fetchBtn     = document.getElementById('apiSearchBtn');
+    var songForm     = document.getElementById('songForm');
+    var saveBtn      = document.getElementById('saveLocalBtn');
+    var delBtn       = document.getElementById('deleteLocalBtn');
+    var exportBtn    = document.getElementById('exportBtn');
+    var importFile   = document.getElementById('importFile');
+    var clearBtn     = document.getElementById('clearBtn');
+    var exportLibBtn = document.getElementById('exportSetListBtn');
+    var importLibFile= document.getElementById('importSetListFile');
+    var flds = {
+        title:     document.getElementById('songTitle'),
+        key:       document.getElementById('songKey'),
+        tempo:     document.getElementById('songTempo'),
+        artist:    document.getElementById('songArtist'),
+        notes:     document.getElementById('songNotes'),
+        structure: document.getElementById('songStructure'),
+        lyrics:    document.getElementById('songLyrics')
+    };
+    var rnd = {
+        title:            document.getElementById('renderTitle'),
+        artist:           document.getElementById('renderArtist'),
+        key:              document.getElementById('renderKey'),
+        tempo:            document.getElementById('renderTempo'),
+        notes:            document.getElementById('renderNotes'),
+        notesWrap:        document.getElementById('renderNotesWrapper'),
+        structure:        document.getElementById('renderStructure'),
+        structureWrap:    document.getElementById('renderStructureWrapper'),
+        content:          document.getElementById('perfContent')
+    };
+    var playBtn      = document.getElementById('playScrollBtn');
+    var resetBtn     = document.getElementById('resetScrollBtn');
+    var statusEl     = document.getElementById('scrollStatus');
+    var statusTxt    = document.getElementById('scrollStatusText');
+    var fontSlider   = document.getElementById('fontSizeSlider');
+    var fontDisplay  = document.getElementById('fontSizeDisplay');
+    var speedSlider  = document.getElementById('scrollSpeedSlider');
+    var speedDisplay = document.getElementById('scrollSpeedDisplay');
+    var actSLSel     = document.getElementById('activeSetlistSelect');
+    var slNameIn     = document.getElementById('setlistNameInput');
+    var createSLBtn  = document.getElementById('newSetListBtn');
+    var renameSLBtn  = document.getElementById('renameSetListBtn');
+    var deleteSLBtn  = document.getElementById('deleteSetListBtn');
+    var addSLSel     = document.getElementById('setlistAddSelect');
+    var addSLBtn     = document.getElementById('setlistAddBtn');
+    var slQueue      = document.getElementById('setlistQueue');
+    var slEmptyHint  = document.getElementById('setlistEmptyHint');
+    var slPanel      = document.getElementById('setlistPanel');
+    var perfLayout   = document.getElementById('perfLayout');
+    var slPanelList  = document.getElementById('setlistPanelList');
+    var slPanelName  = document.getElementById('setlistPanelName');
+    var slProgress   = document.getElementById('setlistProgress');
+    var slNavCluster = document.getElementById('setlistNavCluster');
+    var slNavLabel   = document.getElementById('setlistNavLabel');
+    var prevBtn      = document.getElementById('prevSongBtn');
+    var nextBtn      = document.getElementById('nextSongBtn');
+    var togglePanelBtn= document.getElementById('toggleSetlistPanelBtn');
 
-        const renderFields = {
-            title: document.getElementById('renderTitle'),
-            artist: document.getElementById('renderArtist'),
-            key: document.getElementById('renderKey'),
-            tempo: document.getElementById('renderTempo'),
-            structure: document.getElementById('renderStructure'),
-            structureWrapper: document.getElementById('renderStructureWrapper'),
-            content: document.getElementById('perfContent')
-        };
-
-        const playScrollBtn = document.getElementById('playScrollBtn');
-        const resetScrollBtn = document.getElementById('resetScrollBtn');
-        const fontSizeSlider = document.getElementById('fontSizeSlider');
-        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
-        
-        let isScrolling = false;
-        let animationFrameId = null;
-        let lastTimestamp = 0;
-        let currentScrollY = 0;
-
-        updateLibraryDropdown();
-
-        fontSizeSlider.addEventListener('input', (e) => {
-            const size = e.target.value;
-            fontSizeDisplay.textContent = `${size}px`;
-            document.documentElement.style.setProperty('--perf-font-size', `${size}px`);
-        });
-
-        function getLibrary() {
-            return JSON.parse(localStorage.getItem('song_manager_library')) || {};
-        }
-
-        function updateLibraryDropdown() {
-            const library = getLibrary();
-            const currentSelected = librarySelect.value;
-            
-            librarySelect.innerHTML = '<option value="">-- Select a Saved Song --</option>';
-            Object.keys(library).sort().forEach(title => {
-                const option = document.createElement('option');
-                option.value = title;
-                option.textContent = title;
-                librarySelect.appendChild(option);
-            });
-
-            if (library[currentSelected]) {
-                librarySelect.value = currentSelected;
-            }
-        }
-
-        exportSetListBtn.addEventListener('click', () => {
-            const library = getLibrary();
-            if (Object.keys(library).length === 0) {
-                alert('Your local library is currently empty. Add and save songs before exporting a set list.');
-                return;
-            }
-
-            const packageData = {
-                type: "SET_LIST_EXPORT",
-                version: "1.0",
-                exportedAt: new Date().toISOString(),
-                songs: library
-            };
-
-            const blob = new Blob([JSON.stringify(packageData, null, 2)], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            const timestamp = new Date().toISOString().split('T')[0];
-            link.download = `band_setlist_${timestamp}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-        });
-
-        // REWRITTEN AND ROBUST SET LIST IMPORT PROCESSING LOGIC
-        importSetListFile.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                try {
-                    const parsedData = JSON.parse(evt.target.result);
-                    let incomingSongs = null;
-
-                    // Fallback Auto-Detection: Did they load a dedicated Set List file or a Single Song file?
-                    if (parsedData.type === "SET_LIST_EXPORT" && parsedData.songs) {
-                        incomingSongs = parsedData.songs;
-                    } else if (parsedData.title && parsedData.lyrics) {
-                        // The user fed a single song JSON file into the set list engine. Adapt on the fly!
-                        incomingSongs = {};
-                        incomingSongs[parsedData.title] = parsedData;
-                    } else {
-                        throw new Error("JSON structure does not match a single song schema or package set list mapping keys.");
-                    }
-
-                    const songCount = Object.keys(incomingSongs).length;
-                    if (songCount === 0) {
-                        throw new Error("No valid song data blocks found inside this file.");
-                    }
-
-                    if (confirm(`Found ${songCount} song(s) in this file. Merge them into your library now?`)) {
-                        const currentLibrary = getLibrary();
-                        const mergedLibrary = { ...currentLibrary, ...incomingSongs };
-                        
-                        localStorage.setItem('song_manager_library', JSON.stringify(mergedLibrary));
-                        updateLibraryDropdown();
-                        alert(`Success! Imported ${songCount} song(s) into your local catalog.`);
-                    }
-                } catch (err) {
-                    console.error("Internal Parser Trace:", err);
-                    alert('Import Failure: ' + err.message + '\nCheck the browser developer console for file diagnostics.');
-                } finally {
-                    e.target.value = ''; // Always clear file inputs to allow re-uploads
-                }
-            };
-            reader.readAsText(file);
-        });
-
-        // API Fetch Engine
-        apiSearchBtn.addEventListener('click', async () => {
-            const artistQuery = searchArtist.value.trim();
-            const titleQuery = searchTitle.value.trim();
-
-            if (!artistQuery || !titleQuery) {
-                alert('Please provide both the Artist Name and Song Title to execute a lyrics sync.');
-                return;
-            }
-
-            apiSearchBtn.textContent = 'Fetching Lyrics...';
-            apiSearchBtn.disabled = true;
-
-            try {
-                const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artistQuery)}/${encodeURIComponent(titleQuery)}`;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Song not found or connection timed out.');
-                const data = await response.json();
-                if (!data.lyrics) throw new Error('Lyrics response container returned empty content.');
-
-                let rawLyrics = data.lyrics;
-                if (!rawLyrics.trim().startsWith('[')) rawLyrics = `[Song Text]\n` + rawLyrics;
-
-                formFields.title.value = titleQuery;
-                formFields.artist.value = artistQuery;
-                formFields.lyrics.value = rawLyrics.trim();
-                formFields.key.value = 'C'; 
-                formFields.tempo.value = 85; 
-                formFields.structure.value = 'Verse 1, Chorus';
-
-                searchArtist.value = '';
-                searchTitle.value = '';
-                alert(`Successfully grabbed lyrics for "${titleQuery}"! Save it to your library below.`);
-            } catch (error) {
-                alert('Fetch Failure: ' + error.message);
-            } finally {
-                apiSearchBtn.textContent = 'Fetch & Import';
-                apiSearchBtn.disabled = false;
-            }
-        });
-
-        // Form Actions
-        saveLocalBtn.addEventListener('click', () => {
-            const title = formFields.title.value.trim();
-            if (!title) return alert('A valid song title is required.');
-
-            const library = getLibrary();
-            library[title] = {
-                title: title,
-                key: formFields.key.value.trim() || 'C',
-                tempo: parseInt(formFields.tempo.value, 10) || 80,
-                artist: formFields.artist.value.trim(),
-                structure: formFields.structure.value.trim(),
-                lyrics: formFields.lyrics.value.trim(),
-                updatedAt: new Date().toISOString()
-            };
-
-            localStorage.setItem('song_manager_library', JSON.stringify(library));
-            updateLibraryDropdown();
-            librarySelect.value = title;
-            alert(`"${title}" saved successfully.`);
-        });
-
-        deleteLocalBtn.addEventListener('click', () => {
-            const title = librarySelect.value;
-            if (!title) return alert('Select an active song to clear.');
-            if (confirm(`Remove "${title}"?`)) {
-                const library = getLibrary();
-                delete library[title];
-                localStorage.setItem('song_manager_library', JSON.stringify(library));
-                updateLibraryDropdown();
-                songForm.reset();
-                editModeBtn.click();
-            }
-        });
-
-        librarySelect.addEventListener('change', (e) => {
-            const selectedTitle = e.target.value;
-            if (!selectedTitle) return;
-            const library = getLibrary();
-            const songData = library[selectedTitle];
-            if (songData) {
-                formFields.title.value = songData.title || '';
-                formFields.key.value = songData.key || 'C';
-                formFields.tempo.value = songData.tempo || '80';
-                formFields.artist.value = songData.artist || '';
-                formFields.structure.value = songData.structure || '';
-                formFields.lyrics.value = songData.lyrics || '';
-                if (perfModeBtn.classList.contains('active')) renderPerformanceView();
-            }
-        });
-
-        editModeBtn.addEventListener('click', () => {
-            stopAutoScroll();
-            editModeBtn.classList.add('active');
-            perfModeBtn.classList.remove('active');
-            performanceView.style.display = 'none';
-            scrollDock.style.display = 'none';
-            editorView.style.display = 'block';
-            appTitle.textContent = "Song Editor";
-        });
-
-        perfModeBtn.addEventListener('click', () => {
-            if (!formFields.title.value.trim()) return alert('Populate staging data first.');
-            editModeBtn.classList.remove('active');
-            perfModeBtn.classList.add('active');
-            editorView.style.display = 'none';
-            performanceView.style.display = 'block';
-            scrollDock.style.display = 'flex';
-            appTitle.textContent = "Performance Mode";
-            renderPerformanceView();
-        });
-
-        function renderPerformanceView() {
-            renderFields.title.textContent = formFields.title.value.trim();
-            renderFields.tempo.textContent = `${parseInt(formFields.tempo.value, 10) || 80} BPM`;
-            renderFields.key.textContent = `Key: ${formFields.key.value.trim() || 'C'}`;
-            renderFields.artist.textContent = formFields.artist.value.trim() || '';
-            renderFields.artist.style.display = formFields.artist.value.trim() ? 'block' : 'none';
-
-            if (formFields.structure.value.trim()) {
-                renderFields.structure.textContent = `Structure: ${formFields.structure.value.trim()}`;
-                renderFields.structureWrapper.style.display = 'block';
-            } else {
-                renderFields.structureWrapper.style.display = 'none';
-            }
-
-            renderFields.content.innerHTML = '';
-            const rawLines = formFields.lyrics.value.split('\n');
-            let currentSectionDiv = null;
-
-            rawLines.forEach(line => {
-                const trimmedLine = line.trim();
-                if (trimmedLine.startsWith('[') && trimmedLine.endsWith(']') && !trimmedLine.includes(' ')) {
-                    currentSectionDiv = document.createElement('div');
-                    currentSectionDiv.className = 'perf-section';
-                    const heading = document.createElement('div');
-                    heading.className = 'perf-section-heading';
-                    heading.textContent = trimmedLine.slice(1, -1);
-                    currentSectionDiv.appendChild(heading);
-                    renderFields.content.appendChild(currentSectionDiv);
-                    return;
-                }
-                if (!currentSectionDiv) {
-                    currentSectionDiv = document.createElement('div');
-                    currentSectionDiv.className = 'perf-section';
-                    renderFields.content.appendChild(currentSectionDiv);
-                }
-                currentSectionDiv.appendChild(parseChordLine(line));
-            });
-            currentScrollY = window.scrollY;
-        }
-
-        function parseChordLine(line) {
-            const lineContainer = document.createElement('div');
-            lineContainer.className = 'song-line';
-            const chordRow = document.createElement('div');
-            chordRow.className = 'chord-row';
-            const lyricRow = document.createElement('div');
-            lyricRow.className = 'lyric-row';
-
-            const regex = /\[([^\]]+)\]/g;
-            let match, lastIndex = 0, pureLyrics = '', chordsArray = [];
-
-            while ((match = regex.exec(line)) !== null) {
-                pureLyrics += line.substring(lastIndex, match.index);
-                chordsArray.push({ chordText: match[1], charPosition: pureLyrics.length });
-                lastIndex = regex.lastIndex;
-            }
-            pureLyrics += line.substring(lastIndex);
-            lyricRow.textContent = pureLyrics || ' ';
-
-            if (chordsArray.length > 0) {
-                chordsArray.forEach(ch => {
-                    const chordSpan = document.createElement('span');
-                    chordSpan.className = 'chord-wrapper';
-                    chordSpan.textContent = ch.chordText;
-                    chordSpan.style.left = `${ch.charPosition * 0.58}em`;
-                    chordRow.appendChild(chordSpan);
-                });
-                lineContainer.appendChild(chordRow);
-            }
-            lineContainer.appendChild(lyricRow);
-            return lineContainer;
-        }
-
-        function scrollLoop(timestamp) {
-            if (!lastTimestamp) lastTimestamp = timestamp;
-            const delta = timestamp - lastTimestamp;
-            lastTimestamp = timestamp;
-            const bpm = parseInt(formFields.tempo.value, 10) || 80;
-            currentScrollY += delta * ((bpm / 60) * 0.015);
-            window.scrollTo(0, currentScrollY);
-            if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight) return stopAutoScroll();
-            if (isScrolling) animationFrameId = requestAnimationFrame(scrollLoop);
-        }
-
-        function startAutoScroll() {
-            isScrolling = true;
-            lastTimestamp = 0;
-            currentScrollY = window.scrollY;
-            playScrollBtn.textContent = "Pause Auto-Scroll";
-            playScrollBtn.className = "btn btn-secondary";
-            animationFrameId = requestAnimationFrame(scrollLoop);
-        }
-
-        function stopAutoScroll() {
-            isScrolling = false;
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            playScrollBtn.textContent = "Play Auto-Scroll";
-            playScrollBtn.className = "btn btn-success";
-        }
-
-        playScrollBtn.addEventListener('click', () => isScrolling ? stopAutoScroll() : startAutoScroll());
-        resetScrollBtn.addEventListener('click', () => { stopAutoScroll(); currentScrollY = 0; window.scrollTo({ top: 0, behavior: 'smooth' }); });
-
-        exportBtn.addEventListener('click', () => {
-            if (!formFields.title.value.trim()) return alert('Enter a song title.');
-            const songData = {
-                title: formFields.title.value.trim(),
-                key: formFields.key.value.trim() || 'C',
-                tempo: parseInt(formFields.tempo.value, 10) || 80,
-                artist: formFields.artist.value.trim(),
-                structure: formFields.structure.value.trim(),
-                lyrics: formFields.lyrics.value.trim(),
-                version: "1.6"
-            };
-            const blob = new Blob([JSON.stringify(songData, null, 2)], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${songData.title.toLowerCase().replace(/[^a-z0-9]/gi, '_')}_song.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-
-        importFile.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                try {
-                    const songData = JSON.parse(evt.target.result);
-                    formFields.title.value = songData.title || '';
-                    formFields.key.value = songData.key || 'C';
-                    formFields.tempo.value = songData.tempo || '80';
-                    formFields.artist.value = songData.artist || '';
-                    formFields.structure.value = songData.structure || '';
-                    formFields.lyrics.value = songData.lyrics || '';
-                    alert('Import successful.');
-                } catch (err) { alert('Invalid layout format.'); }
-                e.target.value = '';
-            };
-            reader.readAsText(file);
-        });
-
-        clearBtn.addEventListener('click', () => {
-            if (confirm('Clear workspace inputs?')) {
-                stopAutoScroll();
-                songForm.reset();
-                librarySelect.value = "";
-                editModeBtn.click();
-            }
-        });
+    /* ---- THEME ---- */
+    function applyTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        themeIcon.textContent  = t==='dark' ? '\uD83C\uDF19' : '\u2600\uFE0F';
+        themeLabel.textContent = t==='dark' ? 'Dark Mode'   : 'Light Mode';
+        localStorage.setItem(K_THEME, t);
+    }
+    applyTheme(localStorage.getItem(K_THEME) || (window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+    themeBtn.addEventListener('click', function(){
+        applyTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
     });
-</script>
 
+    /* ---- HEADER DROPDOWN ---- */
+    function refreshHeaderDropdown() {
+        var library = getLib();
+        var allSL   = getAllSL();
+        var prev    = libSelect.value;
+        libSelect.innerHTML = '<option value="">-- Songs &amp; Set Lists --</option>';
+        var songKeys = Object.keys(library).sort();
+        if (songKeys.length > 0) {
+            var grp1 = document.createElement('optgroup');
+            grp1.label = '\uD83C\uDFB5 Songs';
+            songKeys.forEach(function(t){
+                var o = document.createElement('option');
+                o.value = 'song::'+t; o.textContent = t;
+                grp1.appendChild(o);
+            });
+            libSelect.appendChild(grp1);
+        }
+        var slNames = Object.keys(allSL).sort();
+        if (slNames.length > 0) {
+            var grp2 = document.createElement('optgroup');
+            grp2.label = '\uD83D\uDCCB Set Lists';
+            slNames.forEach(function(n){
+                var o = document.createElement('option');
+                o.value = 'setlist::'+n;
+                o.textContent = n + '  (' + allSL[n].length + ' songs)';
+                grp2.appendChild(o);
+            });
+            libSelect.appendChild(grp2);
+        }
+        if (prev) {
+            var match = libSelect.querySelector('option[value="'+prev.replace(/"/g,'\\"')+'"]');
+            if (match) libSelect.value = prev;
+        }
+    }
+
+    libSelect.addEventListener('change', function(){
+        var val = libSelect.value;
+        if (!val) return;
+        if (val.indexOf('song::') === 0) {
+            var song = getLib()[val.slice(6)];
+            if (song) { loadSong(song); if(perfBtn.classList.contains('active')) renderPerfView(); }
+        } else if (val.indexOf('setlist::') === 0) {
+            var name = val.slice(9);
+            setActSLName(name);
+            curIdx = 0;
+            refreshSLBuilderUI();
+            var queue = getActSL();
+            if (queue.length > 0) { var s=getLib()[queue[0]]; if(s) loadSong(s); }
+            if (!perfBtn.classList.contains('active')) perfBtn.click();
+            if (!panelOpen) togglePanelBtn.click();
+        }
+    });
+
+    /* ---- SET LIST BUILDER ---- */
+    function refreshSLBuilderUI() {
+        refreshActSLDropdown();
+        refreshAddDropdown();
+        renderQueue();
+    }
+
+    function refreshActSLDropdown() {
+        var all    = getAllSL();
+        var active = getActSLName();
+        var names  = Object.keys(all).sort();
+        actSLSel.innerHTML = '';
+        if (names.length === 0) {
+            var o = document.createElement('option');
+            o.value=''; o.textContent='-- No set lists yet. Type a name and click + Create --';
+            actSLSel.appendChild(o);
+        } else {
+            names.forEach(function(n){
+                var o = document.createElement('option');
+                o.value = n;
+                o.textContent = n + '  (' + all[n].length + ' song' + (all[n].length!==1?'s':'') + ')';
+                if (n===active) o.selected=true;
+                actSLSel.appendChild(o);
+            });
+            if (active && !all[active] && names.length>0) {
+                setActSLName(names[0]); actSLSel.value=names[0];
+            }
+        }
+    }
+
+    function refreshAddDropdown() {
+        var library   = getLib();
+        var existing  = getActSL();
+        var hasActive = !!getActSLName();
+        var available = Object.keys(library).sort().filter(function(t){ return !existing.includes(t); });
+        addSLSel.innerHTML = '';
+        addSLBtn.disabled  = !hasActive || available.length===0;
+        var msg;
+        if (!hasActive)                          msg = '-- Create a set list first --';
+        else if (!Object.keys(library).length)   msg = '-- Save songs to your library first --';
+        else if (!available.length)              msg = '-- All library songs are in this set list --';
+        else                                     msg = '-- Pick a song to add --';
+        var ph = document.createElement('option'); ph.value=''; ph.textContent=msg;
+        addSLSel.appendChild(ph);
+        available.forEach(function(t){
+            var o=document.createElement('option'); o.value=t; o.textContent=t;
+            addSLSel.appendChild(o);
+        });
+    }
+
+    function renderQueue() {
+        var queue  = getActSL();
+        var library= getLib();
+        var name   = getActSLName();
+        slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){ el.remove(); });
+        if (!name) {
+            slEmptyHint.textContent='Create a set list above to get started.';
+            slEmptyHint.style.display='block'; return;
+        }
+        if (!queue.length) {
+            slEmptyHint.textContent='No songs in this set list yet. Add songs above.';
+            slEmptyHint.style.display='block'; return;
+        }
+        slEmptyHint.style.display='none';
+        queue.forEach(function(title, idx){
+            var song=library[title]||{};
+            var li=document.createElement('li');
+            li.className='sl-queue-item'; li.draggable=true;
+            li.dataset.index=idx; li.dataset.title=title;
+            li.innerHTML='<span class="drag-handle">&#10783;</span>'+
+                '<span class="q-num">'+(idx+1)+'</span>'+
+                '<div class="q-info">'+
+                  '<div class="q-title">'+esc(title)+'</div>'+
+                  '<div class="q-meta">'+(song.key?'Key: '+esc(song.key):'')+
+                    (song.tempo?' &middot; '+song.tempo+' BPM':'')+'</div>'+
+                '</div>'+
+                '<button class="q-remove" title="Remove">&#10005;</button>';
+            li.querySelector('.q-remove').addEventListener('click', function(e){
+                e.stopPropagation();
+                var q=getActSL(); q.splice(idx,1); saveActSL(q);
+                refreshSLBuilderUI(); refreshHeaderDropdown();
+            });
+            li.addEventListener('dragstart', onDragStart);
+            li.addEventListener('dragover',  onDragOver);
+            li.addEventListener('dragleave', onDragLeave);
+            li.addEventListener('drop',      onDrop);
+            li.addEventListener('dragend',   onDragEnd);
+            slQueue.appendChild(li);
+        });
+    }
+
+    /* ---- DRAG & DROP ---- */
+    var dragSrc=null;
+    function onDragStart(e){ dragSrc=parseInt(this.dataset.index,10); this.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; }
+    function onDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; this.classList.add('drag-over'); }
+    function onDragLeave(){ this.classList.remove('drag-over'); }
+    function onDrop(e){
+        e.preventDefault(); this.classList.remove('drag-over');
+        var dest=parseInt(this.dataset.index,10);
+        if(dragSrc===null||dragSrc===dest) return;
+        var q=getActSL(); var moved=q.splice(dragSrc,1)[0]; q.splice(dest,0,moved);
+        saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown();
+    }
+    function onDragEnd(){ dragSrc=null; slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){ el.classList.remove('dragging','drag-over'); }); }
+
+    /* ---- SET LIST CONTROLS ---- */
+    actSLSel.addEventListener('change', function(){
+        var chosen=actSLSel.value; if(!chosen) return;
+        setActSLName(chosen); curIdx=0;
+        refreshSLBuilderUI(); refreshHeaderDropdown();
+    });
+    createSLBtn.addEventListener('click', function(){
+        var name=slNameIn.value.trim(); if(!name){ slNameIn.focus(); return; }
+        var all=getAllSL();
+        if(all[name]){ alert('A set list named "'+name+'" already exists.'); return; }
+        all[name]=[]; saveAllSL(all); setActSLName(name); curIdx=0;
+        slNameIn.value=''; refreshSLBuilderUI(); refreshHeaderDropdown();
+    });
+    renameSLBtn.addEventListener('click', function(){
+        var oldName=getActSLName(); var newName=slNameIn.value.trim();
+        if(!oldName){ alert('No active set list to rename.'); return; }
+        if(!newName){ alert('Enter a new name first.'); return; }
+        if(newName===oldName) return;
+        var all=getAllSL();
+        if(all[newName]){ alert('A set list named "'+newName+'" already exists.'); return; }
+        all[newName]=all[oldName]; delete all[oldName];
+        saveAllSL(all); setActSLName(newName); slNameIn.value='';
+        refreshSLBuilderUI(); refreshHeaderDropdown();
+    });
+    deleteSLBtn.addEventListener('click', function(){
+        var name=getActSLName(); if(!name){ alert('No active set list to delete.'); return; }
+        if(!confirm('Delete set list "'+name+'"?')) return;
+        var all=getAllSL(); delete all[name]; saveAllSL(all);
+        var rem=Object.keys(all).sort(); setActSLName(rem[0]||''); curIdx=0;
+        refreshSLBuilderUI(); refreshHeaderDropdown();
+    });
+    addSLBtn.addEventListener('click', function(){
+        var title=addSLSel.value; if(!title) return;
+        if(!getActSLName()){ alert('Create a set list first.'); return; }
+        var q=getActSL();
+        if(!q.includes(title)){ q.push(title); saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown(); }
+    });
+
+    /* ---- LIBRARY SAVE / DELETE ---- */
+    saveBtn.addEventListener('click', function(){
+        var title=flds.title.value.trim(); if(!title){ alert('A valid song title is required.'); return; }
+        var lib=getLib();
+        lib[title]={title:title, key:flds.key.value.trim()||'C', tempo:parseInt(flds.tempo.value,10)||80,
+            artist:flds.artist.value.trim(), notes:flds.notes.value.trim(),
+            structure:flds.structure.value.trim(), lyrics:flds.lyrics.value.trim(),
+            updatedAt:new Date().toISOString()};
+        saveLib(lib); refreshHeaderDropdown(); refreshSLBuilderUI();
+        libSelect.value='song::'+title; alert('"'+title+'" saved successfully.');
+    });
+    delBtn.addEventListener('click', function(){
+        var val=libSelect.value;
+        var title=val.indexOf('song::'===0)?val.slice(6):flds.title.value.trim();
+        if(!title){ alert('Select a song to delete.'); return; }
+        if(!confirm('Remove "'+title+'" from your library?')) return;
+        var lib=getLib(); delete lib[title]; saveLib(lib);
+        songForm.reset(); refreshHeaderDropdown(); refreshSLBuilderUI(); editBtn.click();
+    });
+
+    /* ---- EXPORT / IMPORT SONG ---- */
+    exportBtn.addEventListener('click', function(){
+        var title=flds.title.value.trim(); if(!title){ alert('Enter a song title before exporting.'); return; }
+        var data={title:title,key:flds.key.value.trim()||'C',tempo:parseInt(flds.tempo.value,10)||80,
+            artist:flds.artist.value.trim(),notes:flds.notes.value.trim(),
+            structure:flds.structure.value.trim(),lyrics:flds.lyrics.value.trim(),version:'2.1'};
+        var link=document.createElement('a');
+        link.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+        link.download=title.toLowerCase().replace(/[^a-z0-9]/gi,'_')+'_song.json';
+        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+    });
+    importFile.addEventListener('change', function(e){
+        var file=e.target.files[0]; if(!file) return;
+        var reader=new FileReader();
+        reader.onload=function(ev){
+            try{ var song=JSON.parse(ev.target.result); loadSong(song); alert('Import successful.'); }
+            catch(err){ alert('Invalid file format.'); } finally{ e.target.value=''; }
+        };
+        reader.readAsText(file);
+    });
+
+    /* ---- EXPORT / IMPORT LIBRARY ---- */
+    exportLibBtn.addEventListener('click', function(){
+        var lib=getLib(); if(!Object.keys(lib).length){ alert('Your library is empty.'); return; }
+        var pkg={type:'SET_LIST_EXPORT',version:'2.1',exportedAt:new Date().toISOString(),songs:lib};
+        var link=document.createElement('a');
+        link.href=URL.createObjectURL(new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'}));
+        link.download='song_library_'+new Date().toISOString().split('T')[0]+'.json';
+        document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+    });
+    importLibFile.addEventListener('change', function(e){
+        var file=e.target.files[0]; if(!file) return;
+        var reader=new FileReader();
+        reader.onload=function(ev){
+            try{
+                var p=JSON.parse(ev.target.result); var incoming=null;
+                if(p.type==='SET_LIST_EXPORT'&&p.songs) incoming=p.songs;
+                else if(p.title&&p.lyrics) incoming={[p.title]:p};
+                else throw new Error('Unrecognized file format.');
+                var count=Object.keys(incoming).length; if(!count) throw new Error('No song data found.');
+                if(confirm('Found '+count+' song(s). Merge into your library?')){
+                    var merged=Object.assign({},getLib(),incoming); saveLib(merged);
+                    refreshHeaderDropdown(); refreshSLBuilderUI();
+                    alert('Imported '+count+' song(s) successfully.');
+                }
+            } catch(err){ alert('Import failed: '+err.message); }
+            finally{ e.target.value=''; }
+        };
+        reader.readAsText(file);
+    });
+
+    /* ---- CLOUD FETCH ---- */
+    fetchBtn.addEventListener('click', async function(){
+        var artist=srchArtist.value.trim(); var title=srchTitle.value.trim();
+        if(!artist||!title){ alert('Provide both Artist Name and Song Title.'); return; }
+        fetchBtn.textContent='Fetching\u2026'; fetchBtn.disabled=true;
+        try{
+            var res=await fetch('https://api.lyrics.ovh/v1/'+encodeURIComponent(artist)+'/'+encodeURIComponent(title));
+            if(!res.ok) throw new Error('Song not found or connection timed out.');
+            var data=await res.json(); if(!data.lyrics) throw new Error('Lyrics response was empty.');
+            var raw=data.lyrics; if(!raw.trim().startsWith('[')) raw='[Song Text]\n'+raw;
+            flds.title.value=title; flds.artist.value=artist; flds.lyrics.value=raw.trim();
+            flds.key.value='C'; flds.tempo.value=85; flds.structure.value='Verse 1, Chorus';
+            srchArtist.value=''; srchTitle.value='';
+            alert('Lyrics for "'+title+'" imported! Save to your library below.');
+        } catch(err){ alert('Fetch failed: '+err.message); }
+        finally{ fetchBtn.textContent='Fetch & Import'; fetchBtn.disabled=false; }
+    });
+
+    /* ---- CLEAR FORM ---- */
+    clearBtn.addEventListener('click', function(){
+        if(confirm('Clear all workspace inputs?')){ stopScroll(); songForm.reset(); libSelect.value=''; editBtn.click(); }
+    });
+
+    /* ---- MODE SWITCHING ---- */
+    editBtn.addEventListener('click', function(){
+        stopScroll();
+        editBtn.classList.add('active');  editBtn.setAttribute('aria-selected','true');
+        perfBtn.classList.remove('active'); perfBtn.setAttribute('aria-selected','false');
+        perfView.style.display='none'; scrollDock.style.display='none';
+        editorView.style.display='block'; appTitle.textContent='Song Editor';
+    });
+    perfBtn.addEventListener('click', function(){
+        if(!flds.title.value.trim()){ alert('Load a song first.'); return; }
+        editBtn.classList.remove('active'); editBtn.setAttribute('aria-selected','false');
+        perfBtn.classList.add('active');  perfBtn.setAttribute('aria-selected','true');
+        editorView.style.display='none';
+        perfView.style.display='block'; scrollDock.style.display='flex';
+        appTitle.textContent='Performance Mode';
+        renderPerfView(); renderSLPanel();
+    });
+
+    /* ---- PERFORMANCE RENDER ---- */
+    function renderPerfView(){
+        rnd.title.textContent=flds.title.value.trim();
+        rnd.tempo.textContent=(parseInt(flds.tempo.value,10)||80)+' BPM';
+        rnd.key.textContent='Key: '+(flds.key.value.trim()||'C');
+        var artist=flds.artist.value.trim();
+        rnd.artist.textContent=artist; rnd.artist.style.display=artist?'block':'none';
+        var notes=flds.notes.value.trim();
+        rnd.notes.textContent=notes; rnd.notesWrap.style.display=notes?'block':'none';
+        var struct=flds.structure.value.trim();
+        rnd.structure.textContent='Structure: '+struct; rnd.structureWrap.style.display=struct?'block':'none';
+        rnd.content.innerHTML='';
+        var section=null;
+        flds.lyrics.value.split('\n').forEach(function(line){
+            var t=line.trim();
+            if(t.startsWith('['&&t.endsWith(']')&&!t.slice(1,-1).includes(' '))){
+                section=document.createElement('div'); section.className='perf-section';
+                var h=document.createElement('div'); h.className='perf-section-heading'; h.textContent=t.slice(1,-1);
+                section.appendChild(h); rnd.content.appendChild(section);
+            } else {
+                if(!section){ section=document.createElement('div'); section.className='perf-section'; rnd.content.appendChild(section); }
+                section.appendChild(parseChordLine(line));
+            }
+        });
+        curScrollY=window.scrollY;
+    }
+
+    function parseChordLine(line){
+        var wrap=document.createElement('div'); wrap.className='song-line';
+        var cr=document.createElement('div'); cr.className='chord-row';
+        var lr=document.createElement('div'); lr.className='lyric-row';
+        var re=/\[([^\]]+)\]/g; var m,last=0,lyrics='',chords=[];
+        while((m=re.exec(line))!==null){ lyrics+=line.substring(last,m.index); chords.push({text:m[1],pos:lyrics.length}); last=re.lastIndex; }
+        lyrics+=line.substring(last); lr.textContent=lyrics||'\u00A0';
+        if(chords.length){
+            chords.forEach(function(c){ var s=document.createElement('span'); s.className='chord-wrapper'; s.textContent=c.text; s.style.left=(c.pos*0.58)+'em'; cr.appendChild(s); });
+            wrap.appendChild(cr);
+        }
+        wrap.appendChild(lr); return wrap;
+    }
+
+    /* ---- SET LIST PERFORMANCE PANEL ---- */
+    var curIdx=0; var panelOpen=false;
+
+    function renderSLPanel(){
+        var queue=getActSL(); var lib=getLib(); var name=getActSLName();
+        slPanelName.textContent=name?'\uD83C\uDFB5 '+name:'\uD83C\uDFB5 Set List';
+        slProgress.textContent=queue.length?(curIdx+1)+' / '+queue.length:'0 / 0';
+        slPanelList.innerHTML='';
+        queue.forEach(function(title,idx){
+            var song=lib[title]||{};
+            var li=document.createElement('li'); li.className='sl-item';
+            if(idx===curIdx) li.classList.add('active');
+            if(idx<curIdx)   li.classList.add('done');
+            li.innerHTML='<span class="sl-num">'+(idx+1)+'</span>'+
+                '<div class="sl-info">'+
+                  '<div class="sl-title">'+esc(title)+'</div>'+
+                  '<div class="sl-meta">'+(song.key?'Key '+esc(song.key):'')+
+                    (song.tempo?' &middot; '+song.tempo+' BPM':'')+'</div>'+
+                '</div>'+(idx<curIdx?'<span class="sl-tick">\u2713</span>':'');
+            li.addEventListener('click',function(){ jumpTo(idx); });
+            slPanelList.appendChild(li);
+        });
+        if(queue.length){
+            slNavLabel.textContent=(curIdx+1)+' / '+queue.length+'  \u2022  '+(queue[curIdx]||'');
+            slNavCluster.style.display='flex';
+        } else { slNavCluster.style.display='none'; }
+        prevBtn.disabled=curIdx===0;
+        nextBtn.disabled=curIdx>=queue.length-1;
+    }
+
+    function jumpTo(idx){
+        var queue=getActSL(); if(idx<0||idx>=queue.length) return;
+        curIdx=idx; var song=getLib()[queue[idx]]; if(!song) return;
+        loadSong(song); stopScroll(); renderPerfView(); renderSLPanel();
+        window.scrollTo({top:0,behavior:'smooth'}); curScrollY=0;
+    }
+
+    prevBtn.addEventListener('click', function(){ jumpTo(curIdx-1); });
+    nextBtn.addEventListener('click', function(){ jumpTo(curIdx+1); });
+    togglePanelBtn.addEventListener('click', function(){
+        panelOpen=!panelOpen;
+        slPanel.classList.toggle('open',panelOpen);
+        perfLayout.classList.toggle('panel-open',panelOpen);
+        togglePanelBtn.textContent=panelOpen?'\u2715 Set List':'\uD83C\uDFB5 Set List';
+    });
+
+    /* ---- AUTO-SCROLL ---- */
+    var scrolling=false; var rafId=null; var lastTs=null; var curScrollY=0; var lastEngAt=0;
+    var BASE=0.030;
+
+    function scrollLoop(ts){
+        if(lastTs===null) lastTs=ts;
+        var delta=ts-lastTs; lastTs=ts;
+        var speed=parseInt(speedSlider.value,10)/100;
+        curScrollY+=delta*BASE*speed; lastEngAt=performance.now();
+        window.scrollTo(0,curScrollY);
+        if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-2){ stopScroll(); return; }
+        if(scrolling) rafId=requestAnimationFrame(scrollLoop);
+    }
+    window.addEventListener('scroll',function(){
+        if(!scrolling) return;
+        if(performance.now()-lastEngAt>32){ curScrollY=window.scrollY; lastTs=null; }
+    },{passive:true});
+
+    function startScroll(){
+        scrolling=true; lastTs=null; lastEngAt=0; curScrollY=window.scrollY;
+        playBtn.textContent='\u23F8 Pause Auto-Scroll'; playBtn.className='btn btn-secondary';
+        statusEl.classList.add('active'); statusTxt.textContent='Scrolling';
+        rafId=requestAnimationFrame(scrollLoop);
+    }
+    function stopScroll(){
+        scrolling=false; if(rafId){ cancelAnimationFrame(rafId); rafId=null; } lastTs=null;
+        playBtn.textContent='\u25B6 Play Auto-Scroll'; playBtn.className='btn btn-success';
+        statusEl.classList.remove('active'); statusTxt.textContent='Paused';
+    }
+    playBtn.addEventListener('click',  function(){ scrolling?stopScroll():startScroll(); });
+    resetBtn.addEventListener('click', function(){ stopScroll(); curScrollY=0; window.scrollTo({top:0,behavior:'smooth'}); });
+
+    /* ---- SLIDERS ---- */
+    fontSlider.addEventListener('input',function(e){
+        fontDisplay.textContent=e.target.value+'px';
+        document.documentElement.style.setProperty('--perf-font-size',e.target.value+'px');
+    });
+    speedSlider.addEventListener('input',function(e){ speedDisplay.textContent=e.target.value+'%'; });
+
+    /* ---- INIT ---- */
+    refreshHeaderDropdown();
+    refreshSLBuilderUI();
+
+}); // DOMContentLoaded
+</script>
 </body>
 </html>
