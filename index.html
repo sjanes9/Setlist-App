@@ -26,6 +26,7 @@
             --sl-panel-w:260px;
             --radius:8px; --radius-lg:12px;
             --perf-font-size:1.25rem; --transition:0.2s ease;
+            --perf-col-width:100%;
         }
         [data-theme="dark"] {
             --bg:#0f172a; --surface:#1e293b; --surface-2:#273449;
@@ -95,10 +96,10 @@
         .perf-structure{font-size:0.95rem;font-style:italic;color:var(--perf-structure-text);background:var(--perf-structure-bg);padding:0.5rem 1rem;border-radius:var(--radius);display:inline-block;margin-bottom:1.5rem;transition:color var(--transition),background-color var(--transition);}
         .perf-section{margin-bottom:2.5rem;}
         .perf-section-heading{font-weight:700;font-size:1.15rem;color:var(--perf-heading-text);margin-bottom:1rem;border-left:4px solid var(--perf-heading-border);padding-left:0.6rem;transition:color var(--transition),border-color var(--transition);}
-        .song-line{display:flex;flex-direction:column;margin-bottom:1.25rem;position:relative;}
-        .chord-row{display:block;height:1.5rem;position:relative;white-space:pre;font-family:'Courier New',Courier,monospace;font-size:calc(var(--perf-font-size)*0.8);font-weight:700;}
+        .song-line{display:flex;flex-direction:column;margin-bottom:1.25rem;position:relative;max-width:var(--perf-col-width);}
+        .chord-row{display:block;height:1.5rem;position:relative;white-space:pre;font-family:'Courier New',Courier,monospace;font-size:calc(var(--perf-font-size)*0.8);font-weight:700;overflow-x:visible;}
         .chord-wrapper{position:absolute;background-color:var(--chord-bg);color:var(--chord-text);padding:0 5px;border-radius:4px;line-height:1.3;transition:background-color var(--transition),color var(--transition);}
-        .lyric-row{display:block;font-size:var(--perf-font-size);white-space:pre-wrap;color:var(--text);min-height:1.4rem;transition:color var(--transition);}
+        .lyric-row{display:block;font-size:var(--perf-font-size);white-space:pre-wrap;word-break:break-word;color:var(--text);min-height:1.4rem;transition:color var(--transition);}
         .sl-panel{width:0;overflow:hidden;flex-shrink:0;transition:width 0.3s ease;}
         .sl-panel.open{width:var(--sl-panel-w);}
         .sl-panel-inner{width:var(--sl-panel-w);background:var(--sl-bg);border:1px solid var(--sl-border);border-radius:var(--radius-lg);padding:1rem;position:sticky;top:1.5rem;max-height:calc(100vh - 10rem);overflow-y:auto;transition:background-color var(--transition),border-color var(--transition);}
@@ -332,6 +333,12 @@
             <input type="range" id="fontSizeSlider" min="14" max="36" value="20">
             <span id="fontSizeDisplay">20px</span>
         </div>
+        <div class="slider-group">
+            <label for="colWidthSlider">Width:</label>
+            <input type="range" id="colWidthSlider" min="20" max="100" value="100" step="1">
+            <span id="colWidthDisplay">100%</span>
+        </div>
+        <button type="button" id="fitScreenBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.8rem;" title="Auto-fit lyrics to screen width">&#8596; Fit Screen</button>
     </div>
 </div>
 
@@ -690,8 +697,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /* ---- EXPORT / IMPORT LIBRARY ---- */
     exportLibBtn.addEventListener('click', function(){
-        var lib=getLib(); if(!Object.keys(lib).length){ alert('Your library is empty.'); return; }
-        var pkg={type:'SET_LIST_EXPORT',version:'2.1',exportedAt:new Date().toISOString(),songs:lib};
+        var lib=getLib(); if(!Object.keys(lib).length){ alert('Your library is empty. Save some songs first.'); return; }
+        var allSL=getAllSL();
+        var pkg={type:'SET_LIST_EXPORT',version:'2.2',exportedAt:new Date().toISOString(),songs:lib,setlists:allSL};
         var link=document.createElement('a');
         link.href=URL.createObjectURL(new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'}));
         link.download='song_library_'+new Date().toISOString().split('T')[0]+'.json';
@@ -702,15 +710,23 @@ document.addEventListener('DOMContentLoaded', function() {
         var reader=new FileReader();
         reader.onload=function(ev){
             try{
-                var p=JSON.parse(ev.target.result); var incoming=null;
-                if(p.type==='SET_LIST_EXPORT'&&p.songs) incoming=p.songs;
-                else if(p.title&&p.lyrics) incoming={[p.title]:p};
-                else throw new Error('Unrecognized file format.');
-                var count=Object.keys(incoming).length; if(!count) throw new Error('No song data found.');
-                if(confirm('Found '+count+' song(s). Merge into your library?')){
-                    var merged=Object.assign({},getLib(),incoming); saveLib(merged);
+                var p=JSON.parse(ev.target.result); var incomingSongs=null; var incomingSL=null;
+                if(p.type==='SET_LIST_EXPORT'&&p.songs){
+                    incomingSongs=p.songs;
+                    incomingSL=p.setlists||null;  // present in v2.2+
+                } else if(p.title&&p.lyrics){
+                    incomingSongs={[p.title]:p};
+                } else { throw new Error('Unrecognized file format.'); }
+                var songCount=Object.keys(incomingSongs).length;
+                if(!songCount) throw new Error('No song data found.');
+                var slCount=incomingSL?Object.keys(incomingSL).length:0;
+                var msg='Found '+songCount+' song(s)'+(slCount?' and '+slCount+' set list(s)':'')+'. Merge into your library?';
+                if(confirm(msg)){
+                    saveLib(Object.assign({},getLib(),incomingSongs));
+                    if(incomingSL) saveAllSL(Object.assign({},getAllSL(),incomingSL));
                     refreshHeaderDropdown(); refreshSLBuilderUI();
-                    alert('Imported '+count+' song(s) successfully.');
+                    var summary='Imported '+songCount+' song(s)'+(slCount?' and '+slCount+' set list(s)':'')+'  successfully.';
+                    alert(summary);
                 }
             } catch(err){ alert('Import failed: '+err.message); }
             finally{ e.target.value=''; }
@@ -757,6 +773,7 @@ document.addEventListener('DOMContentLoaded', function() {
         perfView.style.display='block'; scrollDock.style.display='flex';
         appTitle.textContent='Performance Mode';
         renderPerfView(); renderSLPanel();
+        applyColWidth(parseInt(colWidthSlider.value, 10));
     });
 
     /* ---- PERFORMANCE RENDER ---- */
@@ -895,6 +912,37 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--perf-font-size',e.target.value+'px');
     });
     speedSlider.addEventListener('input',function(e){ speedDisplay.textContent=e.target.value+'%'; });
+
+    /* ---- LYRICS COLUMN WIDTH ---- */
+    var colWidthSlider  = document.getElementById('colWidthSlider');
+    var colWidthDisplay = document.getElementById('colWidthDisplay');
+    var fitScreenBtn    = document.getElementById('fitScreenBtn');
+
+    function applyColWidth(pct){
+        // pct is 20-100; map to actual pixel width relative to #perfContent-wrap
+        var wrap = document.getElementById('perfContent-wrap');
+        var wrapW = wrap ? wrap.offsetWidth : window.innerWidth;
+        var px = Math.round(wrapW * (pct / 100));
+        document.documentElement.style.setProperty('--perf-col-width', px + 'px');
+        colWidthSlider.value = pct;
+        colWidthDisplay.textContent = pct + '%';
+    }
+
+    colWidthSlider.addEventListener('input', function(e){
+        applyColWidth(parseInt(e.target.value, 10));
+    });
+
+    // "Fit Screen" — auto-calculate the percentage that fills the available width
+    fitScreenBtn.addEventListener('click', function(){
+        applyColWidth(100);
+    });
+
+    // On resize, reapply so the column stays correct
+    window.addEventListener('resize', function(){
+        if(document.getElementById('performanceView').style.display !== 'none'){
+            applyColWidth(parseInt(colWidthSlider.value, 10));
+        }
+    });
 
     /* ---- INIT ---- */
     refreshHeaderDropdown();
