@@ -44,7 +44,7 @@
         }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         body{font-family:'Georgia','Times New Roman',serif;background-color:var(--bg);color:var(--text);line-height:1.6;padding:2rem;transition:background-color var(--transition),color var(--transition);}
-        .container{max-width:900px;margin:0 auto 7rem;background:var(--surface);padding:2rem;border-radius:var(--radius-lg);box-shadow:var(--shadow-card);transition:background-color var(--transition);}
+        .container{max-width:900px;margin:0 auto 7rem;background:var(--surface);padding:2rem;border-radius:var(--radius-lg);box-shadow:var(--shadow-card);transition:background-color var(--transition),max-width var(--transition),padding var(--transition);}.container.perf-mode{max-width:100%;border-radius:0;box-shadow:none;padding:1.5rem 2rem;}
         header{margin-bottom:2rem;border-bottom:2px solid var(--border-subtle);padding-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
         h1{font-size:1.75rem;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
         .header-controls{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
@@ -324,9 +324,10 @@
     </div>
     <div class="dock-cluster">
         <div class="speed-group">
-            <label for="scrollSpeedSlider">Scroll Speed:</label>
-            <input type="range" id="scrollSpeedSlider" min="10" max="300" value="100">
-            <span id="scrollSpeedDisplay">100%</span>
+            <label for="wpmSlider">Speed (WPM):</label>
+            <input type="range" id="wpmSlider" min="10" max="200" value="50" step="1">
+            <span id="wpmDisplay">50 WPM</span>
+            <button type="button" id="saveWpmBtn" class="btn btn-outline" style="padding:0.3rem 0.65rem;font-size:0.75rem;" title="Save this WPM to the current song">&#128190; Save</button>
         </div>
         <div class="slider-group">
             <label for="fontSizeSlider">Font:</label>
@@ -424,8 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var statusTxt    = document.getElementById('scrollStatusText');
     var fontSlider   = document.getElementById('fontSizeSlider');
     var fontDisplay  = document.getElementById('fontSizeDisplay');
-    var speedSlider  = document.getElementById('scrollSpeedSlider');
-    var speedDisplay = document.getElementById('scrollSpeedDisplay');
+    // WPM slider refs declared in scroll engine section below
     var actSLSel     = document.getElementById('activeSetlistSelect');
     var slNameIn     = document.getElementById('setlistNameInput');
     var createSLBtn  = document.getElementById('newSetListBtn');
@@ -764,6 +764,7 @@ document.addEventListener('DOMContentLoaded', function() {
         perfBtn.classList.remove('active'); perfBtn.setAttribute('aria-selected','false');
         perfView.style.display='none'; scrollDock.style.display='none';
         editorView.style.display='block'; appTitle.textContent='Song Editor';
+        document.querySelector('.container').classList.remove('perf-mode');
     });
     perfBtn.addEventListener('click', function(){
         if(!flds.title.value.trim()){ alert('Load a song first.'); return; }
@@ -772,8 +773,12 @@ document.addEventListener('DOMContentLoaded', function() {
         editorView.style.display='none';
         perfView.style.display='block'; scrollDock.style.display='flex';
         appTitle.textContent='Performance Mode';
-        renderPerfView(); renderSLPanel();
-        applyColWidth(parseInt(colWidthSlider.value, 10));
+        document.querySelector('.container').classList.add('perf-mode');
+        renderPerfView(); renderSLPanel(); loadWpmForCurrentSong();
+        // Small rAF delay so layout reflows before we measure offsetWidth
+        requestAnimationFrame(function(){
+            applyColWidth(parseInt(colWidthSlider.value, 10));
+        });
     });
 
     /* ---- PERFORMANCE RENDER ---- */
@@ -850,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function jumpTo(idx){
         var queue=getActSL(); if(idx<0||idx>=queue.length) return;
         curIdx=idx; var song=getLib()[queue[idx]]; if(!song) return;
-        loadSong(song); stopScroll(); renderPerfView(); renderSLPanel();
+        loadSong(song); stopScroll(); renderPerfView(); renderSLPanel(); loadWpmForCurrentSong();
         window.scrollTo({top:0,behavior:'smooth'}); curScrollY=0;
     }
 
@@ -864,36 +869,59 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /* ---- AUTO-SCROLL ---- */
-    var scrolling=false; var rafId=null; var lastTs=null; var curScrollY=0;
-    var lastEngineY=0;   // exact px value the engine last wrote to window.scrollY
-    var BASE=0.030;
+    /* ════ AUTO-SCROLL — WPM-based engine ════
+       Speed is Words Per Minute, computed as:
+         pxPerMs = scrollableHeight * WPM / (wordCount * 60000)
+       This makes scroll time exactly match sing/read time at the
+       chosen WPM regardless of font size, window height, or length.
+       Typical ranges: slow ballad 30-60 WPM, up-tempo 60-100 WPM.
+       Default 50 WPM is comfortable for most sung material.       */
+    var scrolling   = false;
+    var rafId       = null;
+    var lastTs      = null;
+    var curScrollY  = 0;
+    var lastEngineY = 0;
+    var wpmPxPerMs  = 0;
+
+    function countWords(str){
+        return (str||'').replace(/\[[^\]]*\]/g,'').trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
+    }
+
+    function calcWpmRate(){
+        var docH   = document.documentElement.scrollHeight;
+        var winH   = window.innerHeight;
+        var scrollH = Math.max(docH - winH, 1);
+        var words  = Math.max(countWords(flds.lyrics.value), 1);
+        var wpm    = parseInt(wpmSlider.value, 10) || 50;
+        wpmPxPerMs = (scrollH * wpm) / (words * 60000);
+    }
 
     function scrollLoop(ts){
         if(lastTs===null) lastTs=ts;
         var delta=ts-lastTs; lastTs=ts;
-        var speed=parseInt(speedSlider.value,10)/100;
-        curScrollY+=delta*BASE*speed;
-        lastEngineY=curScrollY;          // record what we're about to set
-        window.scrollTo(0,curScrollY);
-        if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-2){ stopScroll(); return; }
+        curScrollY += delta * wpmPxPerMs;
+        lastEngineY = curScrollY;
+        window.scrollTo(0, curScrollY);
+        if(window.innerHeight+window.scrollY >= document.documentElement.scrollHeight-2){
+            stopScroll(); return;
+        }
         if(scrolling) rafId=requestAnimationFrame(scrollLoop);
     }
 
-    // Manual-scroll detection: compare the browser's actual scrollY against
-    // the value the engine just wrote.  A difference > 4px means the user
-    // moved the page; absorb their position so auto-scroll continues from there.
+    // Manual-scroll detection: difference > 4px means user moved it — absorb & continue.
     window.addEventListener('scroll', function(){
         if(!scrolling) return;
         var userDelta = Math.abs(window.scrollY - lastEngineY);
         if(userDelta > 4){
-            curScrollY  = window.scrollY;   // pick up from new position
-            lastEngineY = window.scrollY;   // stop re-triggering this branch
-            lastTs      = null;             // reset frame timer — no jump
+            curScrollY  = window.scrollY;
+            lastEngineY = window.scrollY;
+            lastTs      = null;
         }
     }, {passive:true});
 
     function startScroll(){
-        scrolling=true; lastTs=null; lastEngAt=0; curScrollY=window.scrollY;
+        scrolling=true; lastTs=null; curScrollY=window.scrollY;
+        calcWpmRate();
         playBtn.textContent='\u23F8 Pause Auto-Scroll'; playBtn.className='btn btn-secondary';
         statusEl.classList.add('active'); statusTxt.textContent='Scrolling';
         rafId=requestAnimationFrame(scrollLoop);
@@ -903,6 +931,7 @@ document.addEventListener('DOMContentLoaded', function() {
         playBtn.textContent='\u25B6 Play Auto-Scroll'; playBtn.className='btn btn-success';
         statusEl.classList.remove('active'); statusTxt.textContent='Paused';
     }
+
     playBtn.addEventListener('click',  function(){ scrolling?stopScroll():startScroll(); });
     resetBtn.addEventListener('click', function(){ stopScroll(); curScrollY=0; window.scrollTo({top:0,behavior:'smooth'}); });
 
@@ -911,7 +940,37 @@ document.addEventListener('DOMContentLoaded', function() {
         fontDisplay.textContent=e.target.value+'px';
         document.documentElement.style.setProperty('--perf-font-size',e.target.value+'px');
     });
-    speedSlider.addEventListener('input',function(e){ speedDisplay.textContent=e.target.value+'%'; });
+
+    var wpmSlider  = document.getElementById('wpmSlider');
+    var wpmDisplay = document.getElementById('wpmDisplay');
+    var saveWpmBtn = document.getElementById('saveWpmBtn');
+
+    wpmSlider.addEventListener('input', function(e){
+        var v=parseInt(e.target.value,10);
+        wpmDisplay.textContent = v+' WPM';
+        if(scrolling) calcWpmRate();
+    });
+
+    // Save current WPM to this song in localStorage
+    saveWpmBtn.addEventListener('click', function(){
+        var title=flds.title.value.trim(); if(!title) return;
+        var lib=getLib();
+        if(lib[title]){
+            lib[title].wpm=parseInt(wpmSlider.value,10);
+            saveLib(lib);
+            saveWpmBtn.textContent='\u2713 Saved';
+            setTimeout(function(){ saveWpmBtn.innerHTML='&#128190; Save'; }, 1500);
+        }
+    });
+
+    function loadWpmForCurrentSong(){
+        var title=flds.title.value.trim();
+        var lib=getLib(); var song=lib[title];
+        var wpm=(song&&song.wpm)?song.wpm:50;
+        wpmSlider.value=wpm;
+        wpmDisplay.textContent=wpm+' WPM';
+    }
+
 
     /* ---- LYRICS COLUMN WIDTH ---- */
     var colWidthSlider  = document.getElementById('colWidthSlider');
@@ -919,9 +978,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var fitScreenBtn    = document.getElementById('fitScreenBtn');
 
     function applyColWidth(pct){
-        // pct is 20-100; map to actual pixel width relative to #perfContent-wrap
         var wrap = document.getElementById('perfContent-wrap');
-        var wrapW = wrap ? wrap.offsetWidth : window.innerWidth;
+        // Use offsetWidth after layout — falls back to window inner if not visible
+        var wrapW = (wrap && wrap.offsetWidth > 0) ? wrap.offsetWidth : (window.innerWidth - 64);
         var px = Math.round(wrapW * (pct / 100));
         document.documentElement.style.setProperty('--perf-col-width', px + 'px');
         colWidthSlider.value = pct;
