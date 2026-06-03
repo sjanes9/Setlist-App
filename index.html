@@ -132,7 +132,55 @@
         .q-remove{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:1rem;line-height:1;padding:0.1rem 0.3rem;border-radius:4px;transition:color var(--transition),background-color var(--transition);flex-shrink:0;}
         .q-remove:hover{color:var(--danger);background:rgba(239,68,68,0.1);}
         .sl-empty{text-align:center;color:var(--text-faint);font-size:0.85rem;padding:1rem 0;font-style:italic;}
-        .scroll-control-dock{position:fixed;bottom:0;left:0;right:0;background:var(--dock-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:0.85rem 2rem;display:none;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:var(--shadow-dock);z-index:1000;transition:background-color var(--transition),border-color var(--transition);}
+        
+        /* ── COLLAPSIBLE DOCK ── */
+        .scroll-control-dock{
+            position:fixed;bottom:0;left:0;right:0;
+            background:var(--dock-bg);
+            backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+            border-top:1px solid var(--border);
+            box-shadow:var(--shadow-dock);
+            z-index:1000;
+            display:none;
+            flex-direction:column;
+            transition:background-color var(--transition),border-color var(--transition);
+            touch-action:none;
+        }
+        /* The drag handle / collapsed tab */
+        .dock-handle{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:0.5rem 1.25rem;
+            cursor:pointer;
+            gap:0.75rem;
+            user-select:none;
+            -webkit-user-select:none;
+            min-height:44px; /* iOS tap target */
+        }
+        .dock-handle-left{display:flex;align-items:center;gap:0.6rem;}
+        .dock-handle-pill{
+            width:36px;height:4px;border-radius:2px;
+            background:var(--border);flex-shrink:0;
+        }
+        .dock-chevron{
+            font-size:0.75rem;color:var(--text-muted);
+            transition:transform 0.25s ease;
+            flex-shrink:0;
+        }
+        .dock-collapsed .dock-chevron{transform:rotate(180deg);}
+        /* The expandable controls body */
+        .dock-body{
+            overflow:hidden;
+            max-height:400px;
+            transition:max-height 0.3s ease, padding 0.3s ease;
+            padding:0 1.25rem 0.85rem;
+            display:flex;flex-direction:column;gap:0.6rem;
+        }
+        .dock-collapsed .dock-body{
+            max-height:0;
+            padding-top:0;padding-bottom:0;
+        }
+        /* Inline clusters inside dock body */
+        .dock-row{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
         .dock-cluster{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
         .slider-group{display:flex;align-items:center;gap:0.5rem;font-weight:600;font-size:0.875rem;color:var(--text);}
         .slider-group label{margin-bottom:0;color:var(--text-muted);}
@@ -307,39 +355,54 @@
 </div>
 
 <!-- DOCK -->
-<div class="scroll-control-dock" id="scrollDock">
-    <div class="dock-cluster">
-        <button type="button" id="playScrollBtn" class="btn btn-success">&#9654; Play Auto-Scroll</button>
-        <button type="button" id="resetScrollBtn" class="btn btn-secondary">&#8679; Reset Top</button>
-        <div class="scroll-status" id="scrollStatus">
-            <span class="dot"></span>
-            <span id="scrollStatusText">Paused</span>
+<div class="scroll-control-dock dock-collapsed" id="scrollDock">
+
+    <!-- TAP THIS BAR TO EXPAND / COLLAPSE -->
+    <div class="dock-handle" id="dockHandle">
+        <div class="dock-handle-left">
+            <!-- Primary controls always visible in handle -->
+            <button type="button" id="playScrollBtn" class="btn btn-success" style="padding:0.45rem 1rem;font-size:0.85rem;">&#9654; Play</button>
+            <button type="button" id="resetScrollBtn" class="btn btn-secondary" style="padding:0.45rem 0.75rem;font-size:0.85rem;">&#8679;</button>
+            <div class="scroll-status" id="scrollStatus">
+                <span class="dot"></span>
+                <span id="scrollStatusText">Paused</span>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+            <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;" id="dockHintLabel">Settings</span>
+            <span class="dock-chevron">&#9650;</span>
         </div>
     </div>
-    <div class="dock-cluster" id="setlistNavCluster" style="display:none;">
-        <button type="button" id="prevSongBtn" class="btn btn-outline">&#8592; Prev</button>
-        <span id="setlistNavLabel" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;"></span>
-        <button type="button" id="nextSongBtn" class="btn btn-outline">Next &#8594;</button>
-        <button type="button" id="toggleSetlistPanelBtn" class="btn btn-outline">&#127925; Set List</button>
-    </div>
-    <div class="dock-cluster">
-        <div class="speed-group">
-            <label for="wpmSlider">Speed (WPM):</label>
-            <input type="range" id="wpmSlider" min="10" max="200" value="50" step="1">
-            <span id="wpmDisplay">50 WPM</span>
-            <button type="button" id="saveWpmBtn" class="btn btn-outline" style="padding:0.3rem 0.65rem;font-size:0.75rem;" title="Save this WPM to the current song">&#128190; Save</button>
+
+    <!-- EXPANDABLE BODY -->
+    <div class="dock-body">
+        <!-- Set list nav -->
+        <div class="dock-row" id="setlistNavCluster" style="display:none;">
+            <button type="button" id="prevSongBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">&#8592; Prev</button>
+            <span id="setlistNavLabel" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;"></span>
+            <button type="button" id="nextSongBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">Next &#8594;</button>
+            <button type="button" id="toggleSetlistPanelBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">&#127925; Set List</button>
         </div>
-        <div class="slider-group">
-            <label for="fontSizeSlider">Font:</label>
-            <input type="range" id="fontSizeSlider" min="14" max="36" value="20">
-            <span id="fontSizeDisplay">20px</span>
+        <!-- Speed -->
+        <div class="dock-row">
+            <label for="wpmSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">WPM:</label>
+            <input type="range" id="wpmSlider" min="10" max="200" value="50" step="1" style="flex:1;min-width:80px;">
+            <span id="wpmDisplay" style="font-size:0.8rem;font-weight:600;color:var(--text);min-width:52px;">50 WPM</span>
+            <button type="button" id="saveWpmBtn" class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.75rem;">&#128190;</button>
         </div>
-        <div class="slider-group">
-            <label for="colWidthSlider">Width:</label>
-            <input type="range" id="colWidthSlider" min="20" max="100" value="100" step="1">
-            <span id="colWidthDisplay">100%</span>
+        <!-- Font -->
+        <div class="dock-row">
+            <label for="fontSizeSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Font:</label>
+            <input type="range" id="fontSizeSlider" min="14" max="36" value="20" style="flex:1;min-width:80px;">
+            <span id="fontSizeDisplay" style="font-size:0.8rem;font-weight:600;color:var(--text);min-width:36px;">20px</span>
         </div>
-        <button type="button" id="fitScreenBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.8rem;" title="Auto-fit lyrics to screen width">&#8596; Fit Screen</button>
+        <!-- Width -->
+        <div class="dock-row">
+            <label for="colWidthSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Width:</label>
+            <input type="range" id="colWidthSlider" min="20" max="100" value="100" step="1" style="flex:1;min-width:80px;">
+            <span id="colWidthDisplay" style="font-size:0.8rem;font-weight:600;color:var(--text);min-width:36px;">100%</span>
+            <button type="button" id="fitScreenBtn" class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.75rem;">&#8596;</button>
+        </div>
     </div>
 </div>
 
@@ -771,7 +834,7 @@ document.addEventListener('DOMContentLoaded', function() {
         editBtn.classList.remove('active'); editBtn.setAttribute('aria-selected','false');
         perfBtn.classList.add('active');  perfBtn.setAttribute('aria-selected','true');
         editorView.style.display='none';
-        perfView.style.display='block'; scrollDock.style.display='flex';
+        perfView.style.display='block'; scrollDock.style.display='flex'; setDockExpanded(false);
         appTitle.textContent='Performance Mode';
         document.querySelector('.container').classList.add('perf-mode');
         renderPerfView(); renderSLPanel(); loadWpmForCurrentSong();
@@ -1002,6 +1065,32 @@ document.addEventListener('DOMContentLoaded', function() {
             applyColWidth(parseInt(colWidthSlider.value, 10));
         }
     });
+
+    /* ---- COLLAPSIBLE DOCK ---- */
+    var dockHandle    = document.getElementById('dockHandle');
+    var dockHintLabel = document.getElementById('dockHintLabel');
+    var dockEl        = document.getElementById('scrollDock');
+    var dockExpanded  = false;
+
+    function setDockExpanded(open){
+        dockExpanded = open;
+        dockEl.classList.toggle('dock-collapsed', !open);
+        dockHintLabel.textContent = open ? 'Hide' : 'Settings';
+        // Reapply column width after layout settles
+        if(open) requestAnimationFrame(function(){
+            applyColWidth(parseInt(colWidthSlider.value, 10));
+        });
+    }
+
+    dockHandle.addEventListener('click', function(e){
+        // Don't toggle if user tapped one of the buttons inside the handle
+        if(e.target.closest('button')) return;
+        setDockExpanded(!dockExpanded);
+    });
+
+    // Show dock in collapsed state when entering perf mode
+    // (override the plain display:flex set by mode switch)
+    var _origPerfDockShow = null; // patched inline below
 
     /* ---- INIT ---- */
     refreshHeaderDropdown();
