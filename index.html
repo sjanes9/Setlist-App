@@ -96,6 +96,16 @@
         .perf-structure{font-size:0.95rem;font-style:italic;color:var(--perf-structure-text);background:var(--perf-structure-bg);padding:0.5rem 1rem;border-radius:var(--radius);display:inline-block;margin-bottom:1.5rem;transition:color var(--transition),background-color var(--transition);}
         .perf-section{margin-bottom:2.5rem;}
         .perf-section-heading{font-weight:700;font-size:1.15rem;color:var(--perf-heading-text);margin-bottom:1rem;border-left:4px solid var(--perf-heading-border);padding-left:0.6rem;transition:color var(--transition),border-color var(--transition);}
+        .pause-marker{display:flex;align-items:center;gap:0.6rem;margin:1rem 0 1.5rem;padding:0.6rem 1rem;background:var(--perf-structure-bg);border:1px dashed var(--perf-heading-border);border-radius:var(--radius);color:var(--perf-structure-text);font-size:0.95rem;font-style:italic;font-weight:600;transition:background-color var(--transition),border-color var(--transition),color var(--transition);}
+        .pause-marker.counting{background:#dcfce7;border-color:#16a34a;color:#15803d;font-style:normal;}
+        .pause-marker.counting .pause-adjust{display:none;}
+        [data-theme="dark"] .pause-marker.counting{background:#14532d;border-color:#16a34a;color:#4ade80;}
+        .pause-marker .pause-count{font-variant-numeric:tabular-nums;font-weight:700;}
+        .pause-adjust{display:inline-flex;align-items:center;gap:0.4rem;margin-left:auto;}
+        .pause-adjust button{width:30px;height:30px;border-radius:50%;border:1px solid var(--perf-heading-border);background:var(--surface);color:var(--perf-structure-text);font-size:1.1rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background-color var(--transition),color var(--transition);font-style:normal;}
+        .pause-adjust button:hover{background:var(--perf-heading-border);color:#fff;}
+        .pause-adjust button:active{transform:scale(0.9);}
+        .pause-secs{font-variant-numeric:tabular-nums;font-weight:700;min-width:2.5rem;text-align:center;font-style:normal;}
         .song-line{display:flex;flex-direction:column;margin-bottom:1.25rem;position:relative;max-width:var(--perf-col-width);}
         .chord-row{display:block;height:1.5rem;position:relative;white-space:pre;font-family:'Courier New',Courier,monospace;font-size:calc(var(--perf-font-size)*0.8);font-weight:700;overflow-x:visible;}
         .chord-wrapper{position:absolute;background-color:var(--chord-bg);color:var(--chord-text);padding:0 5px;border-radius:4px;line-height:1.3;transition:background-color var(--transition),color var(--transition);}
@@ -263,7 +273,8 @@
                 </div>
                 <div class="form-group">
                     <label for="songLyrics">Lyrics &amp; Chords (ChordPro Format)</label>
-                    <textarea id="songLyrics" placeholder="[Verse 1]&#10;[E] Amazing [A] grace how [E] sweet the sound..."></textarea>
+                    <textarea id="songLyrics" placeholder="[Verse 1]&#10;[E] Amazing [A] grace how [E] sweet the sound...&#10;&#10;Tip: put {pause:8} on its own line to hold the scroll for 8 seconds (intro, solo, etc.)"></textarea>
+                    <div class="hint">Add a pause by putting <strong>{pause:SECONDS}</strong> on its own line &mdash; e.g. <strong>{pause:8}</strong> holds the auto-scroll for 8 seconds at that spot (great for intros &amp; solos). The scroll resumes automatically.</div>
                 </div>
 
                 <div class="sub-heading">Current Track Actions</div>
@@ -363,6 +374,7 @@
             <!-- Primary controls always visible in handle -->
             <button type="button" id="playScrollBtn" class="btn btn-success" style="padding:0.45rem 1rem;font-size:0.85rem;">&#9654; Play</button>
             <button type="button" id="resetScrollBtn" class="btn btn-secondary" style="padding:0.45rem 0.75rem;font-size:0.85rem;">&#8679;</button>
+            <button type="button" id="listenBtn" class="btn btn-outline" style="padding:0.45rem 0.75rem;font-size:0.85rem;" title="Listen for a 4-count to auto-start">&#127908; Count-In</button>
             <div class="scroll-status" id="scrollStatus">
                 <span class="dot"></span>
                 <span id="scrollStatusText">Paused</span>
@@ -383,12 +395,37 @@
             <button type="button" id="nextSongBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">Next &#8594;</button>
             <button type="button" id="toggleSetlistPanelBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">&#127925; Set List</button>
         </div>
-        <!-- Speed -->
+        <!-- Count-In listener settings -->
+        <div class="dock-row" id="countInRow">
+            <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Count-In:</label>
+            <select id="countInMode" style="font-size:0.8rem;padding:0.35rem 0.6rem;">
+                <option value="clicks">4 Drumstick Clicks</option>
+                <option value="voice">Voice "1 2 3 4" (Chrome)</option>
+            </select>
+            <label style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Sensitivity:</label>
+            <input type="range" id="clickSensitivity" min="5" max="50" value="18" step="1" style="flex:1;min-width:60px;">
+            <span id="listenStatusText" style="font-size:0.75rem;font-weight:600;color:var(--text-muted);min-width:90px;">Not listening</span>
+        </div>
+        <!-- Scroll speed mode selector -->
         <div class="dock-row">
-            <label for="wpmSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">WPM:</label>
+            <label for="speedMode" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Mode:</label>
+            <select id="speedMode" style="font-size:0.8rem;padding:0.35rem 0.6rem;">
+                <option value="rate">Rate (manual)</option>
+                <option value="duration">Song Duration</option>
+            </select>
+            <button type="button" id="saveSpeedBtn" class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.75rem;" title="Save speed settings to this song">&#128190; Save</button>
+        </div>
+        <!-- Rate-mode slider -->
+        <div class="dock-row" id="rateRow">
+            <label for="wpmSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Scroll Speed:</label>
             <input type="range" id="wpmSlider" min="10" max="200" value="50" step="1" style="flex:1;min-width:80px;">
-            <span id="wpmDisplay" style="font-size:0.8rem;font-weight:600;color:var(--text);min-width:52px;">50 WPM</span>
-            <button type="button" id="saveWpmBtn" class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.75rem;">&#128190;</button>
+            <span id="wpmDisplay" style="font-size:0.8rem;font-weight:600;color:var(--text);min-width:52px;">50</span>
+        </div>
+        <!-- Duration-mode input -->
+        <div class="dock-row" id="durationRow" style="display:none;">
+            <label for="durationInput" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Duration:</label>
+            <input type="text" id="durationInput" placeholder="3:45" value="3:30" style="width:80px;font-size:0.85rem;padding:0.35rem 0.5rem;text-align:center;">
+            <span style="font-size:0.75rem;color:var(--text-faint);">min:sec &mdash; scrolls whole song over this time</span>
         </div>
         <!-- Font -->
         <div class="dock-row">
@@ -721,16 +758,19 @@ document.addEventListener('DOMContentLoaded', function() {
     saveBtn.addEventListener('click', function(){
         var title=flds.title.value.trim(); if(!title){ alert('A valid song title is required.'); return; }
         var lib=getLib();
+        var existing=lib[title]||{};
         lib[title]={title:title, key:flds.key.value.trim()||'C', tempo:parseInt(flds.tempo.value,10)||80,
             artist:flds.artist.value.trim(), notes:flds.notes.value.trim(),
             structure:flds.structure.value.trim(), lyrics:flds.lyrics.value.trim(),
+            // preserve any speed settings saved from the performance dock
+            wpm:existing.wpm, speedMode:existing.speedMode, duration:existing.duration,
             updatedAt:new Date().toISOString()};
         saveLib(lib); refreshHeaderDropdown(); refreshSLBuilderUI();
         libSelect.value='song::'+title; alert('"'+title+'" saved successfully.');
     });
     delBtn.addEventListener('click', function(){
         var val=libSelect.value;
-        var title=val.indexOf('song::'===0)?val.slice(6):flds.title.value.trim();
+        var title=(val.indexOf('song::')===0)?val.slice(6):flds.title.value.trim();
         if(!title){ alert('Select a song to delete.'); return; }
         if(!confirm('Remove "'+title+'" from your library?')) return;
         var lib=getLib(); delete lib[title]; saveLib(lib);
@@ -740,9 +780,11 @@ document.addEventListener('DOMContentLoaded', function() {
     /* ---- EXPORT / IMPORT SONG ---- */
     exportBtn.addEventListener('click', function(){
         var title=flds.title.value.trim(); if(!title){ alert('Enter a song title before exporting.'); return; }
+        var existing=getLib()[title]||{};
         var data={title:title,key:flds.key.value.trim()||'C',tempo:parseInt(flds.tempo.value,10)||80,
             artist:flds.artist.value.trim(),notes:flds.notes.value.trim(),
-            structure:flds.structure.value.trim(),lyrics:flds.lyrics.value.trim(),version:'2.1'};
+            structure:flds.structure.value.trim(),lyrics:flds.lyrics.value.trim(),
+            wpm:existing.wpm,speedMode:existing.speedMode,duration:existing.duration,version:'2.3'};
         var link=document.createElement('a');
         link.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
         link.download=title.toLowerCase().replace(/[^a-z0-9]/gi,'_')+'_song.json';
@@ -845,6 +887,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /* ---- PERFORMANCE RENDER ---- */
+    // Rewrite the {pause:N} values in the lyrics field to match the current
+    // (possibly adjusted) pauseMarkers, then save back to the song library so
+    // the new lengths persist.  Markers are matched to {pause:} lines in order.
+    function persistPauseChange(){
+        var lines=flds.lyrics.value.split('\n');
+        var pauseRe=/^\s*\{pause:\s*\d+(?:\.\d+)?\s*\}\s*$/i;
+        var mi=0;
+        for(var i=0;i<lines.length;i++){
+            if(pauseRe.test(lines[i]) && mi<pauseMarkers.length){
+                lines[i]='{pause:'+pauseMarkers[mi].secs+'}';
+                mi++;
+            }
+        }
+        flds.lyrics.value=lines.join('\n');
+        // Save back to the song in the library (if it's a saved song)
+        var title=flds.title.value.trim();
+        var lib=getLib();
+        if(title && lib[title]){
+            lib[title].lyrics=flds.lyrics.value;
+            saveLib(lib);
+        }
+    }
+
     function renderPerfView(){
         rnd.title.textContent=flds.title.value.trim();
         rnd.tempo.textContent=(parseInt(flds.tempo.value,10)||80)+' BPM';
@@ -856,10 +921,48 @@ document.addEventListener('DOMContentLoaded', function() {
         var struct=flds.structure.value.trim();
         rnd.structure.textContent='Structure: '+struct; rnd.structureWrap.style.display=struct?'block':'none';
         rnd.content.innerHTML='';
+        pauseMarkers=[];  // reset; rebuilt below for the scroll engine
         var section=null;
+        var pauseRe=/^\{pause:\s*(\d+(?:\.\d+)?)\s*\}$/i;
         flds.lyrics.value.split('\n').forEach(function(line){
             var t=line.trim();
-            if(t.startsWith('['&&t.endsWith(']')&&!t.slice(1,-1).includes(' '))){
+            // Pause marker on its own line
+            var pm=t.match(pauseRe);
+            if(pm){
+                var secs=parseFloat(pm[1]);
+                if(!section){ section=document.createElement('div'); section.className='perf-section'; rnd.content.appendChild(section); }
+                var marker=document.createElement('div');
+                marker.className='pause-marker';
+                marker.dataset.pause=secs;
+                marker.innerHTML='\u23F8 <span>Pause &mdash;</span> '+
+                    '<span class="pause-secs">'+secs+'s</span>'+
+                    '<span class="pause-count"></span>'+
+                    '<span class="pause-adjust">'+
+                      '<button type="button" class="pause-minus" title="Shorten by 1s" aria-label="Decrease pause">&minus;</button>'+
+                      '<button type="button" class="pause-plus" title="Lengthen by 1s" aria-label="Increase pause">+</button>'+
+                    '</span>';
+                section.appendChild(marker);
+                var pObj={el:marker, secs:secs, fired:false, index:pauseMarkers.length};
+                pauseMarkers.push(pObj);
+                (function(po){
+                    var minus=po.el.querySelector('.pause-minus');
+                    var plus =po.el.querySelector('.pause-plus');
+                    var disp =po.el.querySelector('.pause-secs');
+                    function update(newSecs){
+                        po.secs=Math.max(1, Math.round(newSecs));
+                        disp.textContent=po.secs+'s';
+                        po.el.dataset.pause=po.secs;
+                        persistPauseChange();        // write back to lyrics + save
+                        if(scrolling) calcRate();    // duration mode re-balances
+                    }
+                    minus.addEventListener('click', function(e){ e.stopPropagation(); update(po.secs-1); });
+                    plus .addEventListener('click', function(e){ e.stopPropagation(); update(po.secs+1); });
+                })(pObj);
+                return;
+            }
+            // Section header: a bracketed token with no spaces, e.g. [Verse 1] or [Chorus]
+            var isHeader = t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']';
+            if(isHeader){
                 section=document.createElement('div'); section.className='perf-section';
                 var h=document.createElement('div'); h.className='perf-section-heading'; h.textContent=t.slice(1,-1);
                 section.appendChild(h); rnd.content.appendChild(section);
@@ -931,40 +1034,120 @@ document.addEventListener('DOMContentLoaded', function() {
         togglePanelBtn.textContent=panelOpen?'\u2715 Set List':'\uD83C\uDFB5 Set List';
     });
 
-    /* ---- AUTO-SCROLL ---- */
-    /* ════ AUTO-SCROLL — WPM-based engine ════
-       Speed is Words Per Minute, computed as:
-         pxPerMs = scrollableHeight * WPM / (wordCount * 60000)
-       This makes scroll time exactly match sing/read time at the
-       chosen WPM regardless of font size, window height, or length.
-       Typical ranges: slow ballad 30-60 WPM, up-tempo 60-100 WPM.
-       Default 50 WPM is comfortable for most sung material.       */
+    /* ════════════════════════════════════════════════════════
+       AUTO-SCROLL ENGINE — two speed modes + line pauses
+       ────────────────────────────────────────────────────────
+       MODE 1 "rate": manual scroll speed (px/ms derived from a
+         simple speed value scaled by content length so the number
+         feels consistent across songs).
+       MODE 2 "duration": scroll the WHOLE song over a fixed time
+         (e.g. 3:45).  px/ms = scrollableHeight / (durationMs).
+         This is the "total height / song length" approach.
+       PAUSES: lines marked {pause:N} render as a pause marker.
+         When the top of a marker reaches ~35% of the viewport, the
+         scroll halts for N seconds (with a live countdown), then
+         resumes automatically.
+    ════════════════════════════════════════════════════════ */
     var scrolling   = false;
     var rafId       = null;
     var lastTs      = null;
     var curScrollY  = 0;
     var lastEngineY = 0;
-    var wpmPxPerMs  = 0;
+    var pxPerMs     = 0;
+    var pauseMarkers= [];     // [{el, secs, fired}]
+    var paused      = false;  // true while holding at a pause
+    var pauseUntil  = 0;      // timestamp when current pause ends
+    var activePause = null;
 
     function countWords(str){
-        return (str||'').replace(/\[[^\]]*\]/g,'').trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
+        return (str||'').replace(/\[[^\]]*\]/g,'').replace(/\{pause:[^}]*\}/gi,'').trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
     }
 
-    function calcWpmRate(){
-        var docH   = document.documentElement.scrollHeight;
-        var winH   = window.innerHeight;
-        var scrollH = Math.max(docH - winH, 1);
-        var words  = Math.max(countWords(flds.lyrics.value), 1);
-        var wpm    = parseInt(wpmSlider.value, 10) || 50;
-        wpmPxPerMs = (scrollH * wpm) / (words * 60000);
+    function parseDuration(str){
+        // "3:45" -> 225 seconds; also accepts plain seconds "210"
+        str=(str||'').trim();
+        if(str.indexOf(':')!==-1){
+            var p=str.split(':');
+            var m=parseInt(p[0],10)||0, s=parseInt(p[1],10)||0;
+            return m*60+s;
+        }
+        return parseInt(str,10)||0;
+    }
+
+    // Total seconds the pauses will consume (so duration mode can
+    // subtract them and keep the *scrolling* time on target).
+    function totalPauseSeconds(){
+        var sum=0;
+        pauseMarkers.forEach(function(p){ sum+=p.secs; });
+        return sum;
+    }
+
+    function calcRate(){
+        var docH=document.documentElement.scrollHeight;
+        var winH=window.innerHeight;
+        var scrollH=Math.max(docH-winH,1);
+        if(speedMode.value==='duration'){
+            var durSec=parseDuration(durationInput.value);
+            // Subtract pause time so the moving portion still finishes on time
+            var movingSec=Math.max(durSec-totalPauseSeconds(),1);
+            pxPerMs=scrollH/(movingSec*1000);
+        } else {
+            // rate mode: scale the 10-200 slider against content length,
+            // matching the previous feel (≈ words/min behaviour)
+            var words=Math.max(countWords(flds.lyrics.value),1);
+            var spd=parseInt(wpmSlider.value,10)||50;
+            pxPerMs=(scrollH*spd)/(words*60000);
+        }
+    }
+
+    function clearPauseUI(){
+        pauseMarkers.forEach(function(p){
+            p.el.classList.remove('counting');
+            var c=p.el.querySelector('.pause-count'); if(c) c.textContent='';
+        });
     }
 
     function scrollLoop(ts){
         if(lastTs===null) lastTs=ts;
         var delta=ts-lastTs; lastTs=ts;
-        curScrollY += delta * wpmPxPerMs;
+
+        // Currently holding at a pause?
+        if(paused){
+            var remain=Math.max(0,Math.ceil((pauseUntil-ts)/1000));
+            if(activePause){
+                var c=activePause.el.querySelector('.pause-count');
+                if(c) c.textContent='resuming in '+remain+'s';
+            }
+            if(ts>=pauseUntil){
+                paused=false;
+                if(activePause){ activePause.el.classList.remove('counting'); var cc=activePause.el.querySelector('.pause-count'); if(cc) cc.textContent=''; }
+                activePause=null;
+                lastTs=ts; // reset so no velocity jump
+            }
+            if(scrolling) rafId=requestAnimationFrame(scrollLoop);
+            return;
+        }
+
+        curScrollY += delta * pxPerMs;
         lastEngineY = curScrollY;
         window.scrollTo(0, curScrollY);
+
+        // Check whether a pause marker has reached the trigger line (35% down)
+        var triggerY = window.scrollY + window.innerHeight*0.35;
+        for(var i=0;i<pauseMarkers.length;i++){
+            var p=pauseMarkers[i];
+            if(p.fired) continue;
+            var markerTop = p.el.getBoundingClientRect().top + window.scrollY;
+            if(markerTop <= triggerY){
+                p.fired=true;
+                paused=true;
+                pauseUntil=ts + p.secs*1000;
+                activePause=p;
+                p.el.classList.add('counting');
+                break;
+            }
+        }
+
         if(window.innerHeight+window.scrollY >= document.documentElement.scrollHeight-2){
             stopScroll(); return;
         }
@@ -973,7 +1156,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Manual-scroll detection: difference > 4px means user moved it — absorb & continue.
     window.addEventListener('scroll', function(){
-        if(!scrolling) return;
+        if(!scrolling || paused) return;
         var userDelta = Math.abs(window.scrollY - lastEngineY);
         if(userDelta > 4){
             curScrollY  = window.scrollY;
@@ -983,14 +1166,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }, {passive:true});
 
     function startScroll(){
-        scrolling=true; lastTs=null; curScrollY=window.scrollY;
-        calcWpmRate();
+        scrolling=true; lastTs=null; paused=false; activePause=null; curScrollY=window.scrollY;
+        // Reset which pauses have fired, but only those still below us
+        pauseMarkers.forEach(function(p){
+            var markerTop=p.el.getBoundingClientRect().top + window.scrollY;
+            p.fired = markerTop < window.scrollY; // already passed = considered fired
+            p.el.classList.remove('counting');
+            var c=p.el.querySelector('.pause-count'); if(c) c.textContent='';
+        });
+        calcRate();
         playBtn.textContent='\u23F8 Pause Auto-Scroll'; playBtn.className='btn btn-secondary';
         statusEl.classList.add('active'); statusTxt.textContent='Scrolling';
         rafId=requestAnimationFrame(scrollLoop);
     }
     function stopScroll(){
-        scrolling=false; if(rafId){ cancelAnimationFrame(rafId); rafId=null; } lastTs=null;
+        scrolling=false; paused=false; activePause=null;
+        if(rafId){ cancelAnimationFrame(rafId); rafId=null; } lastTs=null;
+        clearPauseUI();
         playBtn.textContent='\u25B6 Play Auto-Scroll'; playBtn.className='btn btn-success';
         statusEl.classList.remove('active'); statusTxt.textContent='Paused';
     }
@@ -998,40 +1190,65 @@ document.addEventListener('DOMContentLoaded', function() {
     playBtn.addEventListener('click',  function(){ scrolling?stopScroll():startScroll(); });
     resetBtn.addEventListener('click', function(){ stopScroll(); curScrollY=0; window.scrollTo({top:0,behavior:'smooth'}); });
 
-    /* ---- SLIDERS ---- */
+    /* ---- SLIDERS & SPEED CONTROLS ---- */
     fontSlider.addEventListener('input',function(e){
         fontDisplay.textContent=e.target.value+'px';
         document.documentElement.style.setProperty('--perf-font-size',e.target.value+'px');
     });
 
-    var wpmSlider  = document.getElementById('wpmSlider');
-    var wpmDisplay = document.getElementById('wpmDisplay');
-    var saveWpmBtn = document.getElementById('saveWpmBtn');
+    var speedMode     = document.getElementById('speedMode');
+    var rateRow       = document.getElementById('rateRow');
+    var durationRow   = document.getElementById('durationRow');
+    var wpmSlider     = document.getElementById('wpmSlider');
+    var wpmDisplay    = document.getElementById('wpmDisplay');
+    var durationInput = document.getElementById('durationInput');
+    var saveSpeedBtn  = document.getElementById('saveSpeedBtn');
 
-    wpmSlider.addEventListener('input', function(e){
-        var v=parseInt(e.target.value,10);
-        wpmDisplay.textContent = v+' WPM';
-        if(scrolling) calcWpmRate();
+    function syncSpeedModeUI(){
+        if(speedMode.value==='duration'){
+            rateRow.style.display='none';
+            durationRow.style.display='flex';
+        } else {
+            rateRow.style.display='flex';
+            durationRow.style.display='none';
+        }
+    }
+    speedMode.addEventListener('change', function(){
+        syncSpeedModeUI();
+        if(scrolling) calcRate();
     });
 
-    // Save current WPM to this song in localStorage
-    saveWpmBtn.addEventListener('click', function(){
+    wpmSlider.addEventListener('input', function(e){
+        wpmDisplay.textContent = parseInt(e.target.value,10);
+        if(scrolling) calcRate();
+    });
+    durationInput.addEventListener('input', function(){
+        if(scrolling) calcRate();
+    });
+
+    // Save speed settings (mode + rate + duration) to this song
+    saveSpeedBtn.addEventListener('click', function(){
         var title=flds.title.value.trim(); if(!title) return;
         var lib=getLib();
         if(lib[title]){
-            lib[title].wpm=parseInt(wpmSlider.value,10);
+            lib[title].speedMode = speedMode.value;
+            lib[title].wpm       = parseInt(wpmSlider.value,10);
+            lib[title].duration  = durationInput.value.trim();
             saveLib(lib);
-            saveWpmBtn.textContent='\u2713 Saved';
-            setTimeout(function(){ saveWpmBtn.innerHTML='&#128190; Save'; }, 1500);
+            saveSpeedBtn.textContent='\u2713 Saved';
+            setTimeout(function(){ saveSpeedBtn.innerHTML='&#128190; Save'; }, 1500);
         }
     });
 
     function loadWpmForCurrentSong(){
         var title=flds.title.value.trim();
-        var lib=getLib(); var song=lib[title];
-        var wpm=(song&&song.wpm)?song.wpm:50;
-        wpmSlider.value=wpm;
-        wpmDisplay.textContent=wpm+' WPM';
+        var lib=getLib(); var song=lib[title]||{};
+        var spd=song.wpm?song.wpm:50;
+        wpmSlider.value=spd;
+        wpmDisplay.textContent=spd;
+        durationInput.value=song.duration?song.duration:'3:30';
+        speedMode.value=(song.speedMode==='duration')?'duration':'rate';
+        syncSpeedModeUI();
     }
 
 
@@ -1091,6 +1308,210 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show dock in collapsed state when entering perf mode
     // (override the plain display:flex set by mode switch)
     var _origPerfDockShow = null; // patched inline below
+
+    /* ════════════════════════════════════════════════════════
+       COUNT-IN LISTENER
+       ────────────────────────────────────────────────────────
+       Two modes:
+         1. CLICKS — Web Audio API amplitude/transient detection.
+            Listens for 4 sharp percussive peaks (drumstick clicks,
+            hand claps, or counting taps) at a roughly steady tempo.
+            Works in all modern browsers incl. iOS Safari.
+         2. VOICE  — SpeechRecognition for "1 2 3 4" (Chrome/Edge only).
+       On a successful 4-count, auto-starts the scroll AND sets the
+       WPM-derived tempo so the scroll matches the count-in tempo.
+    ════════════════════════════════════════════════════════ */
+    var listenBtn        = document.getElementById('listenBtn');
+    var countInMode      = document.getElementById('countInMode');
+    var clickSensitivity = document.getElementById('clickSensitivity');
+    var listenStatusText = document.getElementById('listenStatusText');
+
+    var audioCtx=null, micStream=null, analyser=null, micSource=null;
+    var listening=false, rafListenId=null;
+    var speechRec=null;
+
+    // Click-detection state
+    var clickTimes=[];          // timestamps of detected peaks
+    var aboveThreshold=false;   // simple debounce so one hit = one click
+    var lastPeakAt=0;
+
+    function setListenStatus(txt){ if(listenStatusText) listenStatusText.textContent=txt; }
+
+    function setListeningUI(on){
+        listening=on;
+        if(on){
+            listenBtn.innerHTML='\u23F9 Stop';
+            listenBtn.className='btn btn-danger';
+            listenBtn.style.padding='0.45rem 0.75rem';
+            listenBtn.style.fontSize='0.85rem';
+        } else {
+            listenBtn.innerHTML='\uD83C\uDFA4 Count-In';
+            listenBtn.className='btn btn-outline';
+            listenBtn.style.padding='0.45rem 0.75rem';
+            listenBtn.style.fontSize='0.85rem';
+        }
+    }
+
+    // Stop the DETECTION loop only — keeps the mic stream + AudioContext alive
+    // so we don't re-trigger the browser permission prompt next time.
+    function stopListening(){
+        if(rafListenId){ cancelAnimationFrame(rafListenId); rafListenId=null; }
+        if(speechRec){ try{ speechRec.stop(); }catch(e){} speechRec=null; }
+        clickTimes=[]; aboveThreshold=false;
+        setListeningUI(false);
+        setListenStatus('Not listening');
+    }
+
+    // Full teardown — releases the microphone entirely. Only call when leaving
+    // performance mode, so the permission prompt appears at most once per session.
+    function releaseMic(){
+        stopListening();
+        if(micStream){ micStream.getTracks().forEach(function(t){ t.stop(); }); micStream=null; }
+        if(audioCtx){ try{ audioCtx.close(); }catch(e){} audioCtx=null; }
+        analyser=null; micSource=null;
+    }
+
+    // Fires when a valid 4-count is complete. avgInterval = ms between counts.
+    function onCountInComplete(avgIntervalMs){
+        setListenStatus('Got it! \u2713');
+        stopListening();
+        // Derive a starting scroll tempo from the count-in if we got intervals.
+        // 4 beats define a tempo; map roughly to WPM scaling so a faster
+        // count-in starts a faster scroll. (Optional nicety — never blocks.)
+        if(avgIntervalMs && avgIntervalMs>120 && avgIntervalMs<2000){
+            var bpm = Math.round(60000 / avgIntervalMs);
+            // Gentle influence: only nudge WPM if it noticeably differs.
+            // Keeps user's saved WPM as the baseline but reflects count tempo.
+            var suggested = Math.max(10, Math.min(200, Math.round(bpm * 0.6)));
+            wpmSlider.value = suggested;
+            wpmDisplay.textContent = suggested;
+        }
+        // Start scrolling from current position.
+        if(!scrolling) startScroll();
+    }
+
+    /* ---- CLICK / TRANSIENT DETECTION ---- */
+    function listenForClicks(){
+        var buf=new Uint8Array(analyser.fftSize);
+        function frame(){
+            if(!listening) return;
+            analyser.getByteTimeDomainData(buf);
+            // Peak deviation from center (128) = loudness of transient
+            var peak=0;
+            for(var i=0;i<buf.length;i++){
+                var dev=Math.abs(buf[i]-128);
+                if(dev>peak) peak=dev;
+            }
+            var threshold=parseInt(clickSensitivity.value,10); // 5(loud only)–50(sensitive)
+            // Invert: higher slider = more sensitive = lower trigger level
+            var trigger=55-threshold; // slider 18 -> trigger ~37
+            var now=performance.now();
+
+            if(peak>trigger && !aboveThreshold && (now-lastPeakAt)>120){
+                aboveThreshold=true;
+                lastPeakAt=now;
+                clickTimes.push(now);
+                // Keep only the last 4
+                if(clickTimes.length>4) clickTimes.shift();
+                setListenStatus('Click ' + clickTimes.length + ' / 4');
+
+                if(clickTimes.length===4){
+                    // Validate roughly even spacing (within 60% tolerance)
+                    var i1=clickTimes[1]-clickTimes[0];
+                    var i2=clickTimes[2]-clickTimes[1];
+                    var i3=clickTimes[3]-clickTimes[2];
+                    var avg=(i1+i2+i3)/3;
+                    var ok = avg>120 && avg<2000 &&
+                             Math.abs(i1-avg)<avg*0.6 &&
+                             Math.abs(i2-avg)<avg*0.6 &&
+                             Math.abs(i3-avg)<avg*0.6;
+                    if(ok){ onCountInComplete(avg); return; }
+                    else { clickTimes.shift(); } // drop oldest, keep listening
+                }
+            } else if(peak<trigger*0.6){
+                aboveThreshold=false;
+            }
+            rafListenId=requestAnimationFrame(frame);
+        }
+        rafListenId=requestAnimationFrame(frame);
+    }
+
+    /* ---- VOICE DETECTION (Chrome/Edge) ---- */
+    function listenForVoice(){
+        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if(!SR){
+            setListenStatus('Voice not supported');
+            alert('Voice count-in needs Chrome or Edge. Try "4 Drumstick Clicks" mode instead, which works on all devices including iPad.');
+            stopListening();
+            return;
+        }
+        speechRec=new SR();
+        speechRec.continuous=true;
+        speechRec.interimResults=true;
+        speechRec.lang='en-US';
+        var seen={};
+        speechRec.onresult=function(ev){
+            for(var i=ev.resultIndex;i<ev.results.length;i++){
+                var txt=ev.results[i][0].transcript.toLowerCase();
+                // Look for the sequence of numbers / number words
+                ['1','2','3','4','one','two','three','four'].forEach(function(tok){
+                    if(txt.indexOf(tok)!==-1){
+                        var n = ({one:'1',two:'2',three:'3',four:'4'})[tok]||tok;
+                        seen[n]=true;
+                    }
+                });
+                var count=['1','2','3','4'].filter(function(n){return seen[n];}).length;
+                setListenStatus('Heard ' + count + ' / 4');
+                if(seen['1']&&seen['2']&&seen['3']&&seen['4']){
+                    onCountInComplete(null);
+                    return;
+                }
+            }
+        };
+        speechRec.onerror=function(){ setListenStatus('Voice error'); };
+        try{ speechRec.start(); setListenStatus('Listening for "1 2 3 4"'); }
+        catch(e){ setListenStatus('Voice error'); stopListening(); }
+    }
+
+    async function startListening(){
+        var mode=countInMode.value;
+        if(mode==='voice'){
+            setListeningUI(true);
+            listenForVoice();
+            return;
+        }
+        // CLICKS mode — set up the mic ONCE, then reuse it on subsequent starts.
+        if(!micStream || !analyser){
+            try{
+                micStream=await navigator.mediaDevices.getUserMedia({audio:{
+                    echoCancellation:false, noiseSuppression:false, autoGainControl:false
+                }});
+            }catch(err){
+                alert('Microphone access is required for count-in detection. Please allow mic access and try again.');
+                return;
+            }
+            audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+            micSource=audioCtx.createMediaStreamSource(micStream);
+            analyser=audioCtx.createAnalyser();
+            analyser.fftSize=1024;
+            micSource.connect(analyser);
+        }
+        // iOS suspends the context when idle — resume it on each user gesture.
+        if(audioCtx && audioCtx.state==='suspended'){ try{ await audioCtx.resume(); }catch(e){} }
+        clickTimes=[]; aboveThreshold=false; lastPeakAt=0;
+        setListeningUI(true);
+        setListenStatus('Listening\u2026 tap 4 clicks');
+        listenForClicks();
+    }
+
+    listenBtn.addEventListener('click', function(){
+        if(listening) stopListening();
+        else startListening();
+    });
+
+    // Fully release the mic when leaving performance mode (so the permission
+    // prompt only appears once per performance session, not on every stop).
+    editBtn.addEventListener('click', function(){ releaseMic(); });
 
     /* ---- INIT ---- */
     refreshHeaderDropdown();
