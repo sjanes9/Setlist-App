@@ -191,6 +191,7 @@
             padding:0 1.25rem 0.85rem;
             display:flex;flex-direction:column;gap:0.6rem;
         }
+        .dock-nav{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 1.25rem 0.5rem;border-top:1px solid var(--border-subtle);}
         .dock-collapsed .dock-body{
             max-height:0;
             padding-top:0;padding-bottom:0;
@@ -307,6 +308,16 @@
                 </div>
 
                 <hr class="section-divider">
+                <div class="sub-heading" style="color:var(--accent);">&#9729;&#65039; Shared Band Library (Load from URL)</div>
+                <div class="hint" style="margin-bottom:0.75rem;">Paste a link to a shared <strong>.json</strong> file (e.g. a GitHub <em>raw</em> file URL) and load it into your library. This is <strong>read-only</strong> &mdash; it pulls the shared songs &amp; set lists down to this device. Your local edits never push back to the shared file.</div>
+                <div class="action-row" style="gap:0.5rem;">
+                    <input type="text" id="sharedUrlInput" placeholder="https://raw.githubusercontent.com/user/repo/main/library.json" autocomplete="off" style="flex:1;min-width:200px;font-size:0.85rem;padding:0.5rem 0.75rem;">
+                    <button type="button" id="loadSharedBtn" class="btn btn-success">&#11015;&#65039; Load Shared Library</button>
+                    <button type="button" id="forgetSharedBtn" class="btn btn-secondary" title="Forget the saved URL">&#10005;</button>
+                </div>
+                <div class="hint" id="sharedUrlStatus" style="margin-top:0.4rem;"></div>
+
+                <hr class="section-divider">
 
                 <!-- SET LIST BUILDER -->
                 <div class="sl-builder">
@@ -392,15 +403,16 @@
         </div>
     </div>
 
+    <!-- ALWAYS-VISIBLE SET LIST NAV (outside the collapsible body) -->
+    <div class="dock-nav" id="setlistNavCluster" style="display:none;">
+        <button type="button" id="prevSongBtn" class="btn btn-outline" style="padding:0.4rem 0.85rem;font-size:0.85rem;">&#8592; Prev</button>
+        <span id="setlistNavLabel" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center;"></span>
+        <button type="button" id="nextSongBtn" class="btn btn-outline" style="padding:0.4rem 0.85rem;font-size:0.85rem;">Next &#8594;</button>
+        <button type="button" id="toggleSetlistPanelBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">&#127925;</button>
+    </div>
+
     <!-- EXPANDABLE BODY -->
     <div class="dock-body">
-        <!-- Set list nav -->
-        <div class="dock-row" id="setlistNavCluster" style="display:none;">
-            <button type="button" id="prevSongBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">&#8592; Prev</button>
-            <span id="setlistNavLabel" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;"></span>
-            <button type="button" id="nextSongBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">Next &#8594;</button>
-            <button type="button" id="toggleSetlistPanelBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">&#127925; Set List</button>
-        </div>
         <!-- Count-In listener settings -->
         <div class="dock-row" id="countInRow">
             <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Count-In:</label>
@@ -457,6 +469,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var K_SLS   = 'song_manager_setlists';
     var K_ACTSL = 'song_manager_active_sl';
     var K_THEME = 'song_manager_theme';
+    var K_SHAREDURL = 'song_manager_shared_url';
+    // Default shared library URL — your band's source-of-truth file on GitHub.
+    // EDIT 'Setlist-App' below if your repository name ever changes.
+    var DEFAULT_SHARED_URL = 'https://raw.githubusercontent.com/sjanes9/Setlist-App/main/library.json';
 
     /* ---- STORAGE HELPERS ---- */
     function getLib()  { try { return JSON.parse(localStorage.getItem(K_LIB))  || {}; } catch(e) { return {}; } }
@@ -505,6 +521,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var clearBtn     = document.getElementById('clearBtn');
     var exportLibBtn = document.getElementById('exportSetListBtn');
     var importLibFile= document.getElementById('importSetListFile');
+    var sharedUrlInput  = document.getElementById('sharedUrlInput');
+    var loadSharedBtn   = document.getElementById('loadSharedBtn');
+    var forgetSharedBtn = document.getElementById('forgetSharedBtn');
+    var sharedUrlStatus = document.getElementById('sharedUrlStatus');
     var flds = {
         title:     document.getElementById('songTitle'),
         key:       document.getElementById('songKey'),
@@ -602,9 +622,15 @@ document.addEventListener('DOMContentLoaded', function() {
     libSelect.addEventListener('change', function(){
         var val = libSelect.value;
         if (!val) return;
+        var inPerf = perfBtn.classList.contains('active');
         if (val.indexOf('song::') === 0) {
             var song = getLib()[val.slice(6)];
-            if (song) { loadSong(song); if(perfBtn.classList.contains('active')) renderPerfView(); }
+            if (song) {
+                loadSong(song);
+                if(inPerf){ loadWpmForCurrentSong(); renderPerfView(); renderSLPanel();
+                    requestAnimationFrame(function(){ window.scrollTo(0,0); applyColWidth(parseInt(colWidthSlider.value,10)); });
+                }
+            }
         } else if (val.indexOf('setlist::') === 0) {
             var name = val.slice(9);
             setActSLName(name);
@@ -612,7 +638,18 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshSLBuilderUI();
             var queue = getActSL();
             if (queue.length > 0) { var s=getLib()[queue[0]]; if(s) loadSong(s); }
-            if (!perfBtn.classList.contains('active')) perfBtn.click();
+            if (!inPerf){
+                // Not in performance mode yet — enter it (renders everything)
+                perfBtn.click();
+            } else {
+                // ALREADY in performance mode — manually refresh the view so the
+                // newly selected set list + its first song appear immediately.
+                stopScroll();
+                loadWpmForCurrentSong();
+                renderPerfView();
+                renderSLPanel();
+                requestAnimationFrame(function(){ window.scrollTo(0,0); applyColWidth(parseInt(colWidthSlider.value,10)); });
+            }
             if (!panelOpen) togglePanelBtn.click();
         }
     });
@@ -832,33 +869,104 @@ document.addEventListener('DOMContentLoaded', function() {
         link.download='song_library_'+new Date().toISOString().split('T')[0]+'.json';
         document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
     });
+    // Parse a library payload (string or object) into {songs, setlists}.
+    // Throws on unrecognized format.
+    function parseLibraryPayload(raw){
+        var p = (typeof raw==='string') ? JSON.parse(raw) : raw;
+        var incomingSongs=null, incomingSL=null;
+        if(p.type==='SET_LIST_EXPORT' && p.songs){
+            incomingSongs=p.songs;
+            incomingSL=p.setlists||null;
+        } else if(p.title && p.lyrics){
+            incomingSongs={}; incomingSongs[p.title]=p;
+        } else {
+            throw new Error('Unrecognized file format.');
+        }
+        if(!Object.keys(incomingSongs).length) throw new Error('No song data found.');
+        return {songs:incomingSongs, setlists:incomingSL};
+    }
+
+    // Merge a parsed payload into the local library, after confirmation.
+    // Returns true if merged.
+    function mergeLibraryPayload(payload, sourceLabel){
+        var songCount=Object.keys(payload.songs).length;
+        var slCount=payload.setlists?Object.keys(payload.setlists).length:0;
+        var msg='Found '+songCount+' song(s)'+(slCount?' and '+slCount+' set list(s)':'')+
+                (sourceLabel?(' from '+sourceLabel):'')+'.\n\nMerge into your library? '+
+                '(Songs/set lists with the same name will be updated to the shared version.)';
+        if(!confirm(msg)) return false;
+        saveLib(Object.assign({},getLib(),payload.songs));
+        if(payload.setlists) saveAllSL(Object.assign({},getAllSL(),payload.setlists));
+        refreshHeaderDropdown(); refreshSLBuilderUI();
+        return true;
+    }
+
     importLibFile.addEventListener('change', function(e){
         var file=e.target.files[0]; if(!file) return;
         var reader=new FileReader();
         reader.onload=function(ev){
             try{
-                var p=JSON.parse(ev.target.result); var incomingSongs=null; var incomingSL=null;
-                if(p.type==='SET_LIST_EXPORT'&&p.songs){
-                    incomingSongs=p.songs;
-                    incomingSL=p.setlists||null;  // present in v2.2+
-                } else if(p.title&&p.lyrics){
-                    incomingSongs={[p.title]:p};
-                } else { throw new Error('Unrecognized file format.'); }
-                var songCount=Object.keys(incomingSongs).length;
-                if(!songCount) throw new Error('No song data found.');
-                var slCount=incomingSL?Object.keys(incomingSL).length:0;
-                var msg='Found '+songCount+' song(s)'+(slCount?' and '+slCount+' set list(s)':'')+'. Merge into your library?';
-                if(confirm(msg)){
-                    saveLib(Object.assign({},getLib(),incomingSongs));
-                    if(incomingSL) saveAllSL(Object.assign({},getAllSL(),incomingSL));
-                    refreshHeaderDropdown(); refreshSLBuilderUI();
-                    var summary='Imported '+songCount+' song(s)'+(slCount?' and '+slCount+' set list(s)':'')+'  successfully.';
-                    alert(summary);
+                var payload=parseLibraryPayload(ev.target.result);
+                if(mergeLibraryPayload(payload, file.name)){
+                    var sc=Object.keys(payload.songs).length;
+                    var lc=payload.setlists?Object.keys(payload.setlists).length:0;
+                    alert('Imported '+sc+' song(s)'+(lc?' and '+lc+' set list(s)':'')+' successfully.');
                 }
             } catch(err){ alert('Import failed: '+err.message); }
             finally{ e.target.value=''; }
         };
         reader.readAsText(file);
+    });
+
+    /* ---- LOAD SHARED LIBRARY FROM URL (pull-only) ---- */
+    function setSharedStatus(txt, color){
+        if(!sharedUrlStatus) return;
+        sharedUrlStatus.textContent=txt;
+        sharedUrlStatus.style.color=color||'var(--text-faint)';
+    }
+
+    // Restore a previously used URL, or fall back to the band default.
+    (function initSharedUrl(){
+        var saved=localStorage.getItem(K_SHAREDURL);
+        sharedUrlInput.value = saved || DEFAULT_SHARED_URL;
+    })();
+
+    loadSharedBtn.addEventListener('click', async function(){
+        var url=sharedUrlInput.value.trim();
+        if(!url){ setSharedStatus('Enter a URL first.', 'var(--danger)'); return; }
+        // Helpful nudge: convert a github.com "blob" URL to a raw URL automatically
+        if(url.indexOf('github.com')!==-1 && url.indexOf('/blob/')!==-1){
+            url=url.replace('github.com','raw.githubusercontent.com').replace('/blob/','/');
+            sharedUrlInput.value=url;
+        }
+        loadSharedBtn.disabled=true;
+        setSharedStatus('Loading\u2026', 'var(--text-muted)');
+        try{
+            // cache-bust so bandmates always get the latest pushed version
+            var bust=(url.indexOf('?')!==-1?'&':'?')+'t='+Date.now();
+            var res=await fetch(url+bust, {cache:'no-store'});
+            if(!res.ok) throw new Error('HTTP '+res.status+' \u2014 check the URL is a public raw file.');
+            var text=await res.text();
+            var payload=parseLibraryPayload(text);
+            if(mergeLibraryPayload(payload, 'the shared library')){
+                localStorage.setItem(K_SHAREDURL, url);  // remember for next time
+                var sc=Object.keys(payload.songs).length;
+                var lc=payload.setlists?Object.keys(payload.setlists).length:0;
+                setSharedStatus('\u2713 Loaded '+sc+' song(s)'+(lc?' & '+lc+' set list(s)':'')+'. URL saved.', 'var(--accent)');
+            } else {
+                setSharedStatus('Load cancelled.', 'var(--text-muted)');
+            }
+        } catch(err){
+            setSharedStatus('Failed: '+err.message, 'var(--danger)');
+        } finally {
+            loadSharedBtn.disabled=false;
+        }
+    });
+
+    forgetSharedBtn.addEventListener('click', function(){
+        localStorage.removeItem(K_SHAREDURL);
+        sharedUrlInput.value=DEFAULT_SHARED_URL;
+        setSharedStatus('Saved URL cleared \u2014 reset to default.', 'var(--text-muted)');
     });
 
     /* ---- CLOUD FETCH ---- */
@@ -1092,7 +1200,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var queue=getActSL(); if(idx<0||idx>=queue.length) return;
         curIdx=idx; var song=getLib()[queue[idx]]; if(!song) return;
         loadSong(song); stopScroll(); renderPerfView(); renderSLPanel(); loadWpmForCurrentSong();
-        window.scrollTo({top:0,behavior:'smooth'}); curScrollY=0;
+        // iOS Safari is unreliable with behavior:'smooth' here, and the reset must
+        // happen AFTER the new content lays out. Use an instant jump on the next frame.
+        curScrollY=0;
+        requestAnimationFrame(function(){
+            window.scrollTo(0,0);
+            applyColWidth(parseInt(colWidthSlider.value,10));
+        });
     }
 
     prevBtn.addEventListener('click', function(){ jumpTo(curIdx-1); });
