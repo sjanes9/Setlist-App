@@ -87,6 +87,7 @@
         .perf-layout{display:flex;gap:0;transition:gap var(--transition);}
         .perf-layout.panel-open{gap:1.5rem;}
         #perfContent-wrap{flex:1;min-width:0;}
+        #perfContent{padding-bottom:60vh;}
         .perf-header{margin-bottom:2rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
         .perf-title{font-size:2.25rem;font-weight:700;color:var(--text);line-height:1.2;}
         .perf-meta{font-size:1.1rem;color:var(--text-muted);margin-top:0.25rem;}
@@ -96,18 +97,18 @@
         .perf-structure{font-size:0.95rem;font-style:italic;color:var(--perf-structure-text);background:var(--perf-structure-bg);padding:0.5rem 1rem;border-radius:var(--radius);display:inline-block;margin-bottom:1.5rem;transition:color var(--transition),background-color var(--transition);}
         .perf-section{margin-bottom:2.5rem;}
         .perf-section-heading{font-weight:700;font-size:1.15rem;color:var(--perf-heading-text);margin-bottom:1rem;border-left:4px solid var(--perf-heading-border);padding-left:0.6rem;transition:color var(--transition),border-color var(--transition);}
-        .pause-marker{display:flex;align-items:center;gap:0.6rem;margin:1rem 0 1.5rem;padding:0.6rem 1rem;background:var(--perf-structure-bg);border:1px dashed var(--perf-heading-border);border-radius:var(--radius);color:var(--perf-structure-text);font-size:0.95rem;font-style:italic;font-weight:600;transition:background-color var(--transition),border-color var(--transition),color var(--transition);}
+        .pause-marker{display:inline-flex;align-items:center;gap:0.4rem;margin:0.5rem 0 0.75rem;padding:0.3rem 0.65rem;background:var(--perf-structure-bg);border:1px dashed var(--perf-heading-border);border-radius:var(--radius);color:var(--perf-structure-text);font-size:0.8rem;font-style:italic;font-weight:600;transition:background-color var(--transition),border-color var(--transition),color var(--transition);}
         .pause-marker.counting{background:#dcfce7;border-color:#16a34a;color:#15803d;font-style:normal;}
         .pause-marker.counting .pause-adjust{display:none;}
         [data-theme="dark"] .pause-marker.counting{background:#14532d;border-color:#16a34a;color:#4ade80;}
         .pause-marker .pause-count{font-variant-numeric:tabular-nums;font-weight:700;}
-        .pause-adjust{display:inline-flex;align-items:center;gap:0.4rem;margin-left:auto;}
-        .pause-adjust button{width:30px;height:30px;border-radius:50%;border:1px solid var(--perf-heading-border);background:var(--surface);color:var(--perf-structure-text);font-size:1.1rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background-color var(--transition),color var(--transition);font-style:normal;}
+        .pause-adjust{display:inline-flex;align-items:center;gap:0.3rem;margin-left:0.5rem;}
+        .pause-adjust button{width:22px;height:22px;border-radius:50%;border:1px solid var(--perf-heading-border);background:var(--surface);color:var(--perf-structure-text);font-size:0.85rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background-color var(--transition),color var(--transition);font-style:normal;}
         .pause-adjust button:hover{background:var(--perf-heading-border);color:#fff;}
         .pause-adjust button:active{transform:scale(0.9);}
-        .pause-secs{font-variant-numeric:tabular-nums;font-weight:700;min-width:2.5rem;text-align:center;font-style:normal;}
-        .pause-move{display:inline-flex;align-items:center;gap:0.3rem;margin-left:0.5rem;padding-left:0.6rem;border-left:1px solid var(--perf-heading-border);}
-        .pause-move button{width:30px;height:30px;border-radius:6px;border:1px solid var(--perf-heading-border);background:var(--surface);color:var(--perf-structure-text);font-size:0.95rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background-color var(--transition),color var(--transition);font-style:normal;}
+        .pause-secs{font-variant-numeric:tabular-nums;font-weight:700;min-width:1.8rem;text-align:center;font-style:normal;}
+        .pause-move{display:inline-flex;align-items:center;gap:0.25rem;margin-left:0.4rem;padding-left:0.5rem;border-left:1px solid var(--perf-heading-border);}
+        .pause-move button{width:22px;height:22px;border-radius:5px;border:1px solid var(--perf-heading-border);background:var(--surface);color:var(--perf-structure-text);font-size:0.7rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background-color var(--transition),color var(--transition);font-style:normal;}
         .pause-move button:hover{background:var(--perf-heading-border);color:#fff;}
         .pause-move button:active{transform:scale(0.9);}
         .pause-move button:disabled{opacity:0.3;cursor:not-allowed;}
@@ -1269,15 +1270,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function calcRate(){
         var docH=document.documentElement.scrollHeight;
         var winH=window.innerHeight;
+        // scrollHeight already includes the 60vh bottom padding on #perfContent,
+        // so this distance carries the last lyric line up into the reading zone
+        // rather than stopping when it merely reaches the bottom edge. That
+        // spreads the song's reading time across the whole scroll and keeps
+        // every line at the true singing pace.
         var scrollH=Math.max(docH-winH,1);
         if(speedMode.value==='duration'){
             var durSec=parseDuration(durationInput.value);
-            // Subtract pause time so the moving portion still finishes on time
             var movingSec=Math.max(durSec-totalPauseSeconds(),1);
             pxPerMs=scrollH/(movingSec*1000);
         } else {
-            // rate mode: scale the 10-200 slider against content length,
-            // matching the previous feel (≈ words/min behaviour)
             var words=Math.max(countWords(flds.lyrics.value),1);
             var spd=parseInt(wpmSlider.value,10)||50;
             pxPerMs=(scrollH*spd)/(words*60000);
