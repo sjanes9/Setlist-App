@@ -1,7 +1,7 @@
 {
   "type": "SET_LIST_EXPORT",
   "version": "2.2",
-  "exportedAt": "2026-07-14T13:47:59.590Z",
+  "exportedAt": "2026-07-14T20:25:00.021Z",
   "songs": {
     "Island In The Sun": {
       "title": "Island In The Sun",
@@ -90,7 +90,7 @@
       "artist": "Green Day",
       "notes": "",
       "structure": "Verse 1 | Verse 2 | Verse 3 | Repeat Verse 1",
-      "lyrics": "Verse 1\n{pause:8}\nI'm having trouble trying to sleep\nI'm counting sheep but running out\nAs time ticks by And still I try\nNo rest for crosstops in my mind\nOn my own... here we go\nVerse 2\n{pause:8}\nMy eyes feel like they're gonna bleed\nDried up and bulging out my skull\nMy mouth is dry My face is numb\nFucked up and spun out in my room\nOn my own... here we go\nVerse 3\n{pause:8}\nMy mind is set on overdrive\nThe clock is laughing in my face\nA crooked spine My sense dulled\nPassed the point of delerium\nOn my own... here we go\nVerse 1\n{pause:8}\nMy eyes feel like they're gonna bleed\nDried up and bulging out my skull\nMy mouth is dry My face is numb\nFucked up and spun out in my room\nOn my own... here we go",
+      "lyrics": "Verse 1\n{pause:1}\nI'm having trouble trying to sleep\nI'm counting sheep but running out\nAs time ticks by And still I try\nNo rest for crosstops in my mind\nOn my own... here we go\nVerse 2\n{pause:1}\nMy eyes feel like they're gonna bleed\nDried up and bulging out my skull\nMy mouth is dry My face is numb\nFucked up and spun out in my room\nOn my own... here we go\nVerse 3\n{pause:8}\nMy mind is set on overdrive\nThe clock is laughing in my face\nA crooked spine My sense dulled\nPassed the point of delerium\nOn my own... here we go\nVerse 1\n{pause:8}\nMy eyes feel like they're gonna bleed\nDried up and bulging out my skull\nMy mouth is dry My face is numb\nFucked up and spun out in my room\nOn my own... here we go",
       "updatedAt": "2026-06-04T12:42:04.409Z"
     },
     "Blister in the sun": {
@@ -260,11 +260,11 @@
       "artist": "Flannel Trappe",
       "notes": "Verse: G Bm Em D C Dsus Am(G)\nChorus: G D Em C G D Em",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus",
-      "lyrics": "[Verse 1]\nIts not long ago a thought of you would bring me joy\nFeels like yesterday a sunny spot a place to lay\nWhite fluff on a stem a hunt for luck for little boy\nPicnics on the rock a smokey fire, a place to play\n\n[Chorus]\nWhy did it have to fall apart? Where did it all go wrong\nYou feel a million miles apart and old and broken down\n\n[Verse 2]\nSpent time yesterday the fwo of us just like before\nGreen Grass int he fields a dusty road so much appeal\nYears gone by so close a thankful gem to file away\nPlease don’t leave me now I’ll get it right, Come back for more",
+      "lyrics": "[Verse 1]\nIts not long ago a thought of you would bring me joy\nFeels like yesterday a sunny spot a place to lay\nWhite fluff on a stem a hunt for luck for little boy\nPicnics on the rock a smokey fire, a place to play\n[Chorus]\nWhy did it have to fall apart? Where did it all go wrong\nYou feel a million miles apart and old and broken down\n[Verse 2]\nSpent time yesterday the fwo of us just like before\nGreen Grass int he fields a dusty road so much appeal\nYears gone by so close a thankful gem to file away\nPlease don’t leave me now I’ll get it right, Come back for more",
       "wpm": 50,
       "speedMode": "rate",
       "duration": "3:30",
-      "updatedAt": "2026-07-14T13:27:20.509Z"
+      "updatedAt": "2026-07-14T20:08:30.869Z"
     },
     "Can't Come Along": {
       "title": "Can't Come Along",
@@ -273,11 +273,11 @@
       "artist": "Flannel Trappe",
       "notes": "Verse: B D A G\nChorus: B D A G",
       "structure": "Verse 1 | Verse 2 | Chorus | Verse 3 | Chorus | Break | Chorus x2",
-      "lyrics": "[Verse 1]\nI found this one out on my own\nKnowledge al;ways find a home\nFocusing on yourself you freeze\nRaising thoughts again we’re free\n\n[Verse 2]\nDismiss the plethora of noise\nAnd focus on a path of joy\nJust like the river on its way\nEnjoy the journey of today\n\n[Chorus]\nBroken again so you cant come along\nHopeful again but you cant come along\nLost in your mind an you cant come along\nYou’re lost in yourselves without me\n\n[Verse 3]\nI see the curtain on your eyes\nNothing at this point would surprise you (or me)\nDistrust disdain will split and cry\nMeet my gaze and say I love you!",
+      "lyrics": "[Verse 1]\nI found this one out on my own\nKnowledge always find a home\nFocusing on yourself you freeze\nRaising thoughts again we’re free\n[Verse 2]\nDismiss the plethora of noise\nAnd focus on a path of joy\nJust like the river on its way\nEnjoy the journey of today\n[Chorus]\nBroken again so you cant come along\nHopeful again but you cant come along\nLost in your mind an you cant come along\nYou’re lost in yourselves without me\n[Verse 3]\nI see the curtain on your eyes\nNothing at this point would surprise you (or me)\nDistrust disdain will split and cry\nMeet my gaze and say I love you!",
       "wpm": 50,
       "speedMode": "rate",
       "duration": "3:30",
-      "updatedAt": "2026-07-14T13:30:36.610Z"
+      "updatedAt": "2026-07-14T20:08:16.109Z"
     },
     "Land of The Toads": {
       "title": "Land of The Toads",
@@ -299,11 +299,11 @@
       "artist": "Flannel Trappe",
       "notes": "",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Break | Chorus x2",
-      "lyrics": "[Verse 1]\nI hear the choking in your voice\nI feel it too, but you’ve got more to lose\nI see the tears in your eyes\nFears I wanna sooth but there's no easy truth\n\n[Chorus]\nWhat I can say to you, but this place don’t want you\nGame stole from you\nI’ll follow you if you want to leave \nyou don't owe anyone a goddam thing\nHow can I comfort you if this place don’t want you? \nSame its come to…\nI’ll follow you if you want to fight \nHand in hand on the front lines\n\n[Verse 2]\nSeeds sown will show a simple truth\nSlowly tended to now their bearing fruit\nTendrils of rot between the lies\nStrangling itself\nDrawing on the lies?",
+      "lyrics": "[Verse 1]\nI hear the choking in your voice\nI feel it too, but you’ve got more to lose\nI see the tears in your eyes\nFears I wanna sooth but there's no easy truth\n[Chorus]\nWhat I can say to you, but this place don’t want you\nGame stole from you\nI’ll follow you if you want to leave \nyou don't owe anyone a goddam thing\nHow can I comfort you if this place don’t want you? \nSame its come to…\nI’ll follow you if you want to fight \nHand in hand on the front lines\n[Verse 2]\nSeeds sown will show a simple truth\nSlowly tended to now their bearing fruit\nTendrils of rot between the lies\nStrangling itself\nDrawing on the lies?",
       "wpm": 50,
       "speedMode": "rate",
       "duration": "3:30",
-      "updatedAt": "2026-07-14T13:37:33.606Z"
+      "updatedAt": "2026-07-14T20:09:45.690Z"
     },
     "Sins To Be Paid": {
       "title": "Sins To Be Paid",
@@ -312,11 +312,11 @@
       "artist": "Flannel Trappe",
       "notes": "Key Change on the last Double Chorus",
       "structure": "Verse 1 | Pre-Chorus | Chorus | Verse 2 | Pre-Chorus | Chorus | Bridge | Pre- Chorus  | Chorus x2",
-      "lyrics": "[Verse 1]\nDo you care not? \nFor the suffering you have wrought\nWhat is one more lie?\nWhat is more life?\n\n[Pre-Chorus]\nSo bottoms up and look alive\nWe’ve got an appetite\nAnd we’re eating cake tonight\n\n[Chorus] \nLook over your shoulder\nI know you’re afraid\nWatch your back\nYour sins need paid\n\nLook over your shoulder\nI know you’re afraid\nOf the shadows\nOf your grave\n\n[Verse 2]\nJustice for all they said\nBut we found none instead\nWhat is worth a life?\nWhat is worth a sacrifice?\n\n[Pre-Chorus]  \nSo bottoms up and look alive\nWe’ve got an appetite\nAnd we’re eating cake tonight\n\n[Chorus]\nSame lyrics as first chorus\n\n[Bridge]\nShow me something\n(no more empathy)\nShow me something good\n(no more apathy)\nShow me something good goddamn you\n(it is getting desperate, it’s getting deadly)\n\nShow me something\n(did you enjoy your)\nShow me something good\n(life of luxury?)\nShow me something good goddamn you\n(did you feel? can you sleep?)\nThere is nothing good within you\n\n[Pre-chorus]\n[Final Double Chorus] - key change\nSame lyrics as first chorus, mostly",
+      "lyrics": "[Verse 1]\nDo you care not? \nFor the suffering you have wrought\nWhat is one more lie?\nWhat is more life?\n[Pre-Chorus]\nSo bottoms up and look alive\nWe’ve got an appetite\nAnd we’re eating cake tonight\n[Chorus] \nLook over your shoulder\nI know you’re afraid\nWatch your back\nYour sins need paid\nLook over your shoulder\nI know you’re afraid\nOf the shadows\nOf your grave\n[Verse 2]\nJustice for all they said\nBut we found none instead\nWhat is worth a life?\nWhat is worth a sacrifice?\n[Pre-Chorus]  \nSo bottoms up and look alive\nWe’ve got an appetite\nAnd we’re eating cake tonight\n[Chorus]\nSame lyrics as first chorus\n[Bridge]\nShow me something\n(no more empathy)\nShow me something good\n(no more apathy)\nShow me something good goddamn you\n(it is getting desperate, it’s getting deadly)\nShow me something\n(did you enjoy your)\nShow me something good\n(life of luxury?)\nShow me something good goddamn you\n(did you feel? can you sleep?)\nThere is nothing good within you\n[Pre-chorus]\n[Final Double Chorus] - key change\nSame lyrics as first chorus, mostly",
       "wpm": 50,
       "speedMode": "rate",
       "duration": "3:30",
-      "updatedAt": "2026-07-14T13:42:21.590Z"
+      "updatedAt": "2026-07-14T20:09:18.637Z"
     }
   },
   "setlists": {
