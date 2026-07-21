@@ -305,6 +305,7 @@
         .scroll-status.active .dot{animation:pulse-dot 1.2s ease-in-out infinite;}
         @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.75);}}
     </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   if (window.pdfjsLib) {
@@ -323,6 +324,20 @@
         <button type="button" class="drawer-close" id="drawerCloseBtn" aria-label="Close menu">&times;</button>
     </div>
     <div class="drawer-body">
+
+        <div class="drawer-group">
+            <div class="drawer-group-title">&#9729;&#65039; Cloud Sync</div>
+            <div class="drawer-hint" style="display:flex;align-items:center;gap:0.45rem;">
+                <span id="syncDot" style="width:9px;height:9px;border-radius:50%;background:var(--text-faint);flex-shrink:0;"></span>
+                <span id="syncStatus">Starting…</span>
+            </div>
+            <button type="button" id="syncPullBtn" class="btn btn-secondary">&#8635; Reload from Cloud</button>
+            <button type="button" id="syncPushBtn" class="btn btn-purple">&#11014;&#65039; Upload This Device's Library</button>
+            <button type="button" id="syncToggleBtn" class="btn btn-secondary">&#9208; Pause Sync</button>
+            <div class="drawer-hint" style="margin-top:0.5rem;opacity:0.75;">
+                Edits sync automatically across devices. Works offline &mdash; changes upload when you reconnect.
+            </div>
+        </div>
 
         <div class="drawer-group">
             <div class="drawer-group-title">Current Song</div>
@@ -389,6 +404,7 @@
 <div class="container">
     <header>
         <button type="button" class="drawer-btn" id="openDrawerBtn" title="Library &amp; file actions" aria-label="Open actions menu">&#9776;</button>
+        <span id="syncDotHeader" title="Cloud sync status" style="width:8px;height:8px;border-radius:50%;background:var(--text-faint);flex-shrink:0;margin-right:0.15rem;"></span>
         <h1 id="appTitle">Song Editor</h1>
         <div class="header-controls">
             <button class="theme-toggle" id="themeToggleBtn">
@@ -749,10 +765,19 @@ document.addEventListener('DOMContentLoaded', function() {
     var DEFAULT_SHARED_URL = 'https://raw.githubusercontent.com/sjanes9/Setlist-App/main/library.json';
 
     /* ---- STORAGE HELPERS ---- */
+    // localStorage stays the source of truth for READS, so the app works with
+    // no connection at all. Writes go to localStorage first (instant, offline
+    // safe) and are then queued to Supabase in the background.
     function getLib()  { try { return JSON.parse(localStorage.getItem(K_LIB))  || {}; } catch(e) { return {}; } }
-    function saveLib(o){ localStorage.setItem(K_LIB, JSON.stringify(o)); }
+    function saveLib(o){
+        localStorage.setItem(K_LIB, JSON.stringify(o));
+        if(typeof queueSongSync==='function') queueSongSync(o);
+    }
     function getAllSL() { try { return JSON.parse(localStorage.getItem(K_SLS))  || {}; } catch(e) { return {}; } }
-    function saveAllSL(o){ localStorage.setItem(K_SLS, JSON.stringify(o)); }
+    function saveAllSL(o){
+        localStorage.setItem(K_SLS, JSON.stringify(o));
+        if(typeof queueSetlistSync==='function') queueSetlistSync(o);
+    }
     function getActSLName() { return localStorage.getItem(K_ACTSL) || ''; }
     function setActSLName(n){ localStorage.setItem(K_ACTSL, n); }
     function getActSL() { var n=getActSLName(); return n ? (getAllSL()[n]||[]) : []; }
@@ -3275,6 +3300,347 @@ document.addEventListener('DOMContentLoaded', function() {
         ghRememberToken.checked=false;
         setGhStatus('Token cleared from this device.','var(--text-muted)');
     });
+
+    /* ════════════════════════════════════════════════════════
+       SUPABASE SYNC — offline-first, two-way
+       ────────────────────────────────────────────────────────
+       Design:
+         • localStorage is the READ source of truth, so the app
+           works with no connection (essential on stage).
+         • Writes hit localStorage instantly, then queue to the
+           cloud. If offline, the queue drains when back online.
+         • Realtime subscriptions pull other people's edits in.
+         • Conflicts resolve last-write-wins by updated_at.
+    ════════════════════════════════════════════════════════ */
+    var SUPABASE_URL  = 'https://srtzeeggjiikezunfoyf.supabase.co';
+    var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydHplZWdnamlpa2V6dW5mb3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDMwNzMsImV4cCI6MjEwMDIxOTA3M30.7mvllyczD2CFmqkrntk3OmRp657RHkqi0bUEjuG88MU';
+
+    var K_DEVICE   = 'song_manager_device_id';
+    var K_SYNC_ON  = 'song_manager_sync_enabled';
+    var K_PENDING  = 'song_manager_pending_sync';
+
+    var sb = null;              // Supabase client
+    var syncEnabled = localStorage.getItem(K_SYNC_ON) !== 'false';
+    var syncBusy = false;
+    var applyingRemote = false; // guards against echoing remote changes back
+
+    // A stable per-device id so we can ignore our own realtime echoes
+    var deviceId = localStorage.getItem(K_DEVICE);
+    if(!deviceId){
+        deviceId = 'dev_' + Math.random().toString(36).slice(2,10);
+        localStorage.setItem(K_DEVICE, deviceId);
+    }
+
+    function setSyncStatus(msg, tone){
+        var colour = tone==='ok'   ? 'var(--accent)' :
+                     tone==='warn' ? '#f59e0b' :
+                     tone==='err'  ? 'var(--danger)' : 'var(--text-faint)';
+        var el  = document.getElementById('syncStatus');
+        var dot = document.getElementById('syncDot');
+        var hd  = document.getElementById('syncDotHeader');
+        if(el)  el.textContent = msg;
+        if(dot) dot.style.background = colour;
+        if(hd){ hd.style.background = colour; hd.title = 'Cloud sync: '+msg; }
+    }
+
+    // ---- Row <-> app-object mapping -------------------------
+    function songToRow(t, s){
+        return {
+            title: t,
+            artist: s.artist || null,
+            key: s.key || null,
+            tempo: s.tempo || null,
+            time_sig: s.timeSig || '4/4',
+            notes: s.notes || null,
+            structure: s.structure || null,
+            lyrics: s.lyrics || null,
+            wpm: (s.wpm===undefined||s.wpm===null) ? null : s.wpm,
+            speed_mode: s.speedMode || null,
+            duration: s.duration || null,
+            updated_by: deviceId
+        };
+    }
+    function rowToSong(r){
+        return {
+            title: r.title, artist: r.artist || '', key: r.key || 'C',
+            tempo: r.tempo || 80, timeSig: r.time_sig || '4/4',
+            notes: r.notes || '', structure: r.structure || '',
+            lyrics: r.lyrics || '',
+            wpm: r.wpm, speedMode: r.speed_mode, duration: r.duration,
+            updatedAt: r.updated_at
+        };
+    }
+
+    // ---- Pending queue (survives reloads / offline) ---------
+    function getPending(){
+        try { return JSON.parse(localStorage.getItem(K_PENDING)) || {songs:{}, setlists:{}}; }
+        catch(e){ return {songs:{}, setlists:{}}; }
+    }
+    function setPending(p){ localStorage.setItem(K_PENDING, JSON.stringify(p)); }
+    function pendingCount(){
+        var p=getPending();
+        return Object.keys(p.songs).length + Object.keys(p.setlists).length;
+    }
+
+    var lastLibSnapshot = null, lastSLSnapshot = null;
+
+    // Queue only what actually changed, so a save doesn't push 25 songs.
+    function queueSongSync(lib){
+        if(applyingRemote) return;
+        var p=getPending(), changed=0;
+        Object.keys(lib).forEach(function(t){
+            var prev = lastLibSnapshot ? lastLibSnapshot[t] : undefined;
+            if(!prev || JSON.stringify(prev)!==JSON.stringify(lib[t])){
+                p.songs[t]='upsert'; changed++;
+            }
+        });
+        if(lastLibSnapshot){
+            Object.keys(lastLibSnapshot).forEach(function(t){
+                if(!(t in lib)){ p.songs[t]='delete'; changed++; }
+            });
+        }
+        lastLibSnapshot = JSON.parse(JSON.stringify(lib));
+        if(changed){ setPending(p); drainQueue(); }
+    }
+
+    function queueSetlistSync(all){
+        if(applyingRemote) return;
+        var p=getPending(), changed=0;
+        Object.keys(all).forEach(function(n){
+            var prev = lastSLSnapshot ? lastSLSnapshot[n] : undefined;
+            if(!prev || JSON.stringify(prev)!==JSON.stringify(all[n])){
+                p.setlists[n]='upsert'; changed++;
+            }
+        });
+        if(lastSLSnapshot){
+            Object.keys(lastSLSnapshot).forEach(function(n){
+                if(!(n in all)){ p.setlists[n]='delete'; changed++; }
+            });
+        }
+        lastSLSnapshot = JSON.parse(JSON.stringify(all));
+        if(changed){ setPending(p); drainQueue(); }
+    }
+
+    // ---- Push the queue to Supabase -------------------------
+    async function drainQueue(){
+        if(!sb || !syncEnabled || syncBusy) return;
+        if(!navigator.onLine){ setSyncStatus('Offline \u2014 '+pendingCount()+' change(s) queued','warn'); return; }
+        var p=getPending();
+        var songKeys=Object.keys(p.songs), slKeys=Object.keys(p.setlists);
+        if(!songKeys.length && !slKeys.length){ setSyncStatus('All changes saved','ok'); return; }
+
+        syncBusy=true;
+        setSyncStatus('Syncing '+(songKeys.length+slKeys.length)+' change(s)\u2026','warn');
+        try{
+            var lib=getLib(), all=getAllSL();
+
+            var upserts = songKeys.filter(function(t){ return p.songs[t]==='upsert' && lib[t]; })
+                                  .map(function(t){ return songToRow(t, lib[t]); });
+            if(upserts.length){
+                var r1 = await sb.from('songs').upsert(upserts, {onConflict:'title'});
+                if(r1.error) throw r1.error;
+            }
+            var songDeletes = songKeys.filter(function(t){ return p.songs[t]==='delete'; });
+            if(songDeletes.length){
+                var r2 = await sb.from('songs').delete().in('title', songDeletes);
+                if(r2.error) throw r2.error;
+            }
+
+            var slUpserts = slKeys.filter(function(n){ return p.setlists[n]==='upsert' && all[n]; })
+                                  .map(function(n){ return {name:n, songs:all[n], updated_by:deviceId}; });
+            if(slUpserts.length){
+                var r3 = await sb.from('setlists').upsert(slUpserts, {onConflict:'name'});
+                if(r3.error) throw r3.error;
+            }
+            var slDeletes = slKeys.filter(function(n){ return p.setlists[n]==='delete'; });
+            if(slDeletes.length){
+                var r4 = await sb.from('setlists').delete().in('name', slDeletes);
+                if(r4.error) throw r4.error;
+            }
+
+            setPending({songs:{}, setlists:{}});
+            setSyncStatus('All changes saved','ok');
+        }catch(err){
+            setSyncStatus('Sync error: '+(err.message||err)+' (will retry)','err');
+        }finally{
+            syncBusy=false;
+        }
+    }
+
+    // ---- Pull everything down -------------------------------
+    async function pullAll(silent){
+        if(!sb || !syncEnabled) return;
+        if(!navigator.onLine){ setSyncStatus('Offline \u2014 using local copy','warn'); return; }
+        if(!silent) setSyncStatus('Loading from cloud\u2026','warn');
+        try{
+            var sres = await sb.from('songs').select('*');
+            if(sres.error) throw sres.error;
+            var lres = await sb.from('setlists').select('*');
+            if(lres.error) throw lres.error;
+
+            var lib={}, all={};
+            (sres.data||[]).forEach(function(r){ lib[r.title]=rowToSong(r); });
+            (lres.data||[]).forEach(function(r){ all[r.name]=r.songs||[]; });
+
+            var localLib=getLib(), localSL=getAllSL();
+
+            // FIRST-RUN GUARD: an empty cloud must never wipe a populated
+            // device. This is the "I just enabled sync" case — the local
+            // library is the real data and needs uploading, not replacing.
+            if(!Object.keys(lib).length && !Object.keys(all).length &&
+               (Object.keys(localLib).length || Object.keys(localSL).length)){
+                setSyncStatus('Cloud is empty — use "Upload This Device\'s Library" to publish '+
+                              Object.keys(localLib).length+' song(s).','warn');
+                return;
+            }
+
+            // Don't clobber local-only work that hasn't synced yet
+            var p=getPending();
+            Object.keys(p.songs).forEach(function(t){
+                if(p.songs[t]==='upsert' && localLib[t]) lib[t]=localLib[t];
+                if(p.songs[t]==='delete') delete lib[t];
+            });
+            Object.keys(p.setlists).forEach(function(n){
+                if(p.setlists[n]==='upsert' && localSL[n]) all[n]=localSL[n];
+                if(p.setlists[n]==='delete') delete all[n];
+            });
+
+            applyingRemote=true;
+            localStorage.setItem(K_LIB, JSON.stringify(lib));
+            localStorage.setItem(K_SLS, JSON.stringify(all));
+            lastLibSnapshot=JSON.parse(JSON.stringify(lib));
+            lastSLSnapshot =JSON.parse(JSON.stringify(all));
+            applyingRemote=false;
+
+            refreshHeaderDropdown(); refreshSLBuilderUI();
+            setSyncStatus('Synced \u2014 '+Object.keys(lib).length+' songs, '+
+                          Object.keys(all).length+' set lists','ok');
+        }catch(err){
+            applyingRemote=false;
+            setSyncStatus('Could not load: '+(err.message||err),'err');
+        }
+    }
+
+    // ---- Realtime: other devices' edits ---------------------
+    function subscribeRealtime(){
+        if(!sb) return;
+        sb.channel('library-changes')
+          .on('postgres_changes', {event:'*', schema:'public', table:'songs'}, function(payload){
+              var row = payload.new || payload.old;
+              if(row && row.updated_by===deviceId) return;   // our own echo
+              applyingRemote=true;
+              var lib=getLib();
+              if(payload.eventType==='DELETE') delete lib[payload.old.title];
+              else lib[payload.new.title]=rowToSong(payload.new);
+              localStorage.setItem(K_LIB, JSON.stringify(lib));
+              lastLibSnapshot=JSON.parse(JSON.stringify(lib));
+              applyingRemote=false;
+              refreshHeaderDropdown(); refreshSLBuilderUI();
+              setSyncStatus('Updated from another device','ok');
+          })
+          .on('postgres_changes', {event:'*', schema:'public', table:'setlists'}, function(payload){
+              var row = payload.new || payload.old;
+              if(row && row.updated_by===deviceId) return;
+              applyingRemote=true;
+              var all=getAllSL();
+              if(payload.eventType==='DELETE') delete all[payload.old.name];
+              else all[payload.new.name]=payload.new.songs||[];
+              localStorage.setItem(K_SLS, JSON.stringify(all));
+              lastSLSnapshot=JSON.parse(JSON.stringify(all));
+              applyingRemote=false;
+              refreshHeaderDropdown(); refreshSLBuilderUI();
+              setSyncStatus('Set list updated from another device','ok');
+          })
+          .subscribe();
+    }
+
+    // ---- Push everything currently local (one-time migration)
+    async function pushAllLocal(){
+        if(!sb){ setSyncStatus('Sync is off.','err'); return; }
+        var lib=getLib(), all=getAllSL();
+        var n=Object.keys(lib).length, m=Object.keys(all).length;
+        if(!n && !m){ setSyncStatus('Nothing local to upload.','warn'); return; }
+        if(!confirm('Upload '+n+' song(s) and '+m+' set list(s) to the cloud?\n\n'+
+                    'Anything with the same name already up there will be overwritten.')) return;
+        setSyncStatus('Uploading\u2026','warn');
+        try{
+            if(n){
+                var rows=Object.keys(lib).map(function(t){ return songToRow(t, lib[t]); });
+                var r1=await sb.from('songs').upsert(rows,{onConflict:'title'});
+                if(r1.error) throw r1.error;
+            }
+            if(m){
+                var srows=Object.keys(all).map(function(k){ return {name:k, songs:all[k], updated_by:deviceId}; });
+                var r2=await sb.from('setlists').upsert(srows,{onConflict:'name'});
+                if(r2.error) throw r2.error;
+            }
+            setPending({songs:{}, setlists:{}});
+            lastLibSnapshot=JSON.parse(JSON.stringify(lib));
+            lastSLSnapshot =JSON.parse(JSON.stringify(all));
+            setSyncStatus('\u2713 Uploaded '+n+' songs & '+m+' set lists','ok');
+        }catch(err){
+            setSyncStatus('Upload failed: '+(err.message||err),'err');
+        }
+    }
+
+    // ---- Boot ----------------------------------------------
+    function initSync(){
+        if(typeof window.supabase==='undefined'){
+            setSyncStatus('Cloud library unavailable (offline mode)','warn');
+            return;
+        }
+        try{
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+                realtime:{ params:{ eventsPerSecond:2 } }
+            });
+        }catch(e){
+            setSyncStatus('Could not start sync: '+e.message,'err');
+            return;
+        }
+        lastLibSnapshot=JSON.parse(JSON.stringify(getLib()));
+        lastSLSnapshot =JSON.parse(JSON.stringify(getAllSL()));
+
+        if(syncEnabled){
+            pullAll();
+            subscribeRealtime();
+            drainQueue();
+        } else {
+            setSyncStatus('Sync paused','warn');
+        }
+
+        window.addEventListener('online', function(){
+            setSyncStatus('Back online \u2014 syncing\u2026','warn');
+            drainQueue(); pullAll(true);
+        });
+        window.addEventListener('offline', function(){
+            setSyncStatus('Offline \u2014 changes saved locally','warn');
+        });
+        // Catch anything the queue missed
+        setInterval(function(){ if(pendingCount()) drainQueue(); }, 30000);
+    }
+
+    // Wire up the drawer controls
+    var syncToggleBtn = document.getElementById('syncToggleBtn');
+    var syncPullBtn   = document.getElementById('syncPullBtn');
+    var syncPushBtn   = document.getElementById('syncPushBtn');
+    if(syncPullBtn) syncPullBtn.addEventListener('click', function(){ pullAll(); });
+    if(syncPushBtn) syncPushBtn.addEventListener('click', pushAllLocal);
+    if(syncToggleBtn){
+        function paintSyncToggle(){
+            syncToggleBtn.textContent = syncEnabled ? '\u23F8 Pause Sync' : '\u25B6 Resume Sync';
+            syncToggleBtn.className   = syncEnabled ? 'btn btn-secondary' : 'btn btn-success';
+        }
+        paintSyncToggle();
+        syncToggleBtn.addEventListener('click', function(){
+            syncEnabled=!syncEnabled;
+            localStorage.setItem(K_SYNC_ON, syncEnabled ? 'true' : 'false');
+            paintSyncToggle();
+            if(syncEnabled){ pullAll(); drainQueue(); }
+            else setSyncStatus('Sync paused \u2014 changes stay on this device','warn');
+        });
+    }
+
+    initSync();
 
     /* ---- INIT ---- */
     refreshHeaderDropdown();
