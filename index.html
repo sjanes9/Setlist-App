@@ -58,7 +58,88 @@
         textarea{resize:vertical;min-height:220px;font-family:'Courier New',Courier,monospace;}
         label{display:block;font-weight:600;margin-bottom:0.45rem;font-size:0.875rem;color:var(--text);}
         .form-group{margin-bottom:1.25rem;}
-        .form-3col{display:grid;grid-template-columns:2fr 1fr 1fr;gap:1rem;}
+        .insert-bar{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;padding:0.5rem 0.75rem;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:var(--radius);}
+        .insert-bar-label{font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;}
+        .insert-btn{padding:0.35rem 0.75rem;font-size:0.8rem;}
+        /* Section bar-count badge + active-section highlight */
+        /* ── SLIDE-OUT ACTIONS DRAWER ── */
+        .drawer-btn{display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:0.5rem 0.75rem;font-size:0.95rem;font-weight:700;cursor:pointer;line-height:1;transition:background-color var(--transition),border-color var(--transition);}
+        .drawer-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+        .drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2400;opacity:0;pointer-events:none;transition:opacity 0.25s ease;}
+        .drawer-backdrop.open{opacity:1;pointer-events:auto;}
+        .drawer{position:fixed;top:0;left:0;bottom:0;width:min(330px,86vw);background:var(--surface);border-right:1px solid var(--border);box-shadow:6px 0 32px rgba(0,0,0,0.35);z-index:2500;transform:translateX(-102%);transition:transform 0.26s ease;display:flex;flex-direction:column;}
+        .drawer.open{transform:translateX(0);}
+        .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+        .drawer-head h3{margin:0;font-size:1.05rem;font-weight:700;color:var(--text);}
+        .drawer-close{background:none;border:none;color:var(--text-muted);font-size:1.4rem;line-height:1;cursor:pointer;padding:0.2rem 0.4rem;border-radius:var(--radius);}
+        .drawer-close:hover{background:var(--surface-2);color:var(--text);}
+        .drawer-body{flex:1;overflow-y:auto;padding:0.85rem 1.1rem 1.5rem;-webkit-overflow-scrolling:touch;}
+        .drawer-group{margin-bottom:1.4rem;}
+        .drawer-group-title{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.5rem;}
+        .drawer-hint{font-size:0.75rem;color:var(--text-faint);margin:-0.15rem 0 0.55rem;line-height:1.45;}
+        /* Every action in the drawer is a full-width stacked row */
+        .drawer-body .btn,.drawer-body .file-wrap{display:flex;width:100%;margin:0 0 0.45rem;justify-content:flex-start;text-align:left;}
+        .drawer-body .file-wrap{position:relative;}
+        .drawer-body .file-wrap .btn{margin:0;}
+        .drawer-body .file-wrap input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+        .drawer-body input[type=text]{width:100%;margin-bottom:0.5rem;}
+        input.derived{background:var(--surface-2);border-style:dashed;opacity:0.9;}
+        .bars-badge{display:inline-block;margin-left:0.6rem;padding:0.1rem 0.45rem;font-size:0.68rem;font-weight:700;font-style:normal;letter-spacing:0.02em;border-radius:50px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);vertical-align:middle;}
+        .perf-section-heading.section-active{color:var(--accent);border-left-color:var(--accent);}
+        .perf-section-heading.section-active .bars-badge{background:var(--accent);border-color:var(--accent);color:#fff;}
+        /* Live button active glow (SongbookPro-style) */
+        .live-btn{padding:0.45rem 0.7rem;font-size:0.95rem;line-height:1;}
+        .btn.live-on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 3px rgba(22,163,74,0.25);}
+        .btn.live-on:hover{background:var(--accent-hover);}
+        /* Metronome beat indicator */
+        .met-dots{display:inline-flex;align-items:center;gap:0.3rem;}
+        .met-dot{width:9px;height:9px;border-radius:50%;background:var(--border);transition:background-color 0.08s linear,transform 0.08s linear;}
+        .met-dot.on{background:var(--accent);transform:scale(1.45);}
+        .met-dot.downbeat.on{background:var(--danger);}
+        .met-flash{position:fixed;inset:0;pointer-events:none;background:var(--accent);opacity:0;z-index:1500;transition:opacity 0.09s ease-out;}
+        .met-flash.hit{opacity:0.13;}
+        /* Quick Actions sheet */
+        .qa-sheet{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) 0 0;box-shadow:0 -10px 40px rgba(0,0,0,0.35);z-index:2100;transform:translateY(110%);transition:transform 0.28s ease;max-height:80vh;overflow-y:auto;padding:1rem 1.25rem 1.5rem;}
+        .qa-sheet.open{transform:translateY(0);}
+        .qa-grab{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 0.85rem;}
+        .qa-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;}
+        .qa-row{display:flex;align-items:center;gap:0.65rem;padding:0.55rem 0;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;}
+        .qa-row:last-child{border-bottom:none;}
+        .qa-label{font-size:0.85rem;font-weight:600;color:var(--text-muted);min-width:88px;}
+        .qa-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2050;display:none;}
+        .qa-backdrop.open{display:block;}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:2000;padding:1rem;}
+        .modal-overlay.open{display:flex;}
+        .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 12px 40px rgba(0,0,0,0.35);width:100%;max-width:340px;padding:1.25rem;}
+        .modal-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;}
+        .modal-body{margin-bottom:1rem;}
+        .modal-actions{display:flex;gap:0.5rem;justify-content:flex-end;}
+        .quick-picks{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.65rem;}
+        .quick-pick{padding:0.3rem 0.7rem;font-size:0.8rem;font-weight:600;border-radius:50px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;transition:background-color var(--transition),border-color var(--transition);}
+        .quick-pick:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+        /* Live button active glow (SongbookPro-style) */
+        .live-btn.active{background:var(--accent)!important;border-color:var(--accent)!important;color:#fff!important;box-shadow:0 0 12px rgba(22,163,74,0.55);}
+        /* Metronome screen flash */
+        .metro-flash{position:fixed;inset:0;background:var(--accent);opacity:0;pointer-events:none;z-index:3000;transition:opacity 60ms linear;}
+        .metro-flash.beat{opacity:0.18;}
+        .metro-flash.downbeat{opacity:0.32;}
+        /* Quick Actions bottom sheet */
+        .qa-sheet{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) 0 0;box-shadow:0 -8px 40px rgba(0,0,0,0.35);width:100%;max-width:520px;padding:0.75rem 1.25rem 1.25rem;margin-top:auto;max-height:85vh;overflow-y:auto;}
+        #quickActions.open{align-items:flex-end;}
+        .qa-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 0.85rem;}
+        .qa-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1rem;text-align:center;}
+        .qa-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.6rem 0;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;}
+        .qa-row>label{font-size:0.85rem;font-weight:600;color:var(--text);margin:0;white-space:nowrap;}
+        .qa-control{display:flex;align-items:center;gap:0.5rem;flex:1;justify-content:flex-end;min-width:150px;}
+        .qa-control input[type="range"]{flex:1;max-width:180px;}
+        .qa-control input[type="text"],.qa-control input[type="number"]{width:80px;text-align:center;font-weight:700;font-size:1rem;padding:0.4rem;}
+        .qa-step{width:38px;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+        .qa-step:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+        .qa-val{font-size:0.8rem;font-weight:700;color:var(--text);min-width:44px;text-align:right;}
+        .qa-check{display:flex;align-items:center;gap:0.35rem;font-size:0.8rem;font-weight:600;color:var(--text);margin:0;white-space:nowrap;}
+        .qa-actions{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1rem;}
+        .form-3col{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:1rem;}
+        @media(max-width:640px){.form-3col{grid-template-columns:1fr 1fr;}}
         .mode-toggle-container{display:flex;align-items:center;gap:0.25rem;background:var(--surface-2);padding:0.25rem;border-radius:50px;border:1px solid var(--border);transition:background-color var(--transition),border-color var(--transition);}
         .mode-btn{background:none;border:none;padding:0.45rem 1.1rem;font-size:0.875rem;font-weight:600;border-radius:50px;cursor:pointer;transition:all var(--transition);color:var(--text-muted);white-space:nowrap;}
         .mode-btn.active{background:var(--surface);color:var(--primary);box-shadow:0 2px 6px rgba(0,0,0,0.1);}
@@ -107,6 +188,7 @@
         .pause-adjust button:hover{background:var(--perf-heading-border);color:#fff;}
         .pause-adjust button:active{transform:scale(0.9);}
         .pause-secs{font-variant-numeric:tabular-nums;font-weight:700;min-width:1.8rem;text-align:center;font-style:normal;}
+        .pause-sub{font-size:0.7rem;opacity:0.7;font-style:normal;font-weight:600;}
         .pause-move{display:inline-flex;align-items:center;gap:0.25rem;margin-left:0.4rem;padding-left:0.5rem;border-left:1px solid var(--perf-heading-border);}
         .pause-move button{width:22px;height:22px;border-radius:5px;border:1px solid var(--perf-heading-border);background:var(--surface);color:var(--perf-structure-text);font-size:0.7rem;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background-color var(--transition),color var(--transition);font-style:normal;}
         .pause-move button:hover{background:var(--perf-heading-border);color:#fff;}
@@ -193,6 +275,17 @@
             display:flex;flex-direction:column;gap:0.6rem;
         }
         .dock-nav{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 1.25rem 0.5rem;border-top:1px solid var(--border-subtle);}
+        .live-btn{padding:0.45rem 0.7rem;font-size:1rem;line-height:1;min-width:40px;}
+        .live-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 3px rgba(22,163,74,0.25);}
+        .beat-dot{display:inline-flex;align-items:center;gap:0.25rem;margin-left:0.4rem;}
+        .beat-dot span{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background-color .06s linear,transform .06s linear;}
+        .beat-dot span.hit{background:var(--accent);transform:scale(1.5);}
+        .beat-dot span.hit.downbeat{background:var(--danger);}
+        .qa-row{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0;border-bottom:1px solid var(--border-subtle);}
+        .qa-row:last-child{border-bottom:none;}
+        .qa-row label{margin:0;font-size:0.85rem;white-space:nowrap;min-width:96px;color:var(--text-muted);}
+        .qa-row input[type=range]{flex:1;min-width:80px;}
+        .qa-val{font-size:0.85rem;font-weight:700;min-width:56px;text-align:right;}
         .dock-collapsed .dock-body{
             max-height:0;
             padding-top:0;padding-bottom:0;
@@ -214,8 +307,53 @@
     </style>
 </head>
 <body>
+
+<!-- ACTIONS DRAWER -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside class="drawer" id="actionsDrawer" aria-label="Library and file actions">
+    <div class="drawer-head">
+        <h3>Actions</h3>
+        <button type="button" class="drawer-close" id="drawerCloseBtn" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="drawer-body">
+
+        <div class="drawer-group">
+            <div class="drawer-group-title">Current Song</div>
+            <button type="button" id="saveLocalBtn2" class="btn btn-success">&#128190; Save to Library</button>
+            <button type="button" id="exportBtn" class="btn">&#11015;&#65039; Export Song (.json)</button>
+            <div class="file-wrap">
+                <button type="button" class="btn btn-secondary">&#11014;&#65039; Import Song (.json)</button>
+                <input type="file" id="importFile" accept=".json">
+            </div>
+            <button type="button" id="deleteLocalBtn" class="btn btn-danger">&#128465;&#65039; Delete From Library</button>
+            <button type="button" id="clearBtn" class="btn btn-secondary">&#10005; Clear Form</button>
+        </div>
+
+        <div class="drawer-group">
+            <div class="drawer-group-title">Library Backup</div>
+            <div class="drawer-hint">Package every saved song into one file to share with bandmates.</div>
+            <button type="button" id="exportSetListBtn" class="btn btn-purple">&#128230; Export Full Library (.json)</button>
+            <div class="file-wrap">
+                <button type="button" class="btn btn-secondary">&#128229; Import Library (.json)</button>
+                <input type="file" id="importSetListFile" accept=".json">
+            </div>
+        </div>
+
+        <div class="drawer-group">
+            <div class="drawer-group-title">&#9729;&#65039; Shared Band Library</div>
+            <div class="drawer-hint">Loads a shared <strong>.json</strong> (e.g. a GitHub <em>raw</em> URL) into your library. Read-only &mdash; your local edits never push back.</div>
+            <input type="text" id="sharedUrlInput" placeholder="https://raw.githubusercontent.com/user/repo/main/library.json" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
+            <button type="button" id="loadSharedBtn" class="btn btn-success">&#11015;&#65039; Load Shared Library</button>
+            <button type="button" id="forgetSharedBtn" class="btn btn-secondary">&#10005; Forget Saved URL</button>
+            <div class="drawer-hint" id="sharedUrlStatus" style="margin-top:0.35rem;"></div>
+        </div>
+
+    </div>
+</aside>
+
 <div class="container">
     <header>
+        <button type="button" class="drawer-btn" id="openDrawerBtn" title="Library &amp; file actions" aria-label="Open actions menu">&#9776;</button>
         <h1 id="appTitle">Song Editor</h1>
         <div class="header-controls">
             <button class="theme-toggle" id="themeToggleBtn">
@@ -266,6 +404,18 @@
                         <label for="songTempo">Tempo (BPM)</label>
                         <input type="number" id="songTempo" min="30" max="300" value="80">
                     </div>
+                    <div class="form-group">
+                        <label for="songTimeSig">Time Signature</label>
+                        <select id="songTimeSig" style="width:100%;">
+                            <option value="4/4">4/4</option>
+                            <option value="3/4">3/4</option>
+                            <option value="6/8">6/8</option>
+                            <option value="2/4">2/4</option>
+                            <option value="5/4">5/4</option>
+                            <option value="7/8">7/8</option>
+                            <option value="12/8">12/8</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="songArtist">Artist / Author</label>
@@ -277,46 +427,41 @@
                 </div>
                 <div class="form-group">
                     <label for="songStructure">Song Structure</label>
-                    <input type="text" id="songStructure" placeholder="e.g., Verse 1, Chorus, Verse 2, Chorus, Bridge, Outro">
+                    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                        <input type="text" id="songStructure" placeholder="Auto-fills as you add sections below" style="flex:1;min-width:180px;">
+                        <button type="button" id="rebuildStructureBtn" class="btn btn-outline insert-btn" title="Rebuild from the section headers in the lyrics">&#8635; Rebuild</button>
+                    </div>
+                    <div class="hint">Updates automatically when you add sections to the lyrics. You can also edit it by hand.</div>
                 </div>
                 <div class="form-group">
                     <label for="songLyrics">Lyrics &amp; Chords (ChordPro Format)</label>
-                    <textarea id="songLyrics" placeholder="[Verse 1]&#10;[E] Amazing [A] grace how [E] sweet the sound...&#10;&#10;Tip: put {pause:8} on its own line to hold the scroll for 8 seconds (intro, solo, etc.)"></textarea>
-                    <div class="hint">Add a pause by putting <strong>{pause:SECONDS}</strong> on its own line &mdash; e.g. <strong>{pause:8}</strong> holds the auto-scroll for 8 seconds at that spot (great for intros &amp; solos). The scroll resumes automatically.</div>
+                    <div class="insert-bar">
+                        <span class="insert-bar-label">Add section:</span>
+                        <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.75rem;font-weight:600;color:var(--text-muted);margin:0;white-space:nowrap;" title="Ask for the section length in measures, so the scroll can follow the song's real timing">
+                            <input type="checkbox" id="sectionBarsToggle" style="width:auto;"> with bars
+                        </label>
+                        <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Intro">Intro</button>
+                        <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Verse">Verse</button>
+                        <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Pre Chorus">Pre Chorus</button>
+                        <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Chorus">Chorus</button>
+                        <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Bridge">Bridge</button>
+                        <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Solo">Solo</button>
+                        <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Outro">Outro</button>
+                    </div>
+                    <div class="insert-bar">
+                        <span class="insert-bar-label">Insert break at cursor:</span>
+                        <button type="button" id="insertBarsBtn" class="btn btn-outline insert-btn">&#127925; Measures</button>
+                        <button type="button" id="insertPauseBtn" class="btn btn-outline insert-btn">&#9201; Seconds</button>
+                        <span class="hint" style="margin:0;">Click where you want it, then pick one.</span>
+                    </div>
+                    <textarea id="songLyrics" placeholder="{c: Verse 1}&#10;[E] Amazing [A] grace how [E] sweet the sound..."></textarea>
+                    <div class="hint">Breaks hold the auto-scroll at that spot, then resume automatically. <strong>Measures</strong> uses this song's tempo &amp; time signature (best for intros, solos, turnarounds). <strong>Seconds</strong> is a fixed hold.</div>
                 </div>
 
-                <div class="sub-heading">Current Track Actions</div>
                 <div class="action-row">
                     <button type="button" id="saveLocalBtn" class="btn btn-success">&#128190; Save to Library</button>
-                    <button type="button" id="exportBtn" class="btn">&#11015;&#65039; Export Song (.json)</button>
-                    <div class="file-wrap">
-                        <button type="button" class="btn btn-secondary">&#11014;&#65039; Import Song (.json)</button>
-                        <input type="file" id="importFile" accept=".json">
-                    </div>
-                    <button type="button" id="deleteLocalBtn" class="btn btn-danger">&#128465;&#65039; Delete From Library</button>
-                    <button type="button" id="clearBtn" class="btn btn-secondary">&#10005; Clear Form</button>
+                    <button type="button" id="openDrawerInline" class="btn btn-secondary">&#9776; More Actions</button>
                 </div>
-
-                <hr class="section-divider">
-                <div class="sub-heading" style="color:var(--purple);">Library Backup Engine</div>
-                <div class="hint" style="margin-bottom:0.75rem;">Package every saved song into one file to share with bandmates.</div>
-                <div class="action-row">
-                    <button type="button" id="exportSetListBtn" class="btn btn-purple">&#128230; Export Full Library (.json)</button>
-                    <div class="file-wrap">
-                        <button type="button" class="btn btn-secondary">&#128229; Import Library (.json)</button>
-                        <input type="file" id="importSetListFile" accept=".json">
-                    </div>
-                </div>
-
-                <hr class="section-divider">
-                <div class="sub-heading" style="color:var(--accent);">&#9729;&#65039; Shared Band Library (Load from URL)</div>
-                <div class="hint" style="margin-bottom:0.75rem;">Paste a link to a shared <strong>.json</strong> file (e.g. a GitHub <em>raw</em> file URL) and load it into your library. This is <strong>read-only</strong> &mdash; it pulls the shared songs &amp; set lists down to this device. Your local edits never push back to the shared file.</div>
-                <div class="action-row" style="gap:0.5rem;">
-                    <input type="text" id="sharedUrlInput" placeholder="https://raw.githubusercontent.com/user/repo/main/library.json" autocomplete="off" style="flex:1;min-width:200px;font-size:0.85rem;padding:0.5rem 0.75rem;">
-                    <button type="button" id="loadSharedBtn" class="btn btn-success">&#11015;&#65039; Load Shared Library</button>
-                    <button type="button" id="forgetSharedBtn" class="btn btn-secondary" title="Forget the saved URL">&#10005;</button>
-                </div>
-                <div class="hint" id="sharedUrlStatus" style="margin-top:0.4rem;"></div>
 
                 <hr class="section-divider">
 
@@ -384,6 +529,83 @@
 </div>
 
 <!-- DOCK -->
+
+<!-- BREAK VALUE MODAL -->
+<div class="modal-overlay" id="breakModal">
+    <div class="modal-box">
+        <div class="modal-title" id="breakModalTitle">Add Break</div>
+        <div class="modal-body">
+            <label for="breakValueInput" id="breakModalLabel" style="font-size:0.85rem;">How many measures?</label>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.4rem;">
+                <button type="button" id="breakMinus" class="btn btn-outline" style="width:44px;height:44px;font-size:1.3rem;padding:0;">&minus;</button>
+                <input type="number" id="breakValueInput" min="1" max="200" value="8" style="flex:1;text-align:center;font-size:1.4rem;font-weight:700;padding:0.5rem;">
+                <button type="button" id="breakPlus" class="btn btn-outline" style="width:44px;height:44px;font-size:1.3rem;padding:0;">+</button>
+            </div>
+            <div class="hint" id="breakModalHint" style="margin-top:0.5rem;"></div>
+            <div class="quick-picks" id="breakQuickPicks"></div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="breakCancel" class="btn btn-secondary">Cancel</button>
+            <button type="button" id="breakConfirm" class="btn btn-success">Insert Break</button>
+        </div>
+    </div>
+</div>
+
+<!-- METRONOME VISUAL FLASH -->
+
+<div class="met-flash" id="metFlash"></div>
+
+<!-- QUICK ACTIONS SHEET -->
+<div class="qa-backdrop" id="qaBackdrop"></div>
+<div class="qa-sheet" id="qaSheet">
+    <div class="qa-grab"></div>
+    <div class="qa-title" id="qaSongTitle">Quick Actions</div>
+
+    <div class="qa-row">
+        <span class="qa-label">Duration</span>
+        <button type="button" id="qaDurMinus" class="btn btn-outline" style="width:38px;height:38px;padding:0;font-size:1.1rem;">&minus;</button>
+        <input type="text" id="qaDuration" style="width:88px;text-align:center;font-size:1.05rem;font-weight:700;padding:0.4rem;">
+        <button type="button" id="qaDurPlus" class="btn btn-outline" style="width:38px;height:38px;padding:0;font-size:1.1rem;">+</button>
+        <span class="hint" id="qaDurNote" style="margin:0;">Time to scroll top&rarr;bottom</span>
+    </div>
+
+    <div class="qa-row">
+        <span class="qa-label">Font size</span>
+        <input type="range" id="qaFont" min="14" max="36" style="flex:1;min-width:110px;">
+        <span id="qaFontVal" style="font-size:0.85rem;font-weight:700;min-width:46px;">20px</span>
+    </div>
+
+    <div class="qa-row">
+        <span class="qa-label">Width</span>
+        <input type="range" id="qaWidth" min="20" max="100" style="flex:1;min-width:110px;">
+        <span id="qaWidthVal" style="font-size:0.85rem;font-weight:700;min-width:46px;">100%</span>
+    </div>
+
+    <div class="qa-row">
+        <span class="qa-label">Tempo</span>
+        <button type="button" id="qaBpmMinus" class="btn btn-outline" style="width:38px;height:38px;padding:0;font-size:1.1rem;">&minus;</button>
+        <input type="number" id="qaBpm" min="30" max="300" style="width:76px;text-align:center;font-size:1.05rem;font-weight:700;padding:0.4rem;">
+        <button type="button" id="qaBpmPlus" class="btn btn-outline" style="width:38px;height:38px;padding:0;font-size:1.1rem;">+</button>
+        <span id="qaTimeSigLabel" style="font-size:0.8rem;color:var(--text-muted);font-weight:600;"></span>
+    </div>
+
+    <div class="qa-row">
+        <span class="qa-label">Metronome</span>
+        <button type="button" id="qaMetroToggle" class="btn btn-outline">Start</button>
+        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin:0;">
+            <input type="checkbox" id="qaMetroSound" checked style="width:auto;"> Sound
+        </label>
+        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin:0;">
+            <input type="checkbox" id="qaMetroFlash" style="width:auto;"> Screen flash
+        </label>
+    </div>
+
+    <div class="qa-row" style="justify-content:flex-end;padding-top:0.85rem;">
+        <button type="button" id="qaSaveBtn" class="btn btn-success">&#128190; Save to Song</button>
+        <button type="button" id="qaCloseBtn" class="btn btn-secondary">Close</button>
+    </div>
+</div>
+
 <div class="scroll-control-dock dock-collapsed" id="scrollDock">
 
     <!-- TAP THIS BAR TO EXPAND / COLLAPSE -->
@@ -392,7 +614,10 @@
             <!-- Primary controls always visible in handle -->
             <button type="button" id="playScrollBtn" class="btn btn-success" style="padding:0.45rem 1rem;font-size:0.85rem;">&#9654; Play</button>
             <button type="button" id="resetScrollBtn" class="btn btn-secondary" style="padding:0.45rem 0.75rem;font-size:0.85rem;">&#8679;</button>
-            <button type="button" id="listenBtn" class="btn btn-outline" style="padding:0.45rem 0.75rem;font-size:0.85rem;" title="Listen for a 4-count to auto-start">&#127908; Count-In</button>
+            <button type="button" id="metronomeBtn" class="btn btn-outline live-btn" title="Metronome">&#9202;</button>
+            <span class="met-dots" id="metDots" style="display:none;"></span>
+            <button type="button" id="listenBtn" class="btn btn-outline live-btn" title="Listen for a 4-count to auto-start">&#127908;</button>
+            <button type="button" id="quickActionsBtn" class="btn btn-outline live-btn" title="Quick Actions">&#9776;</button>
             <div class="scroll-status" id="scrollStatus">
                 <span class="dot"></span>
                 <span id="scrollStatusText">Paused</span>
@@ -409,7 +634,7 @@
         <button type="button" id="prevSongBtn" class="btn btn-outline" style="padding:0.4rem 0.85rem;font-size:0.85rem;">&#8592; Prev</button>
         <span id="setlistNavLabel" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center;"></span>
         <button type="button" id="nextSongBtn" class="btn btn-outline" style="padding:0.4rem 0.85rem;font-size:0.85rem;">Next &#8594;</button>
-        <button type="button" id="toggleSetlistPanelBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;">&#127925;</button>
+        <button type="button" id="toggleSetlistPanelBtn" class="btn btn-outline" style="padding:0.4rem 0.75rem;font-size:0.85rem;" title="Set list">&#127925;</button>
     </div>
 
     <!-- EXPANDABLE BODY -->
@@ -429,22 +654,22 @@
         <div class="dock-row">
             <label for="speedMode" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Mode:</label>
             <select id="speedMode" style="font-size:0.8rem;padding:0.35rem 0.6rem;">
+                <option value="duration" selected>Song Duration</option>
                 <option value="rate">Rate (manual)</option>
-                <option value="duration">Song Duration</option>
             </select>
             <button type="button" id="saveSpeedBtn" class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.75rem;" title="Save speed settings to this song">&#128190; Save</button>
         </div>
         <!-- Rate-mode slider -->
-        <div class="dock-row" id="rateRow">
+        <div class="dock-row" id="rateRow" style="display:none;">
             <label for="wpmSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Scroll Speed:</label>
             <input type="range" id="wpmSlider" min="10" max="200" value="50" step="1" style="flex:1;min-width:80px;">
             <span id="wpmDisplay" style="font-size:0.8rem;font-weight:600;color:var(--text);min-width:52px;">50</span>
         </div>
         <!-- Duration-mode input -->
-        <div class="dock-row" id="durationRow" style="display:none;">
+        <div class="dock-row" id="durationRow">
             <label for="durationInput" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Duration:</label>
-            <input type="text" id="durationInput" placeholder="3:45" value="3:30" style="width:80px;font-size:0.85rem;padding:0.35rem 0.5rem;text-align:center;">
-            <span style="font-size:0.75rem;color:var(--text-faint);">min:sec &mdash; scrolls whole song over this time</span>
+            <input type="text" id="durationInput" placeholder="3:45" value="1:30" style="width:80px;font-size:0.85rem;padding:0.35rem 0.5rem;text-align:center;">
+            <span id="durationNote" style="font-size:0.75rem;color:var(--text-faint);">min:sec &mdash; scrolls whole song over this time</span>
         </div>
         <!-- Font -->
         <div class="dock-row">
@@ -471,6 +696,15 @@ document.addEventListener('DOMContentLoaded', function() {
     var K_ACTSL = 'song_manager_active_sl';
     var K_THEME = 'song_manager_theme';
     var K_SHAREDURL = 'song_manager_shared_url';
+
+    /* ---- ChordPro section syntax ----
+       Standard ChordPro uses {c: Verse 1} (comment directive) for section
+       headers; square brackets are reserved for CHORDS. We write the standard
+       form and still READ the legacy [Verse 1] form so old songs keep working. */
+    var SECTION_RE = /^\{\s*(?:c|comment)\s*:\s*(.+?)\s*\}$/i;
+    // Section header WITH an inline bar count: {c: Verse 1}{bars:16}
+    var SECTION_BARS_RE = /^\{\s*(?:c|comment)\s*:\s*(.+?)\s*\}\s*\{\s*bars\s*:\s*(\d+(?:\.\d+)?)\s*\}$/i;
+    var CHORD_RE   = /^[A-G][#b]?(m|maj|min|dim|aug|sus|add|M)?[0-9]*(sus[0-9]*)?(add[0-9]*)?(\/[A-G][#b]?)?$/i;
     // Default shared library URL — your band's source-of-truth file on GitHub.
     // EDIT 'Setlist-App' below if your repository name ever changes.
     var DEFAULT_SHARED_URL = 'https://raw.githubusercontent.com/sjanes9/Setlist-App/main/library.json';
@@ -494,6 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
         flds.title.value     = song.title     || '';
         flds.key.value       = song.key       || 'C';
         flds.tempo.value     = song.tempo     || '80';
+        flds.timeSig.value   = song.timeSig   || '4/4';
         flds.artist.value    = song.artist    || '';
         flds.notes.value     = song.notes     || '';
         flds.structure.value = song.structure || '';
@@ -530,6 +765,7 @@ document.addEventListener('DOMContentLoaded', function() {
         title:     document.getElementById('songTitle'),
         key:       document.getElementById('songKey'),
         tempo:     document.getElementById('songTempo'),
+        timeSig:   document.getElementById('songTimeSig'),
         artist:    document.getElementById('songArtist'),
         notes:     document.getElementById('songNotes'),
         structure: document.getElementById('songStructure'),
@@ -808,9 +1044,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var wEl=document.getElementById('wpmSlider');
         var dEl=document.getElementById('durationInput');
         return {
-            speedMode: sEl ? sEl.value : (existing.speedMode||'rate'),
+            speedMode: sEl ? sEl.value : (existing.speedMode||'duration'),
             wpm:       wEl ? parseInt(wEl.value,10) : (existing.wpm||50),
-            duration:  dEl ? dEl.value.trim() : (existing.duration||'3:30')
+            duration:  dEl ? dEl.value.trim() : (existing.duration||'1:30')
         };
     }
 
@@ -820,6 +1056,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var existing=lib[title]||{};
         var spd=currentSpeedSettings(existing);
         lib[title]={title:title, key:flds.key.value.trim()||'C', tempo:parseInt(flds.tempo.value,10)||80,
+            timeSig:flds.timeSig.value||'4/4',
             artist:flds.artist.value.trim(), notes:flds.notes.value.trim(),
             structure:flds.structure.value.trim(), lyrics:flds.lyrics.value.trim(),
             // scroll-speed settings saved with the song
@@ -842,6 +1079,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var title=flds.title.value.trim(); if(!title){ alert('Enter a song title before exporting.'); return; }
         var existing=getLib()[title]||{};
         var data={title:title,key:flds.key.value.trim()||'C',tempo:parseInt(flds.tempo.value,10)||80,
+            timeSig:flds.timeSig.value||'4/4',
             artist:flds.artist.value.trim(),notes:flds.notes.value.trim(),
             structure:flds.structure.value.trim(),lyrics:flds.lyrics.value.trim(),
             wpm:existing.wpm,speedMode:existing.speedMode,duration:existing.duration,version:'2.3'};
@@ -1021,18 +1259,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Rewrite the {pause:N} values in the lyrics field to match the current
     // (possibly adjusted) pauseMarkers, then save back to the song library so
     // the new lengths persist.  Markers are matched to {pause:} lines in order.
+    // Beats per bar from the song's time signature (e.g. "6/8" -> 6).
+    function beatsPerBar(){
+        var ts=(flds.timeSig && flds.timeSig.value) ? flds.timeSig.value : '4/4';
+        var n=parseInt(ts.split('/')[0],10);
+        return (n>0)?n:4;
+    }
+    // Seconds per bar at the song's tempo & time signature.
+    function secondsPerBar(){
+        var bpm=parseInt(flds.tempo.value,10)||80;
+        return beatsPerBar()*(60/bpm);
+    }
+    // Convert a bar count to seconds for the current song.
+    function barsToSeconds(bars){ return bars*secondsPerBar(); }
+
+    // Rewrite {pause:N} / {bars:N} values in the lyrics to match the current
+    // (possibly adjusted) markers, then save back to the library.
     function persistPauseChange(){
         var lines=flds.lyrics.value.split('\n');
-        var pauseRe=/^\s*\{pause:\s*\d+(?:\.\d+)?\s*\}\s*$/i;
+        var anyRe=/^\s*\{(?:pause|bars):\s*\d+(?:\.\d+)?\s*\}\s*$/i;
         var mi=0;
         for(var i=0;i<lines.length;i++){
-            if(pauseRe.test(lines[i]) && mi<pauseMarkers.length){
-                lines[i]='{pause:'+pauseMarkers[mi].secs+'}';
+            if(anyRe.test(lines[i]) && mi<pauseMarkers.length){
+                var m=pauseMarkers[mi];
+                lines[i] = (m.unit==='bars')
+                    ? '{bars:'+m.bars+'}'
+                    : '{pause:'+m.secs+'}';
                 mi++;
             }
         }
         flds.lyrics.value=lines.join('\n');
-        // Save back to the song in the library (if it's a saved song)
         var title=flds.title.value.trim();
         var lib=getLib();
         if(title && lib[title]){
@@ -1053,69 +1309,166 @@ document.addEventListener('DOMContentLoaded', function() {
         rnd.structure.textContent='Structure: '+struct; rnd.structureWrap.style.display=struct?'block':'none';
         rnd.content.innerHTML='';
         pauseMarkers=[];  // reset; rebuilt below for the scroll engine
+        sectionTimeline=[];  // rebuilt below; drives bar-accurate scrolling
         var section=null;
-        var pauseRe=/^\{pause:\s*(\d+(?:\.\d+)?)\s*\}$/i;
+        // Matches {pause:N} (seconds) or {bars:N} (measures)
+        var pauseRe=/^\{(pause|bars):\s*(\d+(?:\.\d+)?)\s*\}$/i;
         var allLines=flds.lyrics.value.split('\n');
         allLines.forEach(function(line, lineIdx){
             var t=line.trim();
-            // Pause marker on its own line
             var pm=t.match(pauseRe);
             if(pm){
-                var secs=parseFloat(pm[1]);
+                var unit = pm[1].toLowerCase();          // 'pause' | 'bars'
+                var val  = parseFloat(pm[2]);
+                var isBars = (unit==='bars');
+                var bars = isBars ? val : 0;
+                var secs = isBars ? barsToSeconds(val) : val;
                 if(!section){ section=document.createElement('div'); section.className='perf-section'; rnd.content.appendChild(section); }
                 var marker=document.createElement('div');
                 marker.className='pause-marker';
                 marker.dataset.pause=secs;
-                marker.innerHTML='\u23F8 <span>Pause &mdash;</span> '+
-                    '<span class="pause-secs">'+secs+'s</span>'+
+                var labelHtml = isBars
+                    ? '<span>Break &mdash;</span> <span class="pause-secs">'+bars+' bars</span>'+
+                      '<span class="pause-sub">('+secs.toFixed(1)+'s)</span>'
+                    : '<span>Pause &mdash;</span> <span class="pause-secs">'+secs+'s</span>';
+                marker.innerHTML='\u23F8 '+labelHtml+
                     '<span class="pause-count"></span>'+
                     '<span class="pause-adjust">'+
-                      '<button type="button" class="pause-minus" title="Shorten by 1s" aria-label="Decrease pause">&minus;</button>'+
-                      '<button type="button" class="pause-plus" title="Lengthen by 1s" aria-label="Increase pause">+</button>'+
+                      '<button type="button" class="pause-minus" title="'+(isBars?'One bar shorter':'One second shorter')+'">&minus;</button>'+
+                      '<button type="button" class="pause-plus" title="'+(isBars?'One bar longer':'One second longer')+'">+</button>'+
                     '</span>'+
                     '<span class="pause-move">'+
-                      '<button type="button" class="pause-up" title="Move pause up one line" aria-label="Move pause up">&#9650;</button>'+
-                      '<button type="button" class="pause-down" title="Move pause down one line" aria-label="Move pause down">&#9660;</button>'+
+                      '<button type="button" class="pause-up" title="Move up one line">&#9650;</button>'+
+                      '<button type="button" class="pause-down" title="Move down one line">&#9660;</button>'+
                     '</span>';
                 section.appendChild(marker);
-                // lineIdx = index of this {pause:} line in the raw lyrics text
-                var pObj={el:marker, secs:secs, fired:false, lineIdx:lineIdx, index:pauseMarkers.length};
+                var pObj={el:marker, unit:(isBars?'bars':'pause'), bars:bars, secs:secs,
+                          fired:false, lineIdx:lineIdx, index:pauseMarkers.length};
                 pauseMarkers.push(pObj);
                 (function(po){
                     var minus=po.el.querySelector('.pause-minus');
                     var plus =po.el.querySelector('.pause-plus');
                     var disp =po.el.querySelector('.pause-secs');
+                    var sub  =po.el.querySelector('.pause-sub');
                     var upBtn=po.el.querySelector('.pause-up');
                     var dnBtn=po.el.querySelector('.pause-down');
-                    function update(newSecs){
-                        po.secs=Math.max(1, Math.round(newSecs));
-                        disp.textContent=po.secs+'s';
+                    function step(delta){
+                        if(po.unit==='bars'){
+                            po.bars=Math.max(1, Math.round(po.bars+delta));
+                            po.secs=barsToSeconds(po.bars);
+                            disp.textContent=po.bars+' bars';
+                            if(sub) sub.textContent='('+po.secs.toFixed(1)+'s)';
+                        } else {
+                            po.secs=Math.max(1, Math.round(po.secs+delta));
+                            disp.textContent=po.secs+'s';
+                        }
                         po.el.dataset.pause=po.secs;
-                        persistPauseChange();        // write back to lyrics + save
-                        if(scrolling) calcRate();    // duration mode re-balances
+                        persistPauseChange();
+                        if(scrolling) calcRate();
                     }
-                    minus.addEventListener('click', function(e){ e.stopPropagation(); update(po.secs-1); });
-                    plus .addEventListener('click', function(e){ e.stopPropagation(); update(po.secs+1); });
+                    minus.addEventListener('click', function(e){ e.stopPropagation(); step(-1); });
+                    plus .addEventListener('click', function(e){ e.stopPropagation(); step(+1); });
                     upBtn.addEventListener('click', function(e){ e.stopPropagation(); movePause(po.lineIdx, -1); });
                     dnBtn.addEventListener('click', function(e){ e.stopPropagation(); movePause(po.lineIdx, +1); });
-                    // Disable up/down at the document edges
                     if(po.lineIdx<=0) upBtn.disabled=true;
                     if(po.lineIdx>=allLines.length-1) dnBtn.disabled=true;
                 })(pObj);
                 return;
             }
-            // Section header: a bracketed token with no spaces, e.g. [Verse 1] or [Chorus]
-            var isHeader = t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']';
-            if(isHeader){
+            // Section header: {c: Verse 1}{bars:16} | {c: Verse 1} | legacy [Verse 1]
+            var headerText=null, headerBars=null;
+            var hb=t.match(SECTION_BARS_RE);
+            if(hb){ headerText=hb[1]; headerBars=parseFloat(hb[2]); }
+            else {
+                var hm=t.match(SECTION_RE);
+                if(hm){ headerText=hm[1]; }
+                else if(t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']'){
+                    var inr=t.slice(1,-1).trim();
+                    if(inr && !CHORD_RE.test(inr)) headerText=inr;
+                }
+            }
+            if(headerText!==null){
                 section=document.createElement('div'); section.className='perf-section';
-                var h=document.createElement('div'); h.className='perf-section-heading'; h.textContent=t.slice(1,-1);
+                var h=document.createElement('div'); h.className='perf-section-heading';
+                h.textContent=headerText;
+                if(headerBars!==null){
+                    var badge=document.createElement('span');
+                    badge.className='bars-badge';
+                    badge.textContent=headerBars+' bars';
+                    badge.title=headerBars+' bars \u2248 '+barsToSeconds(headerBars).toFixed(1)+'s at this tempo';
+                    h.appendChild(badge);
+                }
                 section.appendChild(h); rnd.content.appendChild(section);
+                // Register this section on the timeline for the scroll engine
+                sectionTimeline.push({
+                    el: section, heading: h, name: headerText,
+                    bars: headerBars, lineIdx: lineIdx,
+                    lines: 0, startSec: 0, endSec: 0
+                });
             } else {
                 if(!section){ section=document.createElement('div'); section.className='perf-section'; rnd.content.appendChild(section); }
                 section.appendChild(parseChordLine(line));
             }
         });
+        buildSectionTimeline();
+        syncDurationDisplay();
+        // Keep the Structure field current with whatever the lyrics contain
+        var hdrs=getSectionHeaders();
+        if(hdrs.length){
+            flds.structure.value=hdrs.join(' | ');
+            rnd.structure.textContent='Structure: '+flds.structure.value;
+            rnd.structureWrap.style.display='block';
+        }
         curScrollY=window.scrollY;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       SECTION TIMELINE
+       Each {c: Name}{bars:N} header defines a musical window.
+       With tempo + time signature we know exactly when each
+       section starts and ends, so the scroll can place that
+       section's heading at the reading line at the right moment.
+       Sections without a bar count fall back to line-based pacing.
+    ════════════════════════════════════════════════════════ */
+    function buildSectionTimeline(){
+        if(!sectionTimeline.length) return;
+        // How many lyric lines sit inside each section (for fallback pacing)
+        sectionTimeline.forEach(function(s){
+            s.lines = s.el.querySelectorAll('.song-line').length;
+        });
+        // Walk forward assigning start/end times from bar counts
+        var spb = secondsPerBar();
+        var t = 0;
+        sectionTimeline.forEach(function(s){
+            s.startSec = t;
+            if(s.bars !== null && s.bars > 0){
+                s.durSec = s.bars * spb;
+                s.timed  = true;
+            } else {
+                s.durSec = 0;   // resolved later from leftover time
+                s.timed  = false;
+            }
+            t += s.durSec;
+            s.endSec = t;
+        });
+        timelineTotalSec = t;
+    }
+
+    // Total song time implied by the bar counts (0 if none are set).
+    function timelineDurationSec(){
+        var spb=secondsPerBar(), sum=0, any=false;
+        sectionTimeline.forEach(function(s){
+            if(s.bars!==null && s.bars>0){ sum += s.bars*spb; any=true; }
+        });
+        pauseMarkers.forEach(function(p){ sum += p.secs; });
+        return any ? sum : 0;
+    }
+
+    // Does this song have enough bar data to drive timeline scrolling?
+    function hasTimeline(){
+        if(!sectionTimeline.length) return false;
+        var timed=sectionTimeline.filter(function(s){ return s.bars!==null && s.bars>0; }).length;
+        return timed>0;
     }
 
     // Move a pause up (-1) or down (+1) past the next NON-BLANK line, so each
@@ -1240,6 +1593,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var lastEngineY = 0;
     var pxPerMs     = 0;
     var pauseMarkers= [];     // [{el, secs, fired}]
+    var sectionTimeline=[];   // [{el,heading,name,bars,startSec,endSec,timed}]
+    var timelineTotalSec=0;   // song length implied by the bar counts
+    var timelineAnchors=null; // [{t,y}] built at scroll start
+    var useTimeline=false;    // true when bar-accurate scrolling is active
+    var songElapsedMs=0;      // elapsed song time while scrolling
+    var currentSectionEl=null;
     var paused      = false;  // true while holding at a pause
     var pauseUntil  = 0;      // timestamp when current pause ends
     var activePause = null;
@@ -1267,24 +1626,67 @@ document.addEventListener('DOMContentLoaded', function() {
         return sum;
     }
 
-    function calcRate(){
-        var docH=document.documentElement.scrollHeight;
-        var winH=window.innerHeight;
-        // scrollHeight already includes the 60vh bottom padding on #perfContent,
-        // so this distance carries the last lyric line up into the reading zone
-        // rather than stopping when it merely reaches the bottom edge. That
-        // spreads the song's reading time across the whole scroll and keeps
-        // every line at the true singing pace.
-        var scrollH=Math.max(docH-winH,1);
-        if(speedMode.value==='duration'){
-            var durSec=parseDuration(durationInput.value);
-            var movingSec=Math.max(durSec-totalPauseSeconds(),1);
-            pxPerMs=scrollH/(movingSec*1000);
-        } else {
-            var words=Math.max(countWords(flds.lyrics.value),1);
-            var spd=parseInt(wpmSlider.value,10)||50;
-            pxPerMs=(scrollH*spd)/(words*60000);
+    /* ════════════════════════════════════════════════════════
+       DEVICE-AWARE SCROLL RATE
+       ────────────────────────────────────────────────────────
+       The pacing model is TIME-PER-LINE, not raw pixels/second.
+
+       Why: a phone shows ~6 lyric lines while an iPad shows ~20.
+       A fixed px/sec rate would give wildly different reading time
+       per line across those devices. By deriving the rate from
+       "how long should each line be on screen", the scroll
+       automatically self-corrects for screen size, font size, and
+       column width — the same song paces identically everywhere.
+
+       DURATION MODE : timePerLine = (songTime - pauseTime) / lineCount
+       RATE MODE     : timePerLine comes from the speed slider
+       Then:  pxPerMs = avgLineHeight / (timePerLine * 1000)
+    ════════════════════════════════════════════════════════ */
+
+    // Measure the real rendered geometry of the current song.
+    function measureLayout(){
+        var lineEls = rnd.content.querySelectorAll('.song-line');
+        var lineCount = lineEls.length;
+        var docH  = document.documentElement.scrollHeight;
+        var winH  = window.innerHeight;
+        var scrollH = Math.max(docH - winH, 1);
+        // Height occupied by actual lyric lines (excludes the 60vh tail pad)
+        var contentH = 0;
+        if(lineCount>0){
+            var first = lineEls[0].getBoundingClientRect();
+            var last  = lineEls[lineCount-1].getBoundingClientRect();
+            contentH = (last.bottom - first.top);
         }
+        var avgLineH = lineCount>0 ? (contentH/lineCount) : 40;
+        // Roughly how many lyric lines fit on this screen right now
+        var linesPerScreen = avgLineH>0 ? (winH/avgLineH) : 10;
+        return {lineCount:lineCount, scrollH:scrollH, winH:winH,
+                avgLineH:avgLineH, linesPerScreen:linesPerScreen};
+    }
+
+    function calcRate(){
+        var L = measureLayout();
+        if(L.lineCount===0){ pxPerMs = 0.03; return; }
+
+        var timePerLineSec;
+        if(speedMode.value==='duration'){
+            var durSec   = parseDuration(durationInput.value);
+            var movingSec= Math.max(durSec - totalPauseSeconds(), 1);
+            // Spread the singing time evenly across every lyric line.
+            timePerLineSec = movingSec / L.lineCount;
+        } else {
+            // Rate mode: slider 10-200 maps to lines-per-minute.
+            // 50 on the slider ≈ 25 lines/min ≈ 2.4s per line (comfortable).
+            var linesPerMin = Math.max(parseInt(wpmSlider.value,10)||50, 1) * 0.5;
+            timePerLineSec  = 60 / linesPerMin;
+        }
+
+        // Convert time-per-line into a pixel rate using the measured line height.
+        pxPerMs = L.avgLineH / (timePerLineSec * 1000);
+
+        // Safety clamp so a pathological measurement can't run away.
+        if(!isFinite(pxPerMs) || pxPerMs<=0) pxPerMs = 0.03;
+        pxPerMs = Math.min(pxPerMs, 2);
     }
 
     function clearPauseUI(){
@@ -1292,6 +1694,71 @@ document.addEventListener('DOMContentLoaded', function() {
             p.el.classList.remove('counting');
             var c=p.el.querySelector('.pause-count'); if(c) c.textContent='';
         });
+    }
+
+    /* ════════════════════════════════════════════════════════
+       TIMELINE SCROLL (boundary-anchored)
+       For songs with section bar counts we don't accumulate a
+       rate — we compute WHERE the page should be for the current
+       elapsed song time. Each section heading is anchored to hit
+       the reading line exactly at its start time; between two
+       anchors the position interpolates linearly, so motion stays
+       smooth while every section lands on the beat.
+    ════════════════════════════════════════════════════════ */
+    var READ_FRACTION = 0.35;   // reading line, 35% down the viewport
+
+    // Build the list of (songTime -> scrollY) anchor points.
+    function buildAnchors(){
+        var readY = window.innerHeight * READ_FRACTION;
+        var anchors = [];
+        var pageTop = rnd.content.getBoundingClientRect().top + window.scrollY;
+        anchors.push({t:0, y:0});
+        sectionTimeline.forEach(function(s){
+            if(!s.timed) return;
+            var headTop = s.heading.getBoundingClientRect().top + window.scrollY;
+            // Scroll position that puts this heading on the reading line
+            var y = Math.max(0, headTop - readY);
+            anchors.push({t:s.startSec, y:y});
+        });
+        // Final anchor: end of song -> bottom of scrollable area
+        var maxY = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+        anchors.push({t:Math.max(timelineTotalSec, 0.001), y:maxY});
+        // Keep monotonic in both time and position
+        anchors.sort(function(a,b){ return a.t-b.t; });
+        for(var i=1;i<anchors.length;i++){
+            if(anchors[i].y < anchors[i-1].y) anchors[i].y = anchors[i-1].y;
+        }
+        return anchors;
+    }
+
+    // Interpolate scroll position for a given elapsed song time.
+    function scrollYAtTime(sec, anchors){
+        if(sec <= anchors[0].t) return anchors[0].y;
+        for(var i=1;i<anchors.length;i++){
+            if(sec <= anchors[i].t){
+                var a=anchors[i-1], b=anchors[i];
+                var span=(b.t-a.t)||1;
+                var f=(sec-a.t)/span;
+                return a.y + (b.y-a.y)*f;
+            }
+        }
+        return anchors[anchors.length-1].y;
+    }
+
+    // Which section is playing at this moment (for the on-screen highlight)?
+    function activeSectionAt(sec){
+        for(var i=0;i<sectionTimeline.length;i++){
+            var s=sectionTimeline[i];
+            if(s.timed && sec>=s.startSec && sec<s.endSec) return s;
+        }
+        return null;
+    }
+
+    function highlightSection(s){
+        if(s===currentSectionEl) return;
+        sectionTimeline.forEach(function(x){ x.heading.classList.remove('section-active'); });
+        if(s) s.heading.classList.add('section-active');
+        currentSectionEl=s;
     }
 
     function scrollLoop(ts){
@@ -1307,7 +1774,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if(ts>=pauseUntil){
                 paused=false;
-                if(activePause){ activePause.el.classList.remove('counting'); var cc=activePause.el.querySelector('.pause-count'); if(cc) cc.textContent=''; }
+                if(activePause){
+                    // Advance the song clock by the pause we just held, so the
+                    // timeline stays aligned with the music after the break.
+                    if(useTimeline) songElapsedMs += activePause.secs*1000;
+                    activePause.el.classList.remove('counting');
+                    var cc=activePause.el.querySelector('.pause-count'); if(cc) cc.textContent='';
+                }
                 activePause=null;
                 lastTs=ts; // reset so no velocity jump
             }
@@ -1315,9 +1788,21 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        curScrollY += delta * pxPerMs;
-        lastEngineY = curScrollY;
-        window.scrollTo(0, curScrollY);
+        if(useTimeline){
+            // ── TIMELINE MODE ── position derived from elapsed song time
+            songElapsedMs += delta;
+            var sec = songElapsedMs/1000;
+            curScrollY = scrollYAtTime(sec, timelineAnchors);
+            lastEngineY = curScrollY;
+            window.scrollTo(0, curScrollY);
+            highlightSection(activeSectionAt(sec));
+            if(sec >= timelineTotalSec){ stopScroll(); return; }
+        } else {
+            // ── RATE MODE ── accumulate pixels per millisecond
+            curScrollY += delta * pxPerMs;
+            lastEngineY = curScrollY;
+            window.scrollTo(0, curScrollY);
+        }
 
         // Check whether a pause marker has reached the trigger line (35% down)
         var triggerY = window.scrollY + window.innerHeight*0.35;
@@ -1361,13 +1846,49 @@ document.addEventListener('DOMContentLoaded', function() {
             p.el.classList.remove('counting');
             var c=p.el.querySelector('.pause-count'); if(c) c.textContent='';
         });
-        calcRate();
+        // Decide between timeline mode and classic rate mode
+        useTimeline = hasTimeline() && speedMode.value==='duration';
+        if(useTimeline){
+            timelineAnchors = buildAnchors();
+            // If the user overrode the duration, scale the timeline to match
+            var entered = parseDuration(durationInput.value);
+            var natural = timelineDurationSec();
+            if(entered>0 && natural>0 && Math.abs(entered-natural)>1){
+                var f = entered/natural;
+                timelineAnchors.forEach(function(a){ a.t *= f; });
+                timelineTotalSec = natural * f;
+            } else {
+                timelineTotalSec = natural;
+            }
+            // Resume from wherever the page currently sits
+            songElapsedMs = timeAtScrollY(window.scrollY, timelineAnchors)*1000;
+            statusTxt.textContent='Scrolling (bar-timed)';
+        } else {
+            calcRate();
+            statusTxt.textContent='Scrolling';
+        }
         playBtn.textContent='\u23F8 Pause Auto-Scroll'; playBtn.className='btn btn-secondary';
-        statusEl.classList.add('active'); statusTxt.textContent='Scrolling';
+        statusEl.classList.add('active');
         rafId=requestAnimationFrame(scrollLoop);
+    }
+
+    // Inverse of scrollYAtTime — lets Play resume mid-song correctly.
+    function timeAtScrollY(y, anchors){
+        if(!anchors || !anchors.length) return 0;
+        if(y<=anchors[0].y) return anchors[0].t;
+        for(var i=1;i<anchors.length;i++){
+            if(y<=anchors[i].y){
+                var a=anchors[i-1], b=anchors[i];
+                var span=(b.y-a.y)||1;
+                var f=(y-a.y)/span;
+                return a.t + (b.t-a.t)*f;
+            }
+        }
+        return anchors[anchors.length-1].t;
     }
     function stopScroll(){
         scrolling=false; paused=false; activePause=null;
+        highlightSection(null);
         if(rafId){ cancelAnimationFrame(rafId); rafId=null; } lastTs=null;
         clearPauseUI();
         playBtn.textContent='\u25B6 Play Auto-Scroll'; playBtn.className='btn btn-success';
@@ -1381,6 +1902,8 @@ document.addEventListener('DOMContentLoaded', function() {
     fontSlider.addEventListener('input',function(e){
         fontDisplay.textContent=e.target.value+'px';
         document.documentElement.style.setProperty('--perf-font-size',e.target.value+'px');
+        // Line height changed -> recompute the device-aware rate
+        if(scrolling) requestAnimationFrame(calcRate);
     });
 
     var speedMode     = document.getElementById('speedMode');
@@ -1410,6 +1933,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if(scrolling) calcRate();
     });
     durationInput.addEventListener('input', function(){
+        var qd=document.getElementById('qaDuration');
+        if(qd) qd.value=durationInput.value;      // keep the two views identical
         if(scrolling) calcRate();
     });
 
@@ -1439,8 +1964,17 @@ document.addEventListener('DOMContentLoaded', function() {
         var spd=song.wpm?song.wpm:50;
         wpmSlider.value=spd;
         wpmDisplay.textContent=spd;
-        durationInput.value=song.duration?song.duration:'3:30';
-        speedMode.value=(song.speedMode==='duration')?'duration':'rate';
+        // Only apply a stored/default duration when the song has no bar counts.
+        // Bar-timed songs compute their own length, so don't clobber it here.
+        var natural = (typeof timelineDurationSec==='function') ? timelineDurationSec() : 0;
+        if(natural>0){
+            syncDurationDisplay();
+        } else {
+            durationInput.value=song.duration?song.duration:'1:30';
+        }
+        // Duration is the default mode (matches how most songbook apps work):
+        // one number = how long the song takes to scroll top to bottom.
+        speedMode.value=(song.speedMode==='rate')?'rate':'duration';
         syncSpeedModeUI();
     }
 
@@ -1462,6 +1996,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     colWidthSlider.addEventListener('input', function(e){
         applyColWidth(parseInt(e.target.value, 10));
+        // Narrower column -> more wrapped lines -> recompute rate
+        if(scrolling) requestAnimationFrame(calcRate);
     });
 
     // "Fit Screen" — auto-calculate the percentage that fills the available width
@@ -1473,6 +2009,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', function(){
         if(document.getElementById('performanceView').style.display !== 'none'){
             applyColWidth(parseInt(colWidthSlider.value, 10));
+            // Screen geometry changed -> re-derive the scroll rate for this device
+            if(scrolling) requestAnimationFrame(calcRate);
         }
     });
 
@@ -1705,6 +2243,597 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fully release the mic when leaving performance mode (so the permission
     // prompt only appears once per performance session, not on every stop).
     editBtn.addEventListener('click', function(){ releaseMic(); });
+
+    /* ════════════════════════════════════════════════════════
+       SECTION BUILDER
+       Buttons insert [Section] headers into the lyrics and keep the
+       Song Structure field in sync automatically.
+       Repeated sections auto-number: Verse -> Verse 1, Verse 2, ...
+       Sections that normally appear once (Intro/Outro/Bridge/Solo)
+       only get numbered from the second occurrence onward.
+    ════════════════════════════════════════════════════════ */
+    var rebuildStructureBtn = document.getElementById('rebuildStructureBtn');
+    // Sections that get numbered from the FIRST use (each one is different content)
+    var ALWAYS_NUMBERED = ['Verse'];
+    // Sections that repeat the SAME content, so they stay unnumbered no matter
+    // how many times you add them (a chorus is the same chorus each time).
+    var NEVER_NUMBERED  = ['Chorus','Pre Chorus','Intro','Outro'];
+
+    // Pull all [Section] headers out of the lyrics, in order.
+    // ChordPro section directive: {c: Verse 1} or {comment: Verse 1}
+
+    function getSectionHeaders(){
+        var out=[];
+        flds.lyrics.value.split('\n').forEach(function(line){
+            var t=line.trim();
+            var mb=t.match(SECTION_BARS_RE);
+            if(mb){ out.push(mb[1]); return; }
+            var m=t.match(SECTION_RE);
+            if(m){ out.push(m[1]); return; }
+            // Legacy [Section] support (ignores chord brackets)
+            if(t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']'){
+                var inner=t.slice(1,-1).trim();
+                if(inner && !CHORD_RE.test(inner)) out.push(inner);
+            }
+        });
+        return out;
+    }
+
+    // Rebuild the Song Structure field from the lyrics' section headers.
+    function syncStructureFromLyrics(){
+        var headers=getSectionHeaders();
+        flds.structure.value = headers.join(' | ');
+        var title=flds.title.value.trim();
+        var lib=getLib();
+        if(title && lib[title]){
+            lib[title].structure = flds.structure.value;
+            lib[title].lyrics    = flds.lyrics.value;
+            lib[title].updatedAt = new Date().toISOString();
+            saveLib(lib);
+        }
+    }
+
+    // Work out the next label for a section type, e.g. "Verse 2".
+    function nextSectionLabel(base){
+        // Repeating sections (chorus etc.) always use the same plain label
+        if(NEVER_NUMBERED.indexOf(base)!==-1) return base;
+        var existing=getSectionHeaders();
+        var re=new RegExp('^'+base.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\s+\\d+)?$','i');
+        var count=existing.filter(function(h){ return re.test(h.trim()); }).length;
+        if(ALWAYS_NUMBERED.indexOf(base)!==-1) return base+' '+(count+1);
+        return (count===0) ? base : (base+' '+(count+1));
+    }
+
+    // Insert a [Section] header at the cursor (snapped to its own line).
+    // Insert text into a textarea WITHOUT the page or the textarea jumping.
+    // Assigning .value resets the element's internal scrollTop, and .focus()
+    // will scroll the page to bring the caret into view — so we capture both
+    // positions first and restore them afterwards.
+    function insertIntoTextarea(ta, insert, atLineStart){
+        var pageY  = window.scrollY;
+        var taTop  = ta.scrollTop;
+        var val    = ta.value;
+        var pos    = (typeof ta.selectionStart==='number') ? ta.selectionStart : val.length;
+        if(atLineStart){
+            pos = val.lastIndexOf('\n', pos-1) + 1;
+        }
+        var before = val.slice(0,pos);
+        var after  = val.slice(pos);
+        ta.value = before + insert + after;
+        var newPos = (before+insert).length;
+        // preventScroll keeps focus() from yanking the page (ignored by older
+        // browsers, which is why we also restore window.scrollY below).
+        try { ta.focus({preventScroll:true}); } catch(e){ ta.focus(); }
+        ta.setSelectionRange(newPos,newPos);
+        ta.scrollTop = taTop;
+        window.scrollTo(0, pageY);
+        return newPos;
+    }
+
+    function insertSectionAtCursor(label, bars){
+        var ta=flds.lyrics;
+        var val=ta.value;
+        var pos=(typeof ta.selectionStart==='number') ? ta.selectionStart : val.length;
+        var lineStart=val.lastIndexOf('\n', pos-1)+1;
+        var before=val.slice(0,lineStart);
+        var prefix = (before.length>0 && !/\n\s*\n$/.test(before)) ? '\n' : '';
+        var tag = '{c: ' + label + '}' + (bars ? ('{bars:'+bars+'}') : '');
+        insertIntoTextarea(ta, prefix + tag + '\n', true);
+        syncStructureFromLyrics();
+    }
+
+    // Section buttons: plain click inserts the header; the "with bars" toggle
+    // opens the stepper modal so you can state how long the section runs.
+    var sectionBarsToggle = document.getElementById('sectionBarsToggle');
+    Array.prototype.forEach.call(document.querySelectorAll('.sect-btn'), function(btn){
+        btn.addEventListener('click', function(){
+            var base=btn.getAttribute('data-section');
+            var label=nextSectionLabel(base);
+            if(sectionBarsToggle && sectionBarsToggle.checked){
+                openBreakModal('section', label);
+            } else {
+                insertSectionAtCursor(label);
+            }
+        });
+    });
+
+    rebuildStructureBtn.addEventListener('click', function(){
+        syncStructureFromLyrics();
+        rebuildStructureBtn.textContent='\u2713 Rebuilt';
+        setTimeout(function(){ rebuildStructureBtn.innerHTML='&#8635; Rebuild'; },1200);
+    });
+
+    // Keep structure in sync if the user hand-edits the lyrics
+    flds.lyrics.addEventListener('blur', function(){
+        var headers=getSectionHeaders();
+        if(headers.length) flds.structure.value=headers.join(' | ');
+    });
+
+    /* ════════════════════════════════════════════════════════
+       INSERT BREAK (measures / seconds) VIA BUTTONS + MODAL
+       Inserts {bars:N} or {pause:N} on its own line at the cursor
+       position in the lyrics textarea — no manual typing needed.
+    ════════════════════════════════════════════════════════ */
+    var insertBarsBtn   = document.getElementById('insertBarsBtn');
+    var insertPauseBtn  = document.getElementById('insertPauseBtn');
+    var breakModal      = document.getElementById('breakModal');
+    var breakModalTitle = document.getElementById('breakModalTitle');
+    var breakModalLabel = document.getElementById('breakModalLabel');
+    var breakModalHint  = document.getElementById('breakModalHint');
+    var breakValueInput = document.getElementById('breakValueInput');
+    var breakMinus      = document.getElementById('breakMinus');
+    var breakPlus       = document.getElementById('breakPlus');
+    var breakConfirm    = document.getElementById('breakConfirm');
+    var breakCancel     = document.getElementById('breakCancel');
+    var breakQuickPicks = document.getElementById('breakQuickPicks');
+
+    var pendingBreakUnit = 'bars';   // 'bars' | 'pause'
+    var savedCursorPos   = null;     // where to insert
+
+    var pendingSectionLabel = null;  // set when adding a section with bars
+
+    function updateBreakHint(){
+        var v = parseInt(breakValueInput.value,10) || 1;
+        if(pendingBreakUnit==='section'){
+            var bpmS = parseInt(flds.tempo.value,10) || 80;
+            var tsS  = flds.timeSig.value || '4/4';
+            breakModalHint.textContent = pendingSectionLabel+' runs '+v+' bars \u2014 '+
+                barsToSeconds(v).toFixed(1)+'s at '+bpmS+' BPM in '+tsS+'.';
+        } else if(pendingBreakUnit==='bars'){
+            var bpm = parseInt(flds.tempo.value,10) || 80;
+            var ts  = flds.timeSig.value || '4/4';
+            var secs = barsToSeconds(v);
+            breakModalHint.textContent = v+' bars at '+bpm+' BPM in '+ts+' = '+secs.toFixed(1)+' seconds';
+        } else {
+            breakModalHint.textContent = 'Holds the scroll for exactly '+v+' second'+(v!==1?'s':'')+'.';
+        }
+    }
+
+    function renderQuickPicks(){
+        breakQuickPicks.innerHTML='';
+        var isBarUnit = (pendingBreakUnit==='bars' || pendingBreakUnit==='section');
+        var picks = isBarUnit ? [4,8,12,16,24,32] : [3,5,8,10,15,30];
+        picks.forEach(function(n){
+            var b=document.createElement('button');
+            b.type='button'; b.className='quick-pick';
+            b.textContent = n + (isBarUnit ? ' bars' : 's');
+            b.addEventListener('click', function(){
+                breakValueInput.value=n;
+                updateBreakHint();
+            });
+            breakQuickPicks.appendChild(b);
+        });
+    }
+
+    function openBreakModal(unit, sectionLabel){
+        pendingBreakUnit = unit;
+        pendingSectionLabel = sectionLabel || null;
+        savedCursorPos = flds.lyrics.selectionStart;
+        if(unit==='section'){
+            breakModalTitle.textContent = 'How long is ' + sectionLabel + '?';
+            breakModalLabel.textContent = 'Length in measures';
+            breakValueInput.value = 8;
+        } else {
+            breakModalTitle.textContent = (unit==='bars') ? 'Add Measure Break' : 'Add Timed Pause';
+            breakModalLabel.textContent = (unit==='bars') ? 'How many measures?' : 'How many seconds?';
+            breakValueInput.value = 8;
+        }
+        renderQuickPicks();
+        updateBreakHint();
+        breakModal.classList.add('open');
+        setTimeout(function(){ breakValueInput.focus(); breakValueInput.select(); }, 50);
+    }
+
+    function closeBreakModal(){ breakModal.classList.remove('open'); }
+
+    function insertBreakAtCursor(text){
+        var ta = flds.lyrics;
+        var val = ta.value;
+        // Restore the caret to where the user was before the modal opened, then
+        // insert at that line's start (keeps the marker on its own line).
+        if(savedCursorPos!==null && savedCursorPos<=val.length){
+            ta.selectionStart = ta.selectionEnd = savedCursorPos;
+        } else {
+            ta.selectionStart = ta.selectionEnd = val.length;
+        }
+        insertIntoTextarea(ta, text + '\n', true);
+        // Persist to the library if this song is saved
+        var title = flds.title.value.trim();
+        var lib = getLib();
+        if(title && lib[title]){
+            lib[title].lyrics = ta.value;
+            lib[title].updatedAt = new Date().toISOString();
+            saveLib(lib);
+        }
+    }
+
+    insertBarsBtn.addEventListener('click',  function(){ openBreakModal('bars'); });
+    insertPauseBtn.addEventListener('click', function(){ openBreakModal('pause'); });
+
+    breakMinus.addEventListener('click', function(){
+        breakValueInput.value = Math.max(1, (parseInt(breakValueInput.value,10)||1) - 1);
+        updateBreakHint();
+    });
+    breakPlus.addEventListener('click', function(){
+        breakValueInput.value = Math.min(200, (parseInt(breakValueInput.value,10)||1) + 1);
+        updateBreakHint();
+    });
+    breakValueInput.addEventListener('input', updateBreakHint);
+    breakValueInput.addEventListener('keydown', function(e){
+        if(e.key==='Enter'){ e.preventDefault(); breakConfirm.click(); }
+    });
+
+    breakConfirm.addEventListener('click', function(){
+        var v = Math.max(1, parseInt(breakValueInput.value,10) || 8);
+        if(pendingBreakUnit==='section'){
+            insertSectionAtCursor(pendingSectionLabel, v);
+        } else {
+            var tag = (pendingBreakUnit==='bars') ? ('{bars:'+v+'}') : ('{pause:'+v+'}');
+            insertBreakAtCursor(tag);
+        }
+        closeBreakModal();
+    });
+    breakCancel.addEventListener('click', closeBreakModal);
+    breakModal.addEventListener('click', function(e){
+        if(e.target===breakModal) closeBreakModal();   // click backdrop to dismiss
+    });
+    document.addEventListener('keydown', function(e){
+        if(e.key==='Escape' && breakModal.classList.contains('open')) closeBreakModal();
+    });
+
+    /* ════════════════════════════════════════════════════════
+       METRONOME — Web Audio click + visual beat indicator
+       Uses the song's tempo & time signature. Accent on beat 1.
+       Scheduled with a lookahead timer (not setInterval alone) so
+       the click stays rock-solid even if the main thread is busy.
+    ════════════════════════════════════════════════════════ */
+    var metronomeBtn = document.getElementById('metronomeBtn');
+    var metDots      = document.getElementById('metDots');
+    var metFlash     = document.getElementById('metFlash');
+    var metCtx=null, metTimer=null, metRunning=false;
+    var metNextNoteTime=0, metBeat=0;
+    var metSoundOn=true, metFlashOn=false;
+    var MET_LOOKAHEAD=0.1, MET_INTERVAL=25;
+
+    function buildMetDots(){
+        var n=beatsPerBar();
+        metDots.innerHTML='';
+        for(var i=0;i<n;i++){
+            var d=document.createElement('span');
+            d.className='met-dot'+(i===0?' downbeat':'');
+            metDots.appendChild(d);
+        }
+    }
+
+    function lightMetDot(idx){
+        var dots=metDots.querySelectorAll('.met-dot');
+        for(var i=0;i<dots.length;i++) dots[i].classList.remove('on');
+        if(dots[idx]) dots[idx].classList.add('on');
+        setTimeout(function(){ if(dots[idx]) dots[idx].classList.remove('on'); }, 90);
+        if(metFlashOn){
+            metFlash.classList.add('hit');
+            setTimeout(function(){ metFlash.classList.remove('hit'); }, 90);
+        }
+    }
+
+    function metClick(time, isDownbeat){
+        if(!metSoundOn || !metCtx) return;
+        var osc=metCtx.createOscillator();
+        var gain=metCtx.createGain();
+        osc.frequency.value = isDownbeat ? 1600 : 1000;
+        gain.gain.setValueAtTime(0.0001, time);
+        gain.gain.exponentialRampToValueAtTime(0.35, time+0.001);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time+0.05);
+        osc.connect(gain); gain.connect(metCtx.destination);
+        osc.start(time); osc.stop(time+0.06);
+    }
+
+    function metScheduler(){
+        var bpm=parseInt(flds.tempo.value,10)||80;
+        var spb=60/bpm;                       // seconds per beat
+        var bars=beatsPerBar();
+        while(metNextNoteTime < metCtx.currentTime + MET_LOOKAHEAD){
+            var isDown=(metBeat%bars===0);
+            metClick(metNextNoteTime, isDown);
+            (function(b,t){
+                var delay=Math.max(0,(t-metCtx.currentTime)*1000);
+                setTimeout(function(){ lightMetDot(b%bars); }, delay);
+            })(metBeat, metNextNoteTime);
+            metNextNoteTime += spb;
+            metBeat++;
+        }
+    }
+
+    function startMetronome(){
+        if(metRunning) return;
+        if(!metCtx) metCtx=new (window.AudioContext||window.webkitAudioContext)();
+        if(metCtx.state==='suspended') metCtx.resume();
+        buildMetDots();
+        metDots.style.display='inline-flex';
+        metBeat=0;
+        metNextNoteTime=metCtx.currentTime+0.05;
+        metRunning=true;
+        metronomeBtn.classList.add('live-on');
+        if(qaMetroToggle) qaMetroToggle.textContent='Stop';
+        metTimer=setInterval(metScheduler, MET_INTERVAL);
+    }
+
+    function stopMetronome(){
+        metRunning=false;
+        if(metTimer){ clearInterval(metTimer); metTimer=null; }
+        metDots.style.display='none';
+        metFlash.classList.remove('hit');
+        metronomeBtn.classList.remove('live-on');
+        if(qaMetroToggle) qaMetroToggle.textContent='Start';
+    }
+
+    metronomeBtn.addEventListener('click', function(){
+        metRunning ? stopMetronome() : startMetronome();
+    });
+
+    /* ════════════════════════════════════════════════════════
+       QUICK ACTIONS SHEET
+       A bottom sheet with the controls you actually reach for
+       mid-song: duration, font, width, tempo, metronome.
+    ════════════════════════════════════════════════════════ */
+    var quickActionsBtn = document.getElementById('quickActionsBtn');
+    var qaSheet     = document.getElementById('qaSheet');
+    var qaBackdrop  = document.getElementById('qaBackdrop');
+    var qaSongTitle = document.getElementById('qaSongTitle');
+    var qaDuration  = document.getElementById('qaDuration');
+    var qaDurMinus  = document.getElementById('qaDurMinus');
+    var qaDurPlus   = document.getElementById('qaDurPlus');
+    var qaFont      = document.getElementById('qaFont');
+    var qaFontVal   = document.getElementById('qaFontVal');
+    var qaWidth     = document.getElementById('qaWidth');
+    var qaWidthVal  = document.getElementById('qaWidthVal');
+    var qaBpm       = document.getElementById('qaBpm');
+    var qaBpmMinus  = document.getElementById('qaBpmMinus');
+    var qaBpmPlus   = document.getElementById('qaBpmPlus');
+    var qaTimeSigLabel = document.getElementById('qaTimeSigLabel');
+    var qaMetroToggle  = document.getElementById('qaMetroToggle');
+    var qaMetroSound   = document.getElementById('qaMetroSound');
+    var qaMetroFlash   = document.getElementById('qaMetroFlash');
+    var qaSaveBtn      = document.getElementById('qaSaveBtn');
+    var qaCloseBtn     = document.getElementById('qaCloseBtn');
+
+    function secsToClock(s){
+        s=Math.max(1,Math.round(s));
+        return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);
+    }
+
+    function openQuickActions(){
+        qaSongTitle.textContent = flds.title.value.trim() || 'Quick Actions';
+        qaDuration.value = durationInput.value || '1:30';
+        qaFont.value     = fontSlider.value;
+        qaFontVal.textContent = fontSlider.value+'px';
+        qaWidth.value    = colWidthSlider.value;
+        qaWidthVal.textContent = colWidthSlider.value+'%';
+        qaBpm.value      = parseInt(flds.tempo.value,10)||80;
+        qaTimeSigLabel.textContent = (flds.timeSig.value||'4/4');
+        qaMetroToggle.textContent = metRunning ? 'Stop' : 'Start';
+        qaSheet.classList.add('open');
+        qaBackdrop.classList.add('open');
+    }
+    function closeQuickActions(){
+        qaSheet.classList.remove('open');
+        qaBackdrop.classList.remove('open');
+    }
+
+    quickActionsBtn.addEventListener('click', openQuickActions);
+    qaCloseBtn.addEventListener('click', closeQuickActions);
+    qaBackdrop.addEventListener('click', closeQuickActions);
+
+    function nudgeDuration(delta){
+        var s=parseDuration(qaDuration.value)+delta;
+        qaDuration.value=secsToClock(s);
+        durationInput.value=qaDuration.value;
+        if(scrolling) calcRate();
+    }
+    qaDurMinus.addEventListener('click', function(){ nudgeDuration(-5); });
+    qaDurPlus .addEventListener('click', function(){ nudgeDuration(+5); });
+    qaDuration.addEventListener('input', function(){
+        durationInput.value=qaDuration.value;
+        if(scrolling) calcRate();
+    });
+
+    qaFont.addEventListener('input', function(){
+        fontSlider.value=qaFont.value;
+        qaFontVal.textContent=qaFont.value+'px';
+        fontDisplay.textContent=qaFont.value+'px';
+        document.documentElement.style.setProperty('--perf-font-size', qaFont.value+'px');
+        if(scrolling) requestAnimationFrame(calcRate);
+    });
+
+    qaWidth.addEventListener('input', function(){
+        colWidthSlider.value=qaWidth.value;
+        qaWidthVal.textContent=qaWidth.value+'%';
+        applyColWidth(parseInt(qaWidth.value,10));
+        if(scrolling) requestAnimationFrame(calcRate);
+    });
+
+    // Apply a tempo value everywhere. writeBack=false while the user is still
+    // typing, so we don't clamp a half-entered number ("2" -> "30") and make
+    // it impossible to type 200.
+    // Keep the two Duration fields (dock + Quick Actions) showing the same
+    // value, and make it clear when that value is COMPUTED from bar counts
+    // rather than typed by hand.
+    function syncDurationDisplay(){
+        // Look these up live — this runs during the first render, before the
+        // dock control variables further down have been assigned.
+        var durEl  = document.getElementById('durationInput');
+        var durNote= document.getElementById('durationNote');
+        var qaNote = document.getElementById('qaDurNote');
+        var qd     = document.getElementById('qaDuration');
+        if(!durEl) return;
+        var natural = (typeof timelineDurationSec==='function') ? timelineDurationSec() : 0;
+        if(natural>0){
+            // Bars define the length — show it and mark the field as derived.
+            var txt = secsToClock(natural);
+            durEl.value = txt;
+            if(qd) qd.value = txt;
+            var msg='computed from bar counts \u2014 edit to override';
+            if(durNote) durNote.textContent=msg;
+            if(qaNote)  qaNote.textContent=msg;
+            durEl.classList.add('derived');
+        } else {
+            var msg2='min:sec \u2014 scrolls whole song over this time';
+            if(durNote) durNote.textContent=msg2;
+            if(qaNote)  qaNote.textContent='Time to scroll top\u2192bottom';
+            durEl.classList.remove('derived');
+        }
+    }
+
+    // Tempo or time-signature changed: everything derived from bars must be
+    // recomputed — bar-based pause lengths, the section timeline, the live
+    // scroll rate, and the metronome's beat dots.
+    function refreshBarDependentUI(){
+        // 1. Bar-based pauses: recompute their seconds from the new tempo
+        pauseMarkers.forEach(function(p){
+            if(p.unit==='bars'){
+                p.secs = barsToSeconds(p.bars);
+                var sub=p.el.querySelector('.pause-sub');
+                if(sub) sub.textContent='('+p.secs.toFixed(1)+'s)';
+                p.el.dataset.pause=p.secs;
+            }
+        });
+        // 2. Section badges show bars, but their tooltip carries seconds
+        sectionTimeline.forEach(function(s){
+            if(s.bars!==null && s.bars>0){
+                var b=s.heading.querySelector('.bars-badge');
+                if(b) b.title=s.bars+' bars \u2248 '+barsToSeconds(s.bars).toFixed(1)+'s at this tempo';
+            }
+        });
+        // 3. Rebuild the timeline windows
+        buildSectionTimeline();
+        // 4. If a bar-timed scroll is running, re-anchor it mid-flight
+        if(scrolling && useTimeline){
+            var elapsed = songElapsedMs/1000;
+            timelineAnchors = buildAnchors();
+            timelineTotalSec = timelineDurationSec();
+            songElapsedMs = Math.min(elapsed, timelineTotalSec)*1000;
+        } else if(scrolling){
+            calcRate();
+        }
+        // 5. Metronome beat dots follow the time signature
+        if(metRunning) buildMetDots();
+        // 6. Keep the dock's duration display honest for bar-timed songs
+        syncDurationDisplay();
+    }
+
+    function setBpm(v, writeBack){
+        v=Math.max(30,Math.min(300,v));
+        if(writeBack!==false) qaBpm.value=v;
+        flds.tempo.value=v;
+        rnd.tempo.textContent=v+' BPM';
+        if(metRunning){ metBeat=0; metNextNoteTime=metCtx.currentTime+0.05; }
+        // Tempo changes the seconds-per-bar, so any bar-timed scroll and the
+        // pause markers derived from bars need recomputing.
+        refreshBarDependentUI();
+    }
+    qaBpmMinus.addEventListener('click', function(){ setBpm((parseInt(qaBpm.value,10)||80)-1); });
+    qaBpmPlus .addEventListener('click', function(){ setBpm((parseInt(qaBpm.value,10)||80)+1); });
+    qaBpm.addEventListener('input', function(){
+        var raw=qaBpm.value.trim();
+        if(raw==='') return;                 // let them clear the field
+        var v=parseInt(raw,10);
+        if(isNaN(v)) return;
+        if(v<30) { flds.tempo.value=v; return; }   // partial entry, don't clamp yet
+        setBpm(v, false);
+    });
+    qaBpm.addEventListener('blur', function(){
+        setBpm(parseInt(qaBpm.value,10)||80);      // clamp once they're done
+    });
+
+    qaMetroToggle.addEventListener('click', function(){
+        metRunning ? stopMetronome() : startMetronome();
+    });
+    qaMetroSound.addEventListener('change', function(){ metSoundOn=qaMetroSound.checked; });
+    qaMetroFlash.addEventListener('change', function(){ metFlashOn=qaMetroFlash.checked; });
+
+    qaSaveBtn.addEventListener('click', function(){
+        var title=flds.title.value.trim();
+        if(!title){ alert('This song needs a title first.'); return; }
+        var lib=getLib();
+        if(!lib[title]){ alert('Save the song to your library first.'); return; }
+        lib[title].duration  = qaDuration.value;
+        lib[title].tempo     = parseInt(qaBpm.value,10)||80;
+        lib[title].speedMode = speedMode.value;
+        lib[title].wpm       = parseInt(wpmSlider.value,10);
+        lib[title].updatedAt = new Date().toISOString();
+        saveLib(lib);
+        qaSaveBtn.textContent='\u2713 Saved';
+        setTimeout(function(){ qaSaveBtn.innerHTML='&#128190; Save to Song'; },1400);
+    });
+
+    document.addEventListener('keydown', function(e){
+        if(e.key==='Escape' && qaSheet.classList.contains('open')) closeQuickActions();
+    });
+
+    // Leaving performance mode stops the metronome and closes the sheet
+    editBtn.addEventListener('click', function(){ stopMetronome(); closeQuickActions(); });
+
+    /* ════════════════════════════════════════════════════════
+       ACTIONS DRAWER
+       All library/file actions live in a slide-out panel so the
+       editor stays focused on the song itself.
+    ════════════════════════════════════════════════════════ */
+    var actionsDrawer   = document.getElementById('actionsDrawer');
+    var drawerBackdrop  = document.getElementById('drawerBackdrop');
+    var openDrawerBtn   = document.getElementById('openDrawerBtn');
+    var openDrawerInline= document.getElementById('openDrawerInline');
+    var drawerCloseBtn  = document.getElementById('drawerCloseBtn');
+
+    function openDrawer(){
+        actionsDrawer.classList.add('open');
+        drawerBackdrop.classList.add('open');
+    }
+    function closeDrawer(){
+        actionsDrawer.classList.remove('open');
+        drawerBackdrop.classList.remove('open');
+    }
+    if(openDrawerBtn)    openDrawerBtn.addEventListener('click', openDrawer);
+    if(openDrawerInline) openDrawerInline.addEventListener('click', openDrawer);
+    if(drawerCloseBtn)   drawerCloseBtn.addEventListener('click', closeDrawer);
+    drawerBackdrop.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', function(e){
+        if(e.key==='Escape' && actionsDrawer.classList.contains('open')) closeDrawer();
+    });
+
+    // The drawer's Save button mirrors the main one in the editor
+    var saveLocalBtn2 = document.getElementById('saveLocalBtn2');
+    if(saveLocalBtn2){
+        saveLocalBtn2.addEventListener('click', function(){
+            saveBtn.click();
+            closeDrawer();
+        });
+    }
+
+    // Close the drawer after any action that navigates or clears the form
+    ['exportBtn','deleteLocalBtn','clearBtn','exportSetListBtn'].forEach(function(id){
+        var el=document.getElementById(id);
+        if(el) el.addEventListener('click', function(){ setTimeout(closeDrawer, 150); });
+    });
 
     /* ---- INIT ---- */
     refreshHeaderDropdown();
