@@ -305,6 +305,13 @@
         .scroll-status.active .dot{animation:pulse-dot 1.2s ease-in-out infinite;}
         @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.75);}}
     </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
 </head>
 <body>
 
@@ -330,6 +337,16 @@
         </div>
 
         <div class="drawer-group">
+            <div class="drawer-group-title">&#127925; Import Tab PDF</div>
+            <div class="drawer-hint">Import a <strong>Songsterr</strong> tab PDF and the app builds the song for you &mdash; title, artist, tempo, sections, bar counts and lyrics.</div>
+            <div class="file-wrap">
+                <button type="button" class="btn btn-purple">&#128196; Import Tab PDF</button>
+                <input type="file" id="importTabPdf" accept="application/pdf,.pdf">
+            </div>
+            <div class="drawer-hint" id="pdfImportStatus" style="margin-top:0.35rem;"></div>
+        </div>
+
+        <div class="drawer-group">
             <div class="drawer-group-title">Library Backup</div>
             <div class="drawer-hint">Package every saved song into one file to share with bandmates.</div>
             <button type="button" id="exportSetListBtn" class="btn btn-purple">&#128230; Export Full Library (.json)</button>
@@ -346,6 +363,24 @@
             <button type="button" id="loadSharedBtn" class="btn btn-success">&#11015;&#65039; Load Shared Library</button>
             <button type="button" id="forgetSharedBtn" class="btn btn-secondary">&#10005; Forget Saved URL</button>
             <div class="drawer-hint" id="sharedUrlStatus" style="margin-top:0.35rem;"></div>
+        </div>
+
+        <div class="drawer-group">
+            <div class="drawer-group-title">&#128640; Publish to GitHub</div>
+            <div class="drawer-hint">Commits your whole library straight to the repo &mdash; no download, no upload. Needs a GitHub token with <strong>Contents: write</strong> on this repo only.</div>
+            <input type="text" id="ghRepoInput" placeholder="owner/repo" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
+            <input type="text" id="ghPathInput" placeholder="library.json" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
+            <input type="text" id="ghBranchInput" placeholder="main" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
+            <input type="password" id="ghTokenInput" placeholder="GitHub token (github_pat_... or ghp_...)" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
+            <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-weight:600;color:var(--text-muted);margin:0 0 0.5rem;">
+                <input type="checkbox" id="ghRememberToken" style="width:auto;"> Remember token on this device
+            </label>
+            <button type="button" id="ghPushBtn" class="btn btn-success">&#128640; Publish Library to GitHub</button>
+            <button type="button" id="ghForgetBtn" class="btn btn-secondary">&#10005; Forget Token</button>
+            <div class="drawer-hint" id="ghStatus" style="margin-top:0.35rem;"></div>
+            <div class="drawer-hint" style="margin-top:0.5rem;opacity:0.75;">
+                <strong>Security:</strong> the token is stored in this browser only and is never sent anywhere except github.com. Use a <em>fine-grained</em> token limited to this one repo. Don't enable "remember" on a shared device.
+            </div>
         </div>
 
     </div>
@@ -696,6 +731,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var K_ACTSL = 'song_manager_active_sl';
     var K_THEME = 'song_manager_theme';
     var K_SHAREDURL = 'song_manager_shared_url';
+    var K_GH_REPO   = 'song_manager_gh_repo';
+    var K_GH_PATH   = 'song_manager_gh_path';
+    var K_GH_BRANCH = 'song_manager_gh_branch';
+    var K_GH_TOKEN  = 'song_manager_gh_token';
 
     /* ---- ChordPro section syntax ----
        Standard ChordPro uses {c: Verse 1} (comment directive) for section
@@ -1107,7 +1146,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var pkg={type:'SET_LIST_EXPORT',version:'2.2',exportedAt:new Date().toISOString(),songs:lib,setlists:allSL};
         var link=document.createElement('a');
         link.href=URL.createObjectURL(new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'}));
-        link.download='song_library_'+new Date().toISOString().split('T')[0]+'.json';
+        // Always 'library.json' so it can be dropped straight into the repo
+        // without renaming (the date lives inside the file as exportedAt).
+        link.download='library.json';
         document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
     });
     // Parse a library payload (string or object) into {songs, setlists}.
@@ -2857,6 +2898,382 @@ document.addEventListener('DOMContentLoaded', function() {
     ['exportBtn','deleteLocalBtn','clearBtn','exportSetListBtn'].forEach(function(id){
         var el=document.getElementById(id);
         if(el) el.addEventListener('click', function(){ setTimeout(closeDrawer, 150); });
+    });
+
+    /* ════════════════════════════════════════════════════════
+       SONGSTERR TAB PDF IMPORT
+       These PDFs encode everything we need in distinct fonts:
+         Georgia 33pt      -> song title
+         Georgia 13pt      -> artist
+         Georgia-Italic    -> section labels (Intro, Verse 1, ...)
+         Arial-Bold ~7pt   -> measure numbers
+         ArialMT ~8pt      -> lyric syllables
+       Section bar counts come from the gap between consecutive
+       section start measures, so the timeline is exact.
+    ════════════════════════════════════════════════════════ */
+    var importTabPdf    = document.getElementById('importTabPdf');
+    var pdfImportStatus = document.getElementById('pdfImportStatus');
+
+    var TAB_SECTION_RE = /^(Intro|Verse|Chorus|Bridge|Solo|Outro|Interlude|Pre[- ]?Chorus|Break|Coda|Tag|Ending)/i;
+    var TAB_NOISE_RE   = /songsterr\.com|Tabs with Rhythm|^\d+\/\d+$|^\d{1,2}\/\d{1,2}\/\d{2},/i;
+
+    function setPdfStatus(msg, color){
+        if(!pdfImportStatus) return;
+        pdfImportStatus.textContent = msg;
+        pdfImportStatus.style.color = color || 'var(--text-faint)';
+    }
+
+    // Pull every text item out of the PDF, tagged with page, position and font.
+    async function readPdfItems(file){
+        var buf = await file.arrayBuffer();
+        var pdf = await pdfjsLib.getDocument({data:buf}).promise;
+        var items = [];
+        for(var p=0; p<pdf.numPages; p++){
+            var page = await pdf.getPage(p+1);
+            var content = await page.getTextContent();
+            var styles = content.styles || {};
+            content.items.forEach(function(it){
+                var s = (it.str||'').trim();
+                if(!s) return;
+                var st = styles[it.fontName] || {};
+                items.push({
+                    page: p,
+                    x: it.transform[4],
+                    // PDF origin is bottom-left; flip so "top" increases downward
+                    top: Math.round((page.view[3] - it.transform[5])*10)/10,
+                    size: Math.round(Math.abs(it.transform[0])*10)/10,
+                    // PDF.js reports generic families ("serif"/"sans-serif"),
+                    // which is enough: Songsterr sets section labels & the title
+                    // in a serif face and everything else in sans-serif.
+                    family: (st.fontFamily||'').toLowerCase(),
+                    text: s
+                });
+            });
+        }
+        return items;
+    }
+
+    function parseSongsterrPdf(items){
+        var titleParts=[], artistParts=[], tempo=null, timeSig='4/4';
+        var rawSections=[], measures=[], lyricItems=[];
+
+        var tsDigits=[];
+        items.forEach(function(it){
+            var serif = it.family.indexOf('serif')===0;   // "serif" not "sans-serif"
+
+            // Tempo marking looks like "= 136" (or just the number)
+            if(tempo===null){
+                var tm = it.text.match(/=\s*(\d{2,3})/);
+                if(tm){ tempo=parseInt(tm[1],10); return; }
+            }
+            // Big sans-serif digits at the start are the time signature (4 over 4)
+            if(!serif && it.size>=18 && /^\d$/.test(it.text)){ tsDigits.push(it); return; }
+
+            if(it.page===0 && serif && it.size>=28){ titleParts.push(it); return; }
+            if(it.page===0 && serif && it.size>=12.5 && it.size<=14.5){ artistParts.push(it); return; }
+            if(serif && it.size>=9 && it.size<=11){ rawSections.push(it); return; }
+            if(!serif && it.size>=7.0 && it.size<=7.6 && /^\d+$/.test(it.text)){ measures.push(it); return; }
+            if(!serif && it.size>=7.7 && it.size<=8.25){ lyricItems.push(it); return; }
+        });
+
+        // Reconstruct the time signature from the two stacked digits
+        if(tsDigits.length>=2){
+            tsDigits.sort(function(a,b){ return a.top-b.top; });
+            var beats=tsDigits[0].text, unit=tsDigits[1].text;
+            if(/^[0-9]$/.test(beats) && /^[0-9]$/.test(unit)) timeSig=beats+'/'+unit;
+        }
+
+        function joinByLine(arr){
+            var byLine={};
+            arr.forEach(function(it){
+                var key=it.page+'|'+it.top;
+                (byLine[key]=byLine[key]||[]).push(it);
+            });
+            return Object.keys(byLine).map(function(k){
+                var group=byLine[k].sort(function(a,b){ return a.x-b.x; });
+                return {page:group[0].page, top:group[0].top,
+                        text:group.map(function(g){return g.text;}).join(' ')};
+            }).sort(function(a,b){ return a.page-b.page || a.top-b.top; });
+        }
+
+        var title  = joinByLine(titleParts).map(function(l){return l.text;}).join(' ').trim();
+        var artist = joinByLine(artistParts).map(function(l){return l.text;}).join(' ').trim();
+
+        // Section labels: merge words on the same line, keep only real names
+        var sections = joinByLine(rawSections)
+            .filter(function(l){ return TAB_SECTION_RE.test(l.text); })
+            .map(function(l){ return {name:l.text, page:l.page, top:l.top}; });
+
+        // Each section starts at the first measure number at/below its label
+        var totalMeasures = measures.reduce(function(m,it){
+            return Math.max(m, parseInt(it.text,10));
+        }, 0);
+        sections.forEach(function(s){
+            var best=null;
+            measures.forEach(function(m){
+                var after = (m.page>s.page) || (m.page===s.page && m.top>=s.top-6);
+                if(!after) return;
+                var n=parseInt(m.text,10);
+                if(best===null || n<best) best=n;
+            });
+            s.startMeasure=best;
+        });
+        sections.sort(function(a,b){ return (a.startMeasure||0)-(b.startMeasure||0); });
+        sections.forEach(function(s,i){
+            var next = (i+1<sections.length) ? sections[i+1].startMeasure : totalMeasures+1;
+            s.bars = (s.startMeasure && next) ? Math.max(next-s.startMeasure,1) : null;
+        });
+
+        // Lyric lines, de-hyphenated and stripped of page furniture
+        var lines = joinByLine(lyricItems).map(function(l){
+            var t=l.text.replace(/\s*-\s*/g,'-').replace(/(\w)-(\w)/g,'$1$2').replace(/\s+/g,' ').trim();
+            return {page:l.page, top:l.top, text:t};
+        }).filter(function(l){ return l.text && !TAB_NOISE_RE.test(l.text); });
+
+        // Rejoin words broken across a line ("complica" + "tion,")
+        var merged=[];
+        lines.forEach(function(l){
+            var prev=merged[merged.length-1];
+            if(prev && /[a-z]$/.test(prev.text) && /^(tion|in|ing|ed|er|ly)\b/.test(l.text)){
+                var parts=l.text.split(' ');
+                prev.text += parts.shift();
+                if(parts.length) prev.text += ' '+parts.join(' ');
+            } else {
+                merged.push({page:l.page, top:l.top, text:l.text});
+            }
+        });
+
+        // Attach each lyric line to the section it falls under
+        sections.forEach(function(s){ s.lines=[]; });
+        var ordered = sections.slice().sort(function(a,b){ return a.page-b.page || a.top-b.top; });
+        merged.forEach(function(l){
+            var owner=null;
+            for(var i=0;i<ordered.length;i++){
+                var s=ordered[i];
+                if(s.page<l.page || (s.page===l.page && s.top<=l.top+2)) owner=s; else break;
+            }
+            if(owner) owner.lines.push(l.text);
+        });
+
+        return {title:title, artist:artist, tempo:tempo, timeSig:timeSig,
+                totalMeasures:totalMeasures, sections:ordered};
+    }
+
+    // Turn the parsed result into this app's ChordPro-ish lyrics format
+    function songsterrToLyrics(parsed){
+        var out=[];
+        parsed.sections.forEach(function(s){
+            var head='{c: '+s.name+'}';
+            if(s.bars) head+='{bars:'+s.bars+'}';
+            out.push(head);
+            (s.lines||[]).forEach(function(ln){ out.push(ln); });
+            out.push('');
+        });
+        return out.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+    }
+
+    if(importTabPdf){
+        importTabPdf.addEventListener('change', async function(e){
+            var file=e.target.files[0];
+            if(!file) return;
+            if(typeof pdfjsLib==='undefined'){
+                setPdfStatus('PDF reader failed to load. Check your connection and retry.','var(--danger)');
+                e.target.value=''; return;
+            }
+            setPdfStatus('Reading '+file.name+'\u2026','var(--text-muted)');
+            try{
+                var items  = await readPdfItems(file);
+                var parsed = parseSongsterrPdf(items);
+                if(!parsed.sections.length){
+                    setPdfStatus('No sections found. This may not be a Songsterr tab PDF.','var(--danger)');
+                    e.target.value=''; return;
+                }
+                var lyrics = songsterrToLyrics(parsed);
+                var barSum = parsed.sections.reduce(function(a,s){ return a+(s.bars||0); },0);
+                var msg = 'Found "'+(parsed.title||'Untitled')+'"'+
+                          (parsed.artist?(' by '+parsed.artist):'')+'\n\n'+
+                          parsed.sections.length+' sections, '+parsed.totalMeasures+' measures'+
+                          (parsed.tempo?(', '+parsed.tempo+' BPM'):'')+'.\n\n'+
+                          'Load it into the editor? This replaces the current form.';
+                if(!confirm(msg)){ setPdfStatus('Import cancelled.','var(--text-muted)'); e.target.value=''; return; }
+
+                if(parsed.title)  flds.title.value  = parsed.title;
+                if(parsed.artist) flds.artist.value = parsed.artist;
+                if(parsed.tempo)  flds.tempo.value  = parsed.tempo;
+                flds.timeSig.value = parsed.timeSig || '4/4';
+                flds.lyrics.value  = lyrics;
+                syncStructureFromLyrics();
+
+                setPdfStatus('\u2713 Imported '+parsed.sections.length+' sections ('+barSum+
+                             ' bars). Review, then Save to Library.','var(--accent)');
+                closeDrawer();
+            }catch(err){
+                setPdfStatus('Import failed: '+(err && err.message ? err.message : err),'var(--danger)');
+            }finally{
+                e.target.value='';
+            }
+        });
+    }
+
+    /* ════════════════════════════════════════════════════════
+       PUBLISH TO GITHUB
+       Commits the full library straight to the repo via the
+       GitHub Contents API, replacing the export → rename →
+       upload loop with a single button.
+
+       The API needs the file's current SHA to update it, so we
+       GET the file first, then PUT the new content with that SHA.
+       Content must be base64, and btoa() breaks on non-ASCII, so
+       we UTF-8 encode before encoding.
+    ════════════════════════════════════════════════════════ */
+    var ghRepoInput     = document.getElementById('ghRepoInput');
+    var ghPathInput     = document.getElementById('ghPathInput');
+    var ghBranchInput   = document.getElementById('ghBranchInput');
+    var ghTokenInput    = document.getElementById('ghTokenInput');
+    var ghRememberToken = document.getElementById('ghRememberToken');
+    var ghPushBtn       = document.getElementById('ghPushBtn');
+    var ghForgetBtn     = document.getElementById('ghForgetBtn');
+    var ghStatus        = document.getElementById('ghStatus');
+
+    function setGhStatus(msg, color){
+        if(!ghStatus) return;
+        ghStatus.textContent = msg;
+        ghStatus.style.color = color || 'var(--text-faint)';
+    }
+
+    // btoa() throws on characters above U+00FF, so encode to UTF-8 bytes first.
+    function utf8ToBase64(str){
+        var bytes = new TextEncoder().encode(str);
+        var bin = '';
+        bytes.forEach(function(b){ bin += String.fromCharCode(b); });
+        return btoa(bin);
+    }
+
+    // Derive owner/repo + branch from the shared raw URL, so the fields
+    // pre-fill sensibly the first time.
+    function ghDefaultsFromSharedUrl(){
+        var m = (DEFAULT_SHARED_URL||'').match(
+            /raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)$/);
+        if(!m) return {repo:'', branch:'main', path:'library.json'};
+        return {repo:m[1]+'/'+m[2], branch:m[3], path:m[4]};
+    }
+
+    (function initGhFields(){
+        if(!ghRepoInput) return;
+        var d = ghDefaultsFromSharedUrl();
+        ghRepoInput.value   = localStorage.getItem(K_GH_REPO)   || d.repo;
+        ghPathInput.value   = localStorage.getItem(K_GH_PATH)   || d.path;
+        ghBranchInput.value = localStorage.getItem(K_GH_BRANCH) || d.branch;
+        var savedTok = localStorage.getItem(K_GH_TOKEN);
+        if(savedTok){
+            ghTokenInput.value = savedTok;
+            ghRememberToken.checked = true;
+            setGhStatus('Token remembered on this device.', 'var(--text-muted)');
+        }
+    })();
+
+    async function ghGetExistingSha(repo, path, branch, token){
+        var url = 'https://api.github.com/repos/'+repo+'/contents/'+
+                  encodeURIComponent(path).replace(/%2F/g,'/')+
+                  '?ref='+encodeURIComponent(branch);
+        var res = await fetch(url, {
+            headers:{ 'Authorization':'Bearer '+token,
+                      'Accept':'application/vnd.github+json' }
+        });
+        if(res.status===404) return null;          // first publish, no SHA yet
+        if(!res.ok){
+            var t = await res.text();
+            throw new Error('Could not read the file ('+res.status+'). '+ghExplain(res.status, t));
+        }
+        var j = await res.json();
+        return j.sha || null;
+    }
+
+    function ghExplain(status, body){
+        if(status===401) return 'The token was rejected — check it was copied in full and has not expired.';
+        if(status===403) return 'Access denied — the token likely lacks Contents: write on this repo.';
+        if(status===404) return 'Repo or branch not found — check owner/repo and the branch name.';
+        if(status===409) return 'The file changed on GitHub since this page loaded. Try again.';
+        if(status===422) return 'GitHub rejected the commit (usually a stale SHA). Try again.';
+        try{ var j=JSON.parse(body); if(j.message) return j.message; }catch(e){}
+        return '';
+    }
+
+    async function ghPublish(){
+        var repo   = ghRepoInput.value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
+        var path   = (ghPathInput.value.trim()   || 'library.json').replace(/^\//,'');
+        var branch = ghBranchInput.value.trim()  || 'main';
+        var token  = ghTokenInput.value.trim();
+
+        if(!/^[^\/]+\/[^\/]+$/.test(repo)){
+            setGhStatus('Repository must look like owner/repo (e.g. sjanes9/Setlist-App).','var(--danger)'); return;
+        }
+        if(!token){ setGhStatus('Enter a GitHub token first.','var(--danger)'); return; }
+
+        var lib = getLib();
+        if(!Object.keys(lib).length){ setGhStatus('Your library is empty — nothing to publish.','var(--danger)'); return; }
+
+        var pkg = {type:'SET_LIST_EXPORT', version:'2.4',
+                   exportedAt:new Date().toISOString(),
+                   songs:lib, setlists:getAllSL()};
+        var body = JSON.stringify(pkg, null, 2);
+
+        var songCount = Object.keys(lib).length;
+        var slCount   = Object.keys(getAllSL()).length;
+        if(!confirm('Publish '+songCount+' song(s) and '+slCount+' set list(s) to\n\n'+
+                    repo+' → '+branch+' → '+path+'\n\nThis overwrites the file for everyone who pulls it.')) {
+            setGhStatus('Publish cancelled.','var(--text-muted)'); return;
+        }
+
+        ghPushBtn.disabled = true;
+        setGhStatus('Checking existing file\u2026','var(--text-muted)');
+        try{
+            var sha = await ghGetExistingSha(repo, path, branch, token);
+            setGhStatus(sha ? 'Committing update\u2026' : 'Creating file\u2026','var(--text-muted)');
+
+            var payload = {
+                message: 'Update library ('+songCount+' songs, '+slCount+' set lists)',
+                content: utf8ToBase64(body),
+                branch:  branch
+            };
+            if(sha) payload.sha = sha;
+
+            var res = await fetch('https://api.github.com/repos/'+repo+'/contents/'+
+                                  encodeURIComponent(path).replace(/%2F/g,'/'), {
+                method:'PUT',
+                headers:{ 'Authorization':'Bearer '+token,
+                          'Accept':'application/vnd.github+json',
+                          'Content-Type':'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if(!res.ok){
+                var txt = await res.text();
+                throw new Error('Publish failed ('+res.status+'). '+ghExplain(res.status, txt));
+            }
+            var out = await res.json();
+            var shortSha = (out.commit && out.commit.sha) ? out.commit.sha.slice(0,7) : '';
+            setGhStatus('\u2713 Published '+songCount+' songs & '+slCount+' set lists'+
+                        (shortSha?(' \u2014 commit '+shortSha):'')+'. Bandmates can pull now.','var(--accent)');
+
+            // Remember the destination (token only if asked)
+            localStorage.setItem(K_GH_REPO, repo);
+            localStorage.setItem(K_GH_PATH, path);
+            localStorage.setItem(K_GH_BRANCH, branch);
+            if(ghRememberToken.checked) localStorage.setItem(K_GH_TOKEN, token);
+            else localStorage.removeItem(K_GH_TOKEN);
+        }catch(err){
+            setGhStatus(err && err.message ? err.message : String(err), 'var(--danger)');
+        }finally{
+            ghPushBtn.disabled = false;
+        }
+    }
+
+    if(ghPushBtn) ghPushBtn.addEventListener('click', ghPublish);
+    if(ghForgetBtn) ghForgetBtn.addEventListener('click', function(){
+        localStorage.removeItem(K_GH_TOKEN);
+        ghTokenInput.value='';
+        ghRememberToken.checked=false;
+        setGhStatus('Token cleared from this device.','var(--text-muted)');
     });
 
     /* ---- INIT ---- */
