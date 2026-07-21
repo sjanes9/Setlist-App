@@ -1,7 +1,7 @@
 {
   "type": "SET_LIST_EXPORT",
   "version": "2.4",
-  "exportedAt": "2026-07-21T16:26:35.390Z",
+  "exportedAt": "2026-07-21T19:42:48.538Z",
   "songs": {
     "Island In The Sun": {
       "title": "Island In The Sun",
@@ -317,6 +317,20 @@
       "speedMode": "rate",
       "duration": "3:30",
       "updatedAt": "2026-07-14T20:09:18.637Z"
+    },
+    "Africa": {
+      "title": "Africa",
+      "key": "C",
+      "tempo": 92,
+      "timeSig": "4/4",
+      "artist": "Weezer",
+      "notes": "",
+      "structure": "Intro | Verse 1 | Chorus | Interlude | Verse 2 | Chorus | Interlude | Solo | Chorus | Outro",
+      "lyrics": "{c: Intro}{bars:12}\n\n{c: Verse 1}{bars:18}\n\nI hear the drums echoing tonight\nBut she hears only whispers of some quiet conversation\nShe's coming in the twelve thirty flight\nThe moonlit wings reflect the stars that guide me towards salvation\nI stopped an old man along the way\nHoping to find some old forgotten words or ancient melodies\nHe turned to me as if to say\nHurry, boy, it's waiting there for you!\n\n{c: Chorus}{bars:9}\n\nIt's gonna take a lot to drag me away from you\nThere's nothing that a hundred men or more could ever do\nI bless the rains down in Africa\nGonna take some time to do the things we never had\n\n{c: Interlude}{bars:4}\n\n{c: Verse 2}{bars:13}\n\nThe wild dogs cry out in the night\nAs they grow restless longing for some solitary company\nI know that I must do what's right\nSure as Kilimanjaro rises like Olympus above the Serengeti\nI seek to cure what's deep inside\nFrightened of this thing that I've become\n\n{c: Chorus}{bars:9}\n\nIt's gonna take a lot to drag me away from you\nThere's nothing that a hundred men or more could ever do\nI bless the rains down in Africa\nGonna take some time to do the things we never had\n\n{c: Interlude}{bars:4}\n\n{c: Solo}{bars:9}\n\n{c: Chorus}{bars:17}\n\nHurry boy, she's waiting there for you\n\nIt's gonna take a lot to drag me away from you\nThere's nothing that a hundred men or more could ever do\nI bless the rains down in Africa\nI bless the rains down in Africa\nI bless the rains down in Africa\nI bless the rains down in Africa\nI bless the rains down in Africa\nGonna take some time to do the things we never had\n\n{c: Outro}{bars:18}",
+      "wpm": 50,
+      "speedMode": "duration",
+      "duration": "9:42",
+      "updatedAt": "2026-07-21T19:27:35.079Z"
     }
   },
   "setlists": {
