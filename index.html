@@ -885,9 +885,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadWpmForCurrentSong();
                 renderPerfView();
                 renderSLPanel();
-                requestAnimationFrame(function(){ window.scrollTo(0,0); applyColWidth(parseInt(colWidthSlider.value,10)); });
+                recalcColWidthSoon();
+                requestAnimationFrame(function(){ window.scrollTo(0,0); });
             }
-            if (!panelOpen) togglePanelBtn.click();
+            // Panel stays closed by default so the lyrics get the full screen.
+            // Tap the Set List button in the dock to open it.
         }
     });
 
@@ -1249,10 +1251,12 @@ document.addEventListener('DOMContentLoaded', function() {
         appTitle.textContent='Performance Mode';
         document.querySelector('.container').classList.add('perf-mode');
         renderPerfView(); renderSLPanel(); loadWpmForCurrentSong();
-        // Small rAF delay so layout reflows before we measure offsetWidth
-        requestAnimationFrame(function(){
-            applyColWidth(parseInt(colWidthSlider.value, 10));
-        });
+        // Start with the set list panel closed so lyrics get the full width.
+        panelOpen=false;
+        slPanel.classList.remove('open');
+        perfLayout.classList.remove('panel-open');
+        togglePanelBtn.textContent='\uD83C\uDFB5 Set List';
+        recalcColWidthSoon();
     });
 
     /* ---- PERFORMANCE RENDER ---- */
@@ -1570,6 +1574,8 @@ document.addEventListener('DOMContentLoaded', function() {
         slPanel.classList.toggle('open',panelOpen);
         perfLayout.classList.toggle('panel-open',panelOpen);
         togglePanelBtn.textContent=panelOpen?'\u2715 Set List':'\uD83C\uDFB5 Set List';
+        // The available width just changed — re-measure the lyric column.
+        recalcColWidthSoon();
     });
 
     /* ════════════════════════════════════════════════════════
@@ -1984,14 +1990,32 @@ document.addEventListener('DOMContentLoaded', function() {
     var colWidthDisplay = document.getElementById('colWidthDisplay');
     var fitScreenBtn    = document.getElementById('fitScreenBtn');
 
+    var MIN_COL_PX = 180;   // never let the lyric column collapse below this
+
     function applyColWidth(pct){
         var wrap = document.getElementById('perfContent-wrap');
-        // Use offsetWidth after layout — falls back to window inner if not visible
-        var wrapW = (wrap && wrap.offsetWidth > 0) ? wrap.offsetWidth : (window.innerWidth - 64);
-        var px = Math.round(wrapW * (pct / 100));
+        // offsetWidth can read tiny (or 0) while a panel transition is still
+        // running, which would collapse the column and wrap text one character
+        // per line. Fall back to the viewport and clamp to a sane minimum.
+        var measured = wrap ? wrap.offsetWidth : 0;
+        var fallback = Math.max(window.innerWidth - 32, MIN_COL_PX);
+        var wrapW = (measured > MIN_COL_PX) ? measured : fallback;
+        var px = Math.max(Math.round(wrapW * (pct / 100)), MIN_COL_PX);
         document.documentElement.style.setProperty('--perf-col-width', px + 'px');
         colWidthSlider.value = pct;
         colWidthDisplay.textContent = pct + '%';
+    }
+
+    // Re-measure after a layout change (panel open/close, rotation, resize).
+    // Waits for the CSS transition to finish so offsetWidth is truthful.
+    function recalcColWidthSoon(){
+        requestAnimationFrame(function(){
+            applyColWidth(parseInt(colWidthSlider.value, 10));
+        });
+        setTimeout(function(){
+            applyColWidth(parseInt(colWidthSlider.value, 10));
+            if(scrolling) calcRate();
+        }, 320);
     }
 
     colWidthSlider.addEventListener('input', function(e){
