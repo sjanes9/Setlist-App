@@ -1,7 +1,7 @@
 {
   "type": "SET_LIST_EXPORT",
-  "version": "2.4",
-  "exportedAt": "2026-07-21T19:52:16.401Z",
+  "version": "2.5",
+  "exportedAt": "2026-07-22T00:00:00.000Z",
   "songs": {
     "Island In The Sun": {
       "title": "Island In The Sun",
@@ -10,7 +10,7 @@
       "artist": "Weezer",
       "notes": "",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus |Bridge |Solo | Chorus | Bridge | Outro",
-      "lyrics": "Verse 1\n{pause:8}\nWhen you're on a holiday You can't find the words to say\nAll the things that come to you And I wanna feel it too\nChorus\nOn an island in the sun We'll be playing and having fun\nAnd it makes me feel so fine I can't control my brain\nVerse 2\n{pause:8}\nWhen you're on a golden sea You don't need no memory\nJust a place to call your own As we drift into the zone\nChorus\nOn an island in the sun We'll be playing and having fun\nAnd it makes me feel so fine I can't control my brain\nBridge\n{pause:8}\nWe'll run away together We'll spend some time forever\nChorus\nOn an island in the sun We'll be playing and having fun\nAnd it makes me feel so fine I can't control my brain\nBridge\nWe'll run away together We'll spend some time forever\nWe'll never feel bad anymore",
+      "lyrics": "{c: Verse 1}\nWhen you're on a holiday You can't find the words to say\nAll the things that come to you And I wanna feel it too\n{c: Chorus}\nOn an island in the sun We'll be playing and having fun\nAnd it makes me feel so fine I can't control my brain\n{c: Verse 2}\nWhen you're on a golden sea You don't need no memory\nJust a place to call your own As we drift into the zone\n{c: Chorus}\nOn an island in the sun We'll be playing and having fun\nAnd it makes me feel so fine I can't control my brain\n{c: Bridge}\nWe'll run away together We'll spend some time forever\n{c: Chorus}\nOn an island in the sun We'll be playing and having fun\nAnd it makes me feel so fine I can't control my brain\n{c: Bridge}\nWe'll run away together We'll spend some time forever\nWe'll never feel bad anymore",
       "updatedAt": "2026-06-04T12:46:29.256Z"
     },
     "Learn To Fly": {
@@ -20,7 +20,7 @@
       "artist": "Foo Fighters",
       "notes": "",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Bridge | Chorus x2",
-      "lyrics": "Verse 1\n{pause:8}\nRun and tell all of the angels\nThis could take all night\nThink I need a devil to help me get things right\nHook me up a new revolution\n'Cause this one is a lie\nWe sat around laughin' and watched the last one die\nChorus\n{pause:8}\nNow, I'm looking to the sky to save me\nLooking for a sign of life\nLooking for something to help me burn out bright\nAnd I'm looking for a complication\nLooking 'cause I'm tired of lyin'\nMake my way back home when I learn to fly high\nVerse 2\n{pause:8}\nI think I'm done nursing patients\nIt can wait one night\nI'd give it all away if you give me one last try\nWe'll live happily ever trapped if you just save my life\nRun and tell the angels that everything's alright\nChorus\n{pause:8}\nI'm looking to the sky to save me\nLooking for a sign of life\nLooking for something to help me burn out bright\nI'm looking for a complication\nLooking 'cause I'm tired of tryin'\nMake my way back home when I learn to fly high\nMake my way back home when I learn to\nBridge\n{pause:8}\nFly along with me, I can't quite make it alone\nTry to make this life my own\nFly along with me, I can't quite make it alone\nTry to make this life my own\nChorus x2\n{pause:8}\nI'm looking to the sky to save me\nLooking for a sign of life\nLooking for something to help me burn out bright\nAnd I'm looking for a complication\nLooking 'cause I'm tired of tryin'\nOutro\nMake my way back home when I learn to\nIMake my way back home when I learn to fly high\nMake my way back home when I learn to fly",
+      "lyrics": "{c: Verse 1}\nRun and tell all of the angels\nThis could take all night\nThink I need a devil to help me get things right\nHook me up a new revolution\n'Cause this one is a lie\nWe sat around laughin' and watched the last one die\n{c: Chorus}\nNow, I'm looking to the sky to save me\nLooking for a sign of life\nLooking for something to help me burn out bright\nAnd I'm looking for a complication\nLooking 'cause I'm tired of lyin'\nMake my way back home when I learn to fly high\n{c: Verse 2}\nI think I'm done nursing patients\nIt can wait one night\nI'd give it all away if you give me one last try\nWe'll live happily ever trapped if you just save my life\nRun and tell the angels that everything's alright\n{c: Chorus}\nI'm looking to the sky to save me\nLooking for a sign of life\nLooking for something to help me burn out bright\nI'm looking for a complication\nLooking 'cause I'm tired of tryin'\nMake my way back home when I learn to fly high\nMake my way back home when I learn to\n{c: Bridge}\nFly along with me, I can't quite make it alone\nTry to make this life my own\nFly along with me, I can't quite make it alone\nTry to make this life my own\n{c: Chorus x2}\nI'm looking to the sky to save me\nLooking for a sign of life\nLooking for something to help me burn out bright\nAnd I'm looking for a complication\nLooking 'cause I'm tired of tryin'\n{c: Outro}\nMake my way back home when I learn to\nIMake my way back home when I learn to fly high\nMake my way back home when I learn to fly",
       "updatedAt": "2026-06-04T12:47:08.761Z"
     },
     "Sex and Candy": {
@@ -30,18 +30,22 @@
       "artist": "Marcy Playground",
       "notes": "Capo'd to the 2nd Fret",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus x2 Out",
-      "lyrics": "Verse 1\n{pause:8}\nHangin' round downtown by myself, And I had so much time,\nJust sittin' think about myself. And there she was,\nLike double cherry pie. Yeah there she was\nLike disco super-fly.\nChorus\nI smell sex and candy here.\nWho's that lounging in my chair?\nWho's that casting devious stares in my direction?\nMomma this surely is a dream.\nYeah. Yeah momma this surely is a dream.\nVerse 2\n{pause:8}\nHangin' round downtown by myself, And I'd had too much caffeine,\nAnd I was thinkin' bout' my self. and then there she was,\nin platform double suede. yeah there she was,\nlike disco lemonade.\nChorus x2\n{pause:8}\nI smell sex and candy here.\nWho's that lounging in my chair?\nWho's that casting devious stares in my direction?\nMomma this surely is a dream.\nYeah.\nYeah momma this surely is a dream.\nYeah momma this surely is a dream.\nYeah.",
+      "lyrics": "{c: Verse 1}\nHangin' round downtown by myself, And I had so much time,\nJust sittin' think about myself. And there she was,\nLike double cherry pie. Yeah there she was\nLike disco super-fly.\n{c: Chorus}\nI smell sex and candy here.\nWho's that lounging in my chair?\nWho's that casting devious stares in my direction?\nMomma this surely is a dream.\nYeah. Yeah momma this surely is a dream.\n{c: Verse 2}\nHangin' round downtown by myself, And I'd had too much caffeine,\nAnd I was thinkin' bout' my self. and then there she was,\nin platform double suede. yeah there she was,\nlike disco lemonade.\n{c: Chorus x2}\nI smell sex and candy here.\nWho's that lounging in my chair?\nWho's that casting devious stares in my direction?\nMomma this surely is a dream.\nYeah.\nYeah momma this surely is a dream.\nYeah momma this surely is a dream.\nYeah.",
       "updatedAt": "2026-06-04T12:52:31.494Z"
     },
     "Crazy Little Thing Called Love": {
       "title": "Crazy Little Thing Called Love",
       "key": "D",
-      "tempo": 150,
+      "tempo": 155,
+      "timeSig": "4/4",
       "artist": "Queen",
       "notes": "",
-      "structure": "Verse 1 | Verse 2 | Bridge | Verse 3 | Interlude | Verse 4 | Outro",
-      "lyrics": "Verse 1\n{pause:8}\nThis thing called love I just can't handle it\nThis thing called love I must get round to it\nI ain't ready\nCrazy little thing called love\nVerse 2\n{pause:8}\nThis thing (this thing)\nCalled love (called love)\nIt cries (like a baby)\nIn a cradle all night\nIt swings (woo woo)\nIt jives (woo woo)\nIt shakes all over like a jelly fish\nI kinda like it\nCrazy little thing called love\nBridge\n{pause:8}\nThere goes my baby\nShe knows how to rock 'n' roll\nShe drives me crazy\nShe gives me hot and cold fever\nThen she leaves me in a cold cold sweat\nVerse 3\n{pause:8}\nI gotta be cool, relax, get hip\nAnd get on my track's\nTake a back seat, hitch-hike\nAnd take a long ride on my motorbike\nUntil I'm ready\nCrazy little thing called love\n[Interlude]\n{pause:8}\nI gotta be cool, relax, get hip\nAnd get on my track's\nTake a back seat (ah hum), hitch-hike (ah hum)\nAnd take a long ride on my motorbike\nUntil I'm ready (ready Freddie)\nCrazy little thing called love\n\nThis thing called love I just can't handle it\nThis thing called love I must get round to it\nI ain't ready\nOoh ooh ooh ooh\n[Outro]\nCrazy little thing called love\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah",
-      "updatedAt": "2026-06-04T12:43:39.553Z"
+      "structure": "Intro | Verse 1 | Verse 2 | Bridge | Verse 3 | Solo | Verse 4 | Verse 5",
+      "lyrics": "{c: Intro}{bars:4}\n\n{c: Verse 1}{bars:12}\n\nThis thing called love I just can't handle it\nThis thing called love I must get round to it\nI ain't ready\nCrazy little thing called love\n\n{c: Verse 2}{bars:12}\n\nThis thing (this thing)\nCalled love (called love)\nIt cries (like a baby)\nIn a cradle all night\nIt swings (woo woo)\nIt jives (woo woo)\nIt shakes all over like a jelly fish\nI kinda like it\nCrazy little thing called love\n\n{c: Bridge}{bars:12}\n\nThere goes my baby\nShe knows how to rock 'n' roll\nShe drives me crazy\nShe gives me hot and cold fever\nThen she leaves me in a cold cold sweat\n\n{c: Verse 3}{bars:12}\n\nI gotta be cool, relax, get hip\nAnd get on my track's\nTake a back seat, hitch-hike\nAnd take a long ride on my motorbike\nUntil I'm ready\nCrazy little thing called love\n\n{c: Solo}{bars:12}\n\n{c: Verse 4}{bars:12}\n(No Music)\nI gotta be cool, relax, get hip\nAnd get on my track's\nTake a back seat (ah hum), hitch-hike (ah hum)\nAnd take a long ride on my motorbike\nUntil I'm ready (ready Freddie)\nCrazy little thing called love\n\n{c: Verse 5}{bars:28}\n\nThis thing called love I just can't handle it\nThis thing called love I must get round to it\nI ain't ready\nOoh ooh ooh ooh\nCrazy little thing called love\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah\nCrazy little thing called love yeah yeah",
+      "wpm": 50,
+      "speedMode": "duration",
+      "duration": "",
+      "updatedAt": "2026-07-20T20:49:38.615Z"
     },
     "Heart Shaped Box": {
       "title": "Heart Shaped Box",
@@ -50,7 +54,7 @@
       "artist": "Nirvana",
       "notes": "Dropped D Tunning",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Repeat Verse 1 | Chorus Out",
-      "lyrics": "Verse 1\n{pause:8}\nShe eyes me like a Pisces when I am weak\nI've been locked inside your heart-shaped box for weeks\nI've been drawn into your magnet tar pit trap\nI wish I could eat your cancer when you turn black\nChorus\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nYour advice\nVerse 2\n{pause:8}\nMeat-eating orchids forgive no one just yet\nCut myself on angel hair and baby's breath\nBroken hymen of 'Your Highness', I'm left back\nThrow down your umbilical noose so I can climb right back\nChorus\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nYour advice\nVerse 1\n{pause:8}\nShe eyes me like a Pisces when I am weak\nI've been locked inside your heart-shaped box for weeks\nI've been drawn into your magnet tar pit trap\nI wish I could eat your cancer when you turn black\nChorus\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nYour advice\nYour advice\nYour advice",
+      "lyrics": "{c: Verse 1}\nShe eyes me like a Pisces when I am weak\nI've been locked inside your heart-shaped box for weeks\nI've been drawn into your magnet tar pit trap\nI wish I could eat your cancer when you turn black\n{c: Chorus}\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nYour advice\n{c: Verse 2}\nMeat-eating orchids forgive no one just yet\nCut myself on angel hair and baby's breath\nBroken hymen of 'Your Highness', I'm left back\nThrow down your umbilical noose so I can climb right back\n{c: Chorus}\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nYour advice\n{c: Verse 1}\nShe eyes me like a Pisces when I am weak\nI've been locked inside your heart-shaped box for weeks\nI've been drawn into your magnet tar pit trap\nI wish I could eat your cancer when you turn black\n{c: Chorus}\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nHey! Wait! I got a new complaint\nForever in debt to your priceless advice\nYour advice\nYour advice\nYour advice",
       "updatedAt": "2026-06-04T12:45:30.658Z"
     },
     "Come Together": {
@@ -60,7 +64,7 @@
       "artist": "The Beatles",
       "notes": "",
       "structure": "Verse 1 | Verse 2 | Verse 3 | Verse 4 Out",
-      "lyrics": "Verse 1\n{pause:8}\nHere come old flat top he come growing up slowly\nHe got joo-joo eyeball he one holy roller\nHe got hair down to his knees\nGot to be a joker he just do what he please\nVerse 2\n{pause:8}\nHe wear no shoeshine he got toe-jam football\nHe got monkey finger he shoot coca-cola\nHe say \"I know you, you know me\"\nOne thing I can tell you is you got to be free\nCome together right now over me\nVerse 3\n{pause:8}\nHe bag production he got walrus gumboot\nHe got Ono sideboard he one spinal cracker\nHe got feet down below his knees\nHold you in his armchair you can feel his disease\nCome together right now over me\nVerse 4\n{pause:8}\nHe roller-coaster he got only warning\nHe got muddy water he one mojo filter\nHe say \"One and one and one is three\"\nGot to be good-looking 'cause he's so hard to see\nCome together right now over me.",
+      "lyrics": "{c: Verse 1}\nHere come old flat top he come growing up slowly\nHe got joo-joo eyeball he one holy roller\nHe got hair down to his knees\nGot to be a joker he just do what he please\n{c: Verse 2}\nHe wear no shoeshine he got toe-jam football\nHe got monkey finger he shoot coca-cola\nHe say \"I know you, you know me\"\nOne thing I can tell you is you got to be free\nCome together right now over me\n{c: Verse 3}\nHe bag production he got walrus gumboot\nHe got Ono sideboard he one spinal cracker\nHe got feet down below his knees\nHold you in his armchair you can feel his disease\nCome together right now over me\n{c: Verse 4}\nHe roller-coaster he got only warning\nHe got muddy water he one mojo filter\nHe say \"One and one and one is three\"\nGot to be good-looking 'cause he's so hard to see\nCome together right now over me.",
       "updatedAt": "2026-06-04T12:43:11.782Z"
     },
     "All the small things": {
@@ -70,7 +74,7 @@
       "artist": "Blink 182",
       "notes": "",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Bridge | Chorus | Chorus Out",
-      "lyrics": "Verse 1\n{pause:8}\nAll the small things, True care, truth brings \nI'll take one lift Your ride best trip\nAlways, I know You'll be at my show\nWatching, waiting, commiserating\nPre Chorus\nSay it aint so, I will not go Turn the lights off, carry me home\nNa, na......\n{pause:8}\nVerse 2\nLate night, come home Work sucks, I know\nShe left me roses by the stairs Surprises let me know she cares\nPre Chorus\nSay it aint so, I will not go Turn the lights off, carry me home\nNa, na......\nChorus\nSay it aint so, I will not go Turn the lights off, carry me home\nKeep your head still, I'll be your thrill\nThe night will go on, my little windmill\nBridge\n{pause:8}\nChorus x2 Out\nSay it aint so, I will not go Turn the lights off, carry me home\nKeep your head still, I'll be your thrill\nThe night will go on ( The night will go on ), my little windmill",
+      "lyrics": "{c: Verse 1}\nAll the small things, True care, truth brings \nI'll take one lift Your ride best trip\nAlways, I know You'll be at my show\nWatching, waiting, commiserating\n{c: Pre Chorus}\nSay it aint so, I will not go Turn the lights off, carry me home\nNa, na......\n{c: Verse 2}\nLate night, come home Work sucks, I know\nShe left me roses by the stairs Surprises let me know she cares\n{c: Pre Chorus}\nSay it aint so, I will not go Turn the lights off, carry me home\nNa, na......\n{c: Chorus}\nSay it aint so, I will not go Turn the lights off, carry me home\nKeep your head still, I'll be your thrill\nThe night will go on, my little windmill\n{c: Bridge}\n{c: Chorus x2 Out}\nSay it aint so, I will not go Turn the lights off, carry me home\nKeep your head still, I'll be your thrill\nThe night will go on ( The night will go on ), my little windmill",
       "updatedAt": "2026-06-04T12:22:31.764Z"
     },
     "Billie Jean": {
@@ -80,48 +84,64 @@
       "artist": "Michael Jackson",
       "notes": "",
       "structure": "Verse 1 | Verse 2 | Bridge | Chorus | Verse 3 | Verse 4 | Bridge | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nShe Was More Like A Beauty Queen From A Movie Scene\nI Said Don't Mind, But What Do You Mean I Am The One\nWho Will Dance On The Floor In The Round\nShe Said I Am The One Who Will Dance On The Floor In The Round\nVerse 2\n{pause:8}\nShe Told Me Her Name Was Billie Jean, As She Caused A Scene\nThen Every Head Turned With Eyes That Dreamed Of Being The One\nWho Will Dance On The Floor In The Round\nBridge\n{pause:8}\nPeople Always Told Me Be Careful Of What You Do\nAnd Don't Go Around Breaking Young Girls' Hearts\nAnd Mother Always Told Me Be Careful Of Who You Love\nAnd Be Careful Of What You Do 'Cause The Lie Becomes The Truth\nChorus\n{pause:8}\nBillie Jean Is Not My Lover\nShe's Just A Girl Who Claims That I Am The One\nBut The Kid Is Not My Son\nShe Says I Am The One, But The Kid Is Not My Son\nVerse 3\n{pause:8}\nFor Forty Days And Forty Nights\nThe Law Was On Her Side\nBut Who Can Stand When She's In Demand\nHer Schemes And Plans\n'Cause We Danced On The Floor In The Round\nSo Take My Strong Advice, Just Remember To Always Think Twice\n(Do Think Twice)\nVerse 4\nShe Told My Baby We'd Danced 'Till Three\nThen She Looked At Me\nThen Showed A Photo My Baby Cried\nHis Eyes Looked Like Mine\nGo On Dance On The Floor In The Round, Baby\nBridge\n{pause:8}\nPeople Always Told Me Be Careful Of What You Do\nAnd Don't Go Around Breaking Young Girls' Hearts\nShe Came And Stood Right By Me\nThen The Smell Of Sweet Perfume\nThis Happened Much Too Soon\nShe Called Me To Her Room\nChorus\n{pause:8}\nBillie Jean Is Not My Lover\nShe's Just A Girl Who Claims That I Am The One\nBut The Kid Is Not My Son\nBillie Jean Is Not My Lover\nShe's Just A Girl Who Claims That I Am The One\nBut The Kid Is Not My Son\nShe Says I Am The One, But The Kid Is Not My Son\nShe Says I Am The One, But The Kid Is Not My Son\nBillie Jean Is Not My Lover\nShe's Just A Girl Who Claims That I Am The One\nBut The Kid Is Not My Son\nShe Says I Am The One, But The Kid Is Not My Son\nShe Says I Am The One, She Says He Is My Son\nShe Says I Am The One\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover",
+      "lyrics": "{c: Verse 1}\nShe Was More Like A Beauty Queen From A Movie Scene\nI Said Don't Mind, But What Do You Mean I Am The One\nWho Will Dance On The Floor In The Round\nShe Said I Am The One Who Will Dance On The Floor In The Round\n{c: Verse 2}\nShe Told Me Her Name Was Billie Jean, As She Caused A Scene\nThen Every Head Turned With Eyes That Dreamed Of Being The One\nWho Will Dance On The Floor In The Round\n{c: Bridge}\nPeople Always Told Me Be Careful Of What You Do\nAnd Don't Go Around Breaking Young Girls' Hearts\nAnd Mother Always Told Me Be Careful Of Who You Love\nAnd Be Careful Of What You Do 'Cause The Lie Becomes The Truth\n{c: Chorus}\nBillie Jean Is Not My Lover\nShe's Just A Girl Who Claims That I Am The One\nBut The Kid Is Not My Son\nShe Says I Am The One, But The Kid Is Not My Son\n{c: Verse 3}\nFor Forty Days And Forty Nights\nThe Law Was On Her Side\nBut Who Can Stand When She's In Demand\nHer Schemes And Plans\n'Cause We Danced On The Floor In The Round\nSo Take My Strong Advice, Just Remember To Always Think Twice\n(Do Think Twice)\n{c: Verse 4}\nShe Told My Baby We'd Danced 'Till Three\nThen She Looked At Me\nThen Showed A Photo My Baby Cried\nHis Eyes Looked Like Mine\nGo On Dance On The Floor In The Round, Baby\n{c: Bridge}\nPeople Always Told Me Be Careful Of What You Do\nAnd Don't Go Around Breaking Young Girls' Hearts\nShe Came And Stood Right By Me\nThen The Smell Of Sweet Perfume\nThis Happened Much Too Soon\nShe Called Me To Her Room\n{c: Chorus}\nBillie Jean Is Not My Lover\nShe's Just A Girl Who Claims That I Am The One\nBut The Kid Is Not My Son\nBillie Jean Is Not My Lover\nShe's Just A Girl Who Claims That I Am The One\nBut The Kid Is Not My Son\nShe Says I Am The One, But The Kid Is Not My Son\nShe Says I Am The One, But The Kid Is Not My Son\nBillie Jean Is Not My Lover\nShe's Just A Girl Who Claims That I Am The One\nBut The Kid Is Not My Son\nShe Says I Am The One, But The Kid Is Not My Son\nShe Says I Am The One, She Says He Is My Son\nShe Says I Am The One\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover\nBillie Jean Is Not My Lover",
       "updatedAt": "2026-06-04T12:41:18.540Z"
     },
     "Brain Stew": {
       "title": "Brain Stew",
       "key": "A",
-      "tempo": 75,
+      "tempo": 76,
+      "timeSig": "4/4",
       "artist": "Green Day",
-      "notes": "",
-      "structure": "Verse 1 | Verse 2 | Verse 3 | Repeat Verse 1",
-      "lyrics": "Verse 1\n{pause:1}\nI'm having trouble trying to sleep\nI'm counting sheep but running out\nAs time ticks by And still I try\nNo rest for crosstops in my mind\nOn my own... here we go\nVerse 2\n{pause:1}\nMy eyes feel like they're gonna bleed\nDried up and bulging out my skull\nMy mouth is dry My face is numb\nFucked up and spun out in my room\nOn my own... here we go\nVerse 3\n{pause:8}\nMy mind is set on overdrive\nThe clock is laughing in my face\nA crooked spine My sense dulled\nPassed the point of delerium\nOn my own... here we go\nVerse 1\n{pause:8}\nMy eyes feel like they're gonna bleed\nDried up and bulging out my skull\nMy mouth is dry My face is numb\nFucked up and spun out in my room\nOn my own... here we go",
-      "updatedAt": "2026-06-04T12:42:04.409Z"
+      "notes": "A, G, F#, F, E",
+      "structure": "Verse 1 | Verse 2 | Verse 3 | Verse 4",
+      "lyrics": "{c: Verse 1}{bars:12}\nI'm having trouble trying to sleep\nI'm counting sheep but running out\nAs time ticks by And still I try\nNo rest for crosstops in my mind\nOn my own... here we go\n{c: Verse 2}{bars:12}\nMy eyes feel like they're gonna bleed\nDried up and bulging out my skull\nMy mouth is dry My face is numb\nFucked up and spun out in my room\nOn my own... here we go\n{c: Verse 3}{bars:12}\nMy mind is set on overdrive\nThe clock is laughing in my face\nA crooked spine My sense dulled\nPassed the point of delerium\nOn my own... here we go\n{c: Verse 4}{bars:12}\nMy eyes feel like they're gonna bleed\nDried up and bulging out my skull\nMy mouth is dry My face is numb\nFucked up and spun out in my room\nOn my own... here we go",
+      "wpm": 50,
+      "speedMode": "duration",
+      "duration": "",
+      "updatedAt": "2026-07-20T19:30:39.585Z"
     },
     "Blister in the sun": {
       "title": "Blister in the sun",
       "key": "G",
-      "tempo": 97,
+      "tempo": 200,
+      "timeSig": "4/4",
       "artist": "Violent Femmes",
       "notes": "",
-      "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Verse 1 And 2 Quiet x2 | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nWhen I'm out walking I strut my stuff\nAnd I'm so strung out I'm high as a kite\nI just might stop to check you out.\nChorus\n{pause:8}\nLet me go on like I Blister in the sun\nLet me go on Big hands, I know you're the one.\nVerse 2\n{pause:8}\nBody and beats, I stain my sheets\nI don't even know why My girlfriend, she's at the end,\nShe is starting to cry.\nChorus\n{pause:8}\nLet me go on like I Blister in the sun\nLet me go on Big hands, I know you're the one.\nVerse 1 and 2 Quiet x2\nChorus Out",
-      "updatedAt": "2026-06-04T12:41:42.802Z"
+      "structure": "Intro | Verse 1 | Chorus | Verse 2 | Chorus | Bridge | Verse 3 | Verse 4 | Verse 5 | Verse 6 | Chorus | Outro",
+      "lyrics": "{c: Intro}{bars:16}\n\n{c: Verse 1}{bars:8}\nWhen I'm out walking I strut my stuff\nAnd I'm so strung out \nI'm high as a kite I just might \nstop to check you out. \n\n{c: Chorus}{bars:9}\nLet me go on \nlike I Blister in the sun\nLet me go on \nBig hands, I know you're the one.\n\n{c: Verse 2}{bars:8}\nBody and beats, I stain my sheets\nI don't even know why \nMy girlfriend, she's at the end,\nShe is starting to cry.\n\n{c: Chorus}{bars:9}\nLet me go on \nlike I Blister in the sun\nLet me go on \nBig hands, I know you're the one.\n\n{c: Bridge}{bars:16}\n\n{c: Verse 3}{bars:8}\nWhen I'm out walking I strut my stuff\nAnd I'm so strung out \nI'm high as a kite I just might \nstop to check you out. \n\n{c: Verse 4}{bars:8}\nWhen I'm out walking I strut my stuff\nAnd I'm so strung out \nI'm high as a kite I just might \nstop to check you out.\n\n{c: Verse 5}{bars:8}\nBody and beats, I stain my sheets\nI don't even know why \nMy girlfriend, she's at the end,\nShe is starting to cry.\n\n{c: Verse 6}{bars:8}\nWhen I'm out walking I strut my stuff\nAnd I'm so strung out \nI'm high as a kite I just might \nstop to check you out.\n\n{c: Chorus}{bars:9}\nLet me go on \nlike I Blister in the sun\nLet me go on \nBig hands, I know you're the one.\n\n{c: Outro}{bars:6}",
+      "wpm": 50,
+      "speedMode": "duration",
+      "duration": "",
+      "updatedAt": "2026-07-20T20:39:18.075Z"
     },
     "Creep": {
       "title": "Creep",
       "key": "C",
-      "tempo": 92,
+      "tempo": 93,
+      "timeSig": "4/4",
       "artist": "RadioHead",
       "notes": "",
-      "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Bridge | Verse 3 | Outro",
-      "lyrics": "Verse 1\n{pause:8}\nWhen you were here before\nCouldn't look you in the eye\nYou're just like an angel\nYour skin makes me cry\nYou float like a feather\nIn a beautiful world\nAnd I wish I was special\nYou're so fuckin' special\nChorus\n{pause:8}\nBut I'm a creep, I'm a weirdo.\nWhat the hell am I doing here?\nI don't belong here.\nVerse 2\n{pause:8}\nI don't care if it hurts I want to have control\nI want a perfect body I want a perfect soul\nI want you to notice When I'm not around\nYou're so fuckin' special I wish I was special\nChorus\nBut I'm a creep, I'm a weirdo.\nWhat the hell am I doing here?\nI don't belong here.\nBridge\n{pause:8}\nShe's running out the door,\nShe's running out\nShe's run run run run...\nVerse 3\n{pause:8}\nWhatever makes you happy Whatever you want\nYou're so very special I wish I was special...\nOutro\nBut I'm a creep, I'm a weirdo,\nWhat the hell am I doing here?\nI don't belong here.\nI don't belong here.",
-      "updatedAt": "2026-06-04T12:44:10.619Z"
+      "structure": "Intro | Verse 1 | Chorus | Verse 2 | Chorus | Bridge | Outro",
+      "lyrics": "{c: Intro}{bars:8}\n\n{c: Verse 1}{bars:12}\nWhen you were here before\nCouldn't look you in the eye\nYou're just like an angel\nYour skin makes me cry\nYou float like a feather\nIn a beautiful world\nAnd I wish I was special\n\n{c: Chorus}{bars:12}\nYou're so fuckin' special\nBut I'm a creep, I'm a weirdo.\nWhat the hell am I doing here?\nI don't belong here.\n\n{c: Verse 2}{bars:12}\nI don't care if it hurts I want to have control\nI want a perfect body I want a perfect soul\nI want you to notice When I'm not around\nYou're so fuckin' special \n\n{c: Chorus}{bars:12}\nI wish I was special\nBut I'm a creep, I'm a weirdo.\nWhat the hell am I doing here?\nI don't belong here.\n\n{c: Bridge}{bars:16}\nShe's running out the door,\nShe's running out\nShe's run run run run...\n\n{c: Outro}{bars:19}\nWhatever makes you happy Whatever you want\nYou're so very special I wish I was special...\nBut I'm a creep, I'm a weirdo,\nWhat the hell am I doing here?\nI don't belong here.\nI don't belong here.",
+      "wpm": 50,
+      "speedMode": "duration",
+      "duration": "",
+      "updatedAt": "2026-07-20T19:56:25.284Z"
     },
     "Say it aint so": {
       "title": "Say it aint so",
       "key": "C Minor",
       "tempo": 76,
+      "timeSig": "4/4",
       "artist": "Weezer",
       "notes": "",
-      "structure": "Into | Verse 1 | Interlude | Verse 2 | Chorus | Verse 3 | Chorus | Bridge | Solo | Chorus | Outro",
-      "lyrics": "Intro\nOh yeah\nAlright\nVerse 1\n{pause:8}\nSomebody's Heine' Is crowdin' my icebox\nSomebody's cold one Is givin' me chills\nGuess I'll just close my eyes\nInterlude\n{pause:8}\nOh yeah Alright aFeels good Inside\nVerse 2\nFlip on the tele Wrestle with Jimmy\nSomething is bubbling Behind my back\nThe bottle is ready to blow\nChorus\n{pause:8}\nSay it ain't so\nYour drug is a heartbreaker\nSay it ain't so\nMy love is a life taker\nVerse 3\n{pause:8}\nI can't confront you I never could do\nThat which might hurt you So try and be cool\nWhen I say This way is a waterslide away from me\nThat takes you further every day So be cool\nChorus\nSay it ain't so\nYour drug is a heartbreaker\nSay it ain't so\nMy love is a life taker\nBridge\n{pause:8}\nDear Daddy\nI write you in spite of years of silence\nYou've cleaned up, found Jesus, things are good or so I hear\nThis bottle of Steven's awakens ancient feelings\nLike father, stepfather, the son is drowning in the flood\nYeah, yeah, yeah, yeah\nSolo\n{pause:8}\nChorus\nSay it ain't so\nYour drug is a heartbreaker\nSay it ain't so\nMy love is a life taker",
-      "updatedAt": "2026-06-04T12:52:12.107Z"
+      "structure": "Intro | Verse 1 | Verse 2 | Chorus | Verse 3 | Chorus | Bridge | Solo | Chorus | Outro",
+      "lyrics": "{c: Intro}{bars:8}\n\nOh yeah\nAlright\n\n{c: Verse 1}{bars:10}\n\nSomebody's Heine' Is crowdin' my icebox\nSomebody's cold one Is givin' me chills\nGuess I'll just close my eyes\n\nOh yeah Alright aFeels good Inside\n\n{c: Verse 2}{bars:6}\n\nFlip on the tele Wrestle with Jimmy\nSomething is bubbling Behind my back\nThe bottle is ready to blow\n\n{c: Chorus}{bars:12}\n\nSay it ain't so\nYour drug is a heartbreaker\nSay it ain't so\nMy love is a life taker\n\n{c: Verse 3}{bars:8}\n\nI can't confront you I never could do\nThat which might hurt you So try and be cool\nWhen I say This way is a waterslide away from me\nThat takes you further every day So be cool\n\n{c: Chorus}{bars:8}\n\nSay it ain't so\nYour drug is a heartbreaker\nSay it ain't so\nMy love is a life taker\n\n{c: Bridge}{bars:10}\n\nDear Daddy\nI write you in spite of years of silence\nYou've cleaned up, found Jesus, things are good or so I hear\nThis bottle of Steven's awakens ancient feelings\nLike father, stepfather, the son is drowning in the flood\nYeah, yeah, yeah, yeah\n\n{c: Solo}{bars:6}\n\n{c: Chorus}{bars:8}\n\nSay it ain't so\nYour drug is a heartbreaker\nSay it ain't so\nMy love is a life taker\n\n{c: Outro}{bars:5}",
+      "wpm": 50,
+      "speedMode": "duration",
+      "duration": "1:30",
+      "updatedAt": "2026-07-21T01:01:42.011Z"
     },
     "Mr. Brightside": {
       "title": "Mr. Brightside",
@@ -130,7 +150,7 @@
       "artist": "The Killers",
       "notes": "",
       "structure": "Verse 1 | Pre Chorus | Chorus | Verse 2 | Pre Chorus | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nI'm coming out of my cage and I've been doing just fine\nGotta, gotta be down because I want it all\nIt started out with a kiss, how did it end up like this?\nIt was only a kiss, it was only a kiss\nNow I'm falling asleep and she's calling a cab\nWhile he's having a smoke and she's taking a drag\nNow they're going to bed and my stomach is sick\nAnd it's all in my head, but she's touching his\nPre Chorus\n{pause:8}\nChest now, he takes off her dress now Let me go\nI just can't look, it's killing me And taking control\nChorus\nJealousy, turning saints into the sea\nSwimming through sick lullabies, choking on your alibis\nBut it's just the price I pay, destiny is calling me\nOpen up my eager eyes, 'cause I'm Mr. Brightside\nVerse 2\n{pause:8}\nI'm coming out of my cage and I've been doing just fine\nGotta, gotta be down because I want it all\nIt started out with a kiss, how did it end up like this?\nIt was only a kiss, it was only a kiss\nNow I'm falling asleep and she's calling a cab\nWhile he's having a smoke and she's taking a drag\nNow they're going to bed and my stomach is sick\nAnd it's all in my head, but she's touching his\nPre Chrous\nChest now, he takes off her dress now Let me go\n'Cause I just can't look, it's killing me And taking control\nChorus\n{pause:8}\nJealousy, turning saints into the sea\nSwimming through sick lullabies, choking on your alibis\nBut it's just the price I pay, destiny is calling me\nOpen up my eager eyes, 'cause I'm Mr. Brightside\nOut\nI never\nI never\nI never\nI never",
+      "lyrics": "{c: Verse 1}\nI'm coming out of my cage and I've been doing just fine\nGotta, gotta be down because I want it all\nIt started out with a kiss, how did it end up like this?\nIt was only a kiss, it was only a kiss\nNow I'm falling asleep and she's calling a cab\nWhile he's having a smoke and she's taking a drag\nNow they're going to bed and my stomach is sick\nAnd it's all in my head, but she's touching his\n{c: Pre Chorus}\nChest now, he takes off her dress now Let me go\nI just can't look, it's killing me And taking control\n{c: Chorus}\nJealousy, turning saints into the sea\nSwimming through sick lullabies, choking on your alibis\nBut it's just the price I pay, destiny is calling me\nOpen up my eager eyes, 'cause I'm Mr. Brightside\n{c: Verse 2}\nI'm coming out of my cage and I've been doing just fine\nGotta, gotta be down because I want it all\nIt started out with a kiss, how did it end up like this?\nIt was only a kiss, it was only a kiss\nNow I'm falling asleep and she's calling a cab\nWhile he's having a smoke and she's taking a drag\nNow they're going to bed and my stomach is sick\nAnd it's all in my head, but she's touching his\nPre Chrous\nChest now, he takes off her dress now Let me go\n'Cause I just can't look, it's killing me And taking control\n{c: Chorus}\nJealousy, turning saints into the sea\nSwimming through sick lullabies, choking on your alibis\nBut it's just the price I pay, destiny is calling me\nOpen up my eager eyes, 'cause I'm Mr. Brightside\nOut\nI never\nI never\nI never\nI never",
       "updatedAt": "2026-06-04T12:48:44.419Z"
     },
     "Everlong": {
@@ -140,7 +160,7 @@
       "artist": "Foo Fighters",
       "notes": "Droped D Tunning",
       "structure": "Verse 1 | Verse 2 | Pre Chorus | Chorus | Verse 3 | Pre Chorus | Chorus | interlude | Pre Chorus | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nHello, I've waited here for you, everlong\nTonight, I throw myself into and out of the red, out of her head she sang\nVerse 2\n{pause:4}\nCome down, and waste away with me, down with me\nSlow how, you wanted it to be, I'm over my head, out of her head she sang\nPre Chorus\nAnd I wonder, when I sing along with you \nChorus\nif everything could ever feel this real forever\nIf anything could ever be this good again\nThe only thing I'll ever ask of you\nYou've got to promise not to stop when I say when she sang\nVerse 3\n{pause:8}\nBreathe out, so I can breathe you in, hold you in\nAnd now, I know you've always been out of your head, out of my head I sang\nPre Chorus\nAnd I wonder when I sing along with you \nChorus\nif everything could ever feel this real forever\nIf anything could ever be this good again\nThe only thing I'll ever ask of you\nYou've got to promise not to stop when I say when she sang\nInterlude]\n{pause:8}\nPre Chorus\nAnd I wonder if everything could ever feel this real forever\nChorus\nIf anything could ever be this good again\nThe only thing I'll ever ask of you\nYou've got to promise not to stop when I say when",
+      "lyrics": "{c: Verse 1}\nHello, I've waited here for you, everlong\nTonight, I throw myself into and out of the red, out of her head she sang\n{c: Verse 2}\nCome down, and waste away with me, down with me\nSlow how, you wanted it to be, I'm over my head, out of her head she sang\n{c: Pre Chorus}\nAnd I wonder, when I sing along with you \n{c: Chorus}\nif everything could ever feel this real forever\nIf anything could ever be this good again\nThe only thing I'll ever ask of you\nYou've got to promise not to stop when I say when she sang\n{c: Verse 3}\nBreathe out, so I can breathe you in, hold you in\nAnd now, I know you've always been out of your head, out of my head I sang\n{c: Pre Chorus}\nAnd I wonder when I sing along with you \n{c: Chorus}\nif everything could ever feel this real forever\nIf anything could ever be this good again\nThe only thing I'll ever ask of you\nYou've got to promise not to stop when I say when she sang\n{c: Interlude}\n{c: Pre Chorus}\nAnd I wonder if everything could ever feel this real forever\n{c: Chorus}\nIf anything could ever be this good again\nThe only thing I'll ever ask of you\nYou've got to promise not to stop when I say when",
       "updatedAt": "2026-06-04T12:44:56.983Z"
     },
     "Simple man": {
@@ -150,7 +170,7 @@
       "artist": "Lynyrd Skynyrd",
       "notes": "",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Verse 3 | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nMama told me when I was young\nCome sit beside me, my only son\nAnd listen closely to what I say.\nAnd if you do this\nIt will help you some sunny day.\nTake your time... Don't live too fast,\nTroubles will come and they will pass.\nGo find a woman and you'll find love,\nAnd don't forget son,\nThere is someone up above.\nChorus\n{pause:8}\nAnd be a simple kind of man.\nBe something you love and understand.\nBe a simple kind of man.\nWon't you do this for me son,\nIf you can?\nVerse 2\n{pause:8}\nForget your lust for the rich man's gold\nAll that you need is in your soul,\nAnd you can do this if you try.\nAll that I want for you my son,\nIs to be satisfied.\nChorus\n{pause:8}\nAnd be a simple kind of man.\nBe something you love and understand.\nBe a simple kind of man.\nWon't you do this for me son,\nIf you can?\nVerse 3\n{pause:8}\nBoy, don't you worry... you'll find yourself.\nFollow you heart and nothing else.\nAnd you can do this if you try.\nAll I want for you my son,\nIs to be satisfied.\nChorus\n{pause:8}\nAnd be a simple kind of man.\nBe something you love and understand.\nBe a simple kind of man.\nWon't you do this for me son,\nIf you can?",
+      "lyrics": "{c: Verse 1}\nMama told me when I was young\nCome sit beside me, my only son\nAnd listen closely to what I say.\nAnd if you do this\nIt will help you some sunny day.\nTake your time... Don't live too fast,\nTroubles will come and they will pass.\nGo find a woman and you'll find love,\nAnd don't forget son,\nThere is someone up above.\n{c: Chorus}\nAnd be a simple kind of man.\nBe something you love and understand.\nBe a simple kind of man.\nWon't you do this for me son,\nIf you can?\n{c: Verse 2}\nForget your lust for the rich man's gold\nAll that you need is in your soul,\nAnd you can do this if you try.\nAll that I want for you my son,\nIs to be satisfied.\n{c: Chorus}\nAnd be a simple kind of man.\nBe something you love and understand.\nBe a simple kind of man.\nWon't you do this for me son,\nIf you can?\n{c: Verse 3}\nBoy, don't you worry... you'll find yourself.\nFollow you heart and nothing else.\nAnd you can do this if you try.\nAll I want for you my son,\nIs to be satisfied.\n{c: Chorus}\nAnd be a simple kind of man.\nBe something you love and understand.\nBe a simple kind of man.\nWon't you do this for me son,\nIf you can?",
       "updatedAt": "2026-06-04T12:54:45.443Z"
     },
     "Zombie": {
@@ -160,8 +180,11 @@
       "artist": "the Cranberries",
       "notes": "",
       "structure": "Verse 1 | Pre Chorus | Chorus | Verse 2 | Pre Chorus | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nAnother head hangs lowly Child is slowly taken\nAnd the violence, caused such silence\nWho are we mistaken?\nPre Chorus\nBut you see, it's not me It's not my family\nIn your head, in your head, they are fighting\nWith their tanks, and their bombs\nAnd their bombs, and their guns\nIn your head, in your head they are crying\nChorus\n{pause:8}\nIn your head, in your head\nZombie, zombie, zombie-ie-ie\nWhat's in your head, in your head\nZombie, zombie, zombie-ie-ie ie-ie oh\nDu, du, du, du\nDu, du, du, du\nDu, du, du, du\nDu, du, du, du\nVerse 2\n{pause:8}\nAnother mother's breaking Heart is taking over\nWhen the violence causes silence We must be mistaken\nPre Chorus\nIt's the same old theme Since nineteen-sixteen\nIn your head, in your head, they're still fighting\nWith their tanks, and their bombs And their bombs, and their guns\nIn your head, in your head, they are dying\nChorus\n{pause:8}\nIn your head, in your head\nZombie, zombie, zombie-ie-ie\nWhat's in your head, in your head\nZombie, zombie, zombie-ie-ie ie-ie oh oh oh",
-      "updatedAt": "2026-06-04T13:00:54.065Z"
+      "lyrics": "{c: Verse 1}\nAnother head hangs lowly Child is slowly taken\nAnd the violence, caused such silence\nWho are we mistaken?\n{c: Pre Chorus}\nBut you see, it's not me It's not my family\nIn your head, in your head, they are fighting\nWith their tanks, and their bombs\nAnd their bombs, and their guns\nIn your head, in your head they are crying\n{c: Chorus}\nIn your head, in your head\nZombie, zombie, zombie-ie-ie\nWhat's in your head, in your head\nZombie, zombie, zombie-ie-ie ie-ie oh\nDu, du, du, du\nDu, du, du, du\nDu, du, du, du\nDu, du, du, du\n{c: Verse 2}\nAnother mother's breaking Heart is taking over\nWhen the violence causes silence We must be mistaken\n{c: Pre Chorus}\nIt's the same old theme Since nineteen-sixteen\nIn your head, in your head, they're still fighting\nWith their tanks, and their bombs And their bombs, and their guns\nIn your head, in your head, they are dying\n{c: Chorus}\nIn your head, in your head\nZombie, zombie, zombie-ie-ie\nWhat's in your head, in your head\nZombie, zombie, zombie-ie-ie ie-ie oh oh oh",
+      "updatedAt": "2026-07-20T19:55:53.867Z",
+      "speedMode": "duration",
+      "wpm": 50,
+      "duration": ""
     },
     "Otherside": {
       "title": "Otherside",
@@ -170,7 +193,7 @@
       "artist": "Red Hot Chili Peppers",
       "notes": "",
       "structure": "Intro | Verse 1 | Verse 2 |  Chorus | Verse 3  |Chorus | Bridge | Chorus x2 Out",
-      "lyrics": "Intro\n{pause:8}\nHow long how long will I slide?\nSeparate my side, I don't\nI don't believe it's bad\nSlit my throat, it's all I ever\nVerse 1\n{pause:8}\nI heard your voice through a photograph\nI thought it up and brought up the past\nOnce you know you can never go back\nI've got to take it on the otherside\nVerse 2\n{pause:8}\nCenturies are what it meant to me\nA cemetery where I marry the sea\nStranger things could never change my mind\nI've got to take it on the otherside\nTake it on the otherside\nTake it on... take it on\nChorus\n{pause:8}\nHow long how long will I slide?\nSeparate my side, I don't\nI don't believe it's bad\nSlit my throat, it's all I ever\nPour my life into a paper cup\nThe ashtray's full and I'm spillin' my guts\nShe wants to know am I still a slut?\nI've got to take it on the otherside\nVerse 3\n{pause:8}\nScarlet starlet and she's in my bed\nA candidate for a soul mate bled\nPush the trigger and pull the thread\nI've got to take it on the otherside\nTake it on the otherside\nTake it on... take it on\nChorus\n{pause:8}\nHow long how long will I slide?\nSeparate my side, I don't\nI don't believe it's bad\nSlit my throat, it's all I ever\nBridge\n{pause:8}\nTurn me on, take me for a hard ride\nBurn me out, leave me on the otherside\nI yell and tell it that it's not my friend\nI tear it down, I tear it down, and then it's born again\nChorus x2\n{pause:8}\nHow long how long will I slide?\nSeparate my side, I don't\nI don't believe it's bad\nSlit my throat, it's all I ever",
+      "lyrics": "{c: Intro}\nHow long how long will I slide?\nSeparate my side, I don't\nI don't believe it's bad\nSlit my throat, it's all I ever\n{c: Verse 1}\nI heard your voice through a photograph\nI thought it up and brought up the past\nOnce you know you can never go back\nI've got to take it on the otherside\n{c: Verse 2}\nCenturies are what it meant to me\nA cemetery where I marry the sea\nStranger things could never change my mind\nI've got to take it on the otherside\nTake it on the otherside\nTake it on... take it on\n{c: Chorus}\nHow long how long will I slide?\nSeparate my side, I don't\nI don't believe it's bad\nSlit my throat, it's all I ever\nPour my life into a paper cup\nThe ashtray's full and I'm spillin' my guts\nShe wants to know am I still a slut?\nI've got to take it on the otherside\n{c: Verse 3}\nScarlet starlet and she's in my bed\nA candidate for a soul mate bled\nPush the trigger and pull the thread\nI've got to take it on the otherside\nTake it on the otherside\nTake it on... take it on\n{c: Chorus}\nHow long how long will I slide?\nSeparate my side, I don't\nI don't believe it's bad\nSlit my throat, it's all I ever\n{c: Bridge}\nTurn me on, take me for a hard ride\nBurn me out, leave me on the otherside\nI yell and tell it that it's not my friend\nI tear it down, I tear it down, and then it's born again\n{c: Chorus x2}\nHow long how long will I slide?\nSeparate my side, I don't\nI don't believe it's bad\nSlit my throat, it's all I ever",
       "updatedAt": "2026-06-04T12:49:41.223Z"
     },
     "In My Place": {
@@ -180,7 +203,7 @@
       "artist": "Coldplay",
       "notes": "",
       "structure": "Intro | Verse 1 | Chorus | Verse 2 | Chorus | Bridge | Outro",
-      "lyrics": "Verse 1\n{pause:8}\nIn my place, in my place\nwere lines that I couldn't change\nI was lost, oh yeah\nI was lost, I was lost\ncrossed lines I shouldn't have crossed\nI was lost, oh yeah\nChorus\nyeah, how long must you wait for it?\nyeah, how long must you pay for it?\nyeah, how long must you wait for it?\n[Verse 2]\n{pause:8}\nI was scared, I was scared\ntired and underprepared\nbut I'll wait for it\nif you go, if you go\nand leave me down here on my own\nthen I'll wait for you\nChorus\nyeah, how long must you wait for it?\nyeah, how long must you pay for it?\nyeah, how long must you wait for it?\nOutro\nsingin' please, please, please\ncome back and sing to me to me, me\ncome on and sing it out, now, now\ncome on and sing it out, to me, me\ncome back and sing\nin my place, in my place\nwere lines that I couldn't change\nI was lost, oh yeah\noh yeah",
+      "lyrics": "{c: Verse 1}\nIn my place, in my place\nwere lines that I couldn't change\nI was lost, oh yeah\nI was lost, I was lost\ncrossed lines I shouldn't have crossed\nI was lost, oh yeah\n{c: Chorus}\nyeah, how long must you wait for it?\nyeah, how long must you pay for it?\nyeah, how long must you wait for it?\n[Verse 2]\nI was scared, I was scared\ntired and underprepared\nbut I'll wait for it\nif you go, if you go\nand leave me down here on my own\nthen I'll wait for you\n{c: Chorus}\nyeah, how long must you wait for it?\nyeah, how long must you pay for it?\nyeah, how long must you wait for it?\n{c: Outro}\nsingin' please, please, please\ncome back and sing to me to me, me\ncome on and sing it out, now, now\ncome on and sing it out, to me, me\ncome back and sing\nin my place, in my place\nwere lines that I couldn't change\nI was lost, oh yeah\noh yeah",
       "updatedAt": "2026-06-04T12:45:50.293Z"
     },
     "When I Come Around": {
@@ -190,7 +213,7 @@
       "artist": "Green Day",
       "notes": "",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Solo | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nI heard you crying loud, all the way across town\nYou've been searching for that someone,\nand it's me out on the prowl\nAs you sit around feeling sorry for yourself\nDon't get lonely now Dry your whining eyes\nI'm just roaming for the moment\nSleazin' my back yard so don't get so uptight\nyou been thinking about ditching me\nChorus\nNo time to search the world around\nCause you know where I'll be found\nWhen I come around\nVerse 2\n{pause:8}\nI heard it all before So don't knock down my door\nI'm a loser and a user so I don't need no accuser\nto try and slag me down because I know I'm right\nSo go do what you like Make sure you do it wise\nYou may find out that your self doubt means nothing was ever there\nYou can't go forcing something if it's just not right\nChorus\nNo time to search the world around\nCause you know where I'll be found\nWhen I come around\nWhen I come around\nSolo\n{pause:8}\nChorus\nNo time to search the world around\nCause you know where I'll be found\nWhen I come around\nWhen I come around",
+      "lyrics": "{c: Verse 1}\nI heard you crying loud, all the way across town\nYou've been searching for that someone,\nand it's me out on the prowl\nAs you sit around feeling sorry for yourself\nDon't get lonely now Dry your whining eyes\nI'm just roaming for the moment\nSleazin' my back yard so don't get so uptight\nyou been thinking about ditching me\n{c: Chorus}\nNo time to search the world around\nCause you know where I'll be found\nWhen I come around\n{c: Verse 2}\nI heard it all before So don't knock down my door\nI'm a loser and a user so I don't need no accuser\nto try and slag me down because I know I'm right\nSo go do what you like Make sure you do it wise\nYou may find out that your self doubt means nothing was ever there\nYou can't go forcing something if it's just not right\n{c: Chorus}\nNo time to search the world around\nCause you know where I'll be found\nWhen I come around\nWhen I come around\n{c: Solo}\n{c: Chorus}\nNo time to search the world around\nCause you know where I'll be found\nWhen I come around\nWhen I come around",
       "updatedAt": "2026-06-04T12:59:43.146Z"
     },
     "Let It Be": {
@@ -200,7 +223,7 @@
       "artist": "The Beatles",
       "notes": "",
       "structure": "Verse 1 | Chorus  | Verse 2 | Chorus x2 | Interlude | Solo |  Chorus | Verse 3 | Chorus x 2",
-      "lyrics": "Verse 1\n{pause:8}\nWhen I find myself in times of trouble\nMother Mary comes to me\nSpeaking words of wisdom, let it be. \nAnd in my hour of darkness\nShe is standing right in front of me\nSpeaking words of wisdom, let it be.\nChorus\nLet it be, let it be, let it be, let it be,\nWhisper words of wisdom, let it be!\nVerse 2\n{pause:8}\nAnd when the broken hearted people\nLiving in the world agree,\nThere will be an answer, let it be.\nFor though they may be parted there is\nStill a chance that they will see\nThere will be an answer, let it be.\nChorus \n{pause:8}\nLet it be, let it be, let it be, let it be,\nYeah there will be an answer, let it be!\nChorus\nLet it be, let it be, let it be, let it be,\nWhisper words of wisdom, let it be !\nSolo\nChorus\n{pause:8}\nLet it be, let it be, let it be, let it be,\nWhisper words of wisdom, let it be !\nVerse 3\nAnd when the night is cloudy,\nThere is still a light that shines on me,\nShine on until tomorrow, let it be.\nI wake up to the sound of music\nMother Mary comes to me\nSpeaking words of wisdom, let it be.\nChorus\n{pause:8}\nLet it be, let it be, let it be, let it be,\nYeah there will be an answer, let it be !\nChorus\nLet it be, let it be, let it be, let it be,\nWhisper words of wisdom, let it be !",
+      "lyrics": "{c: Verse 1}\nWhen I find myself in times of trouble\nMother Mary comes to me\nSpeaking words of wisdom, let it be. \nAnd in my hour of darkness\nShe is standing right in front of me\nSpeaking words of wisdom, let it be.\n{c: Chorus}\nLet it be, let it be, let it be, let it be,\nWhisper words of wisdom, let it be!\n{c: Verse 2}\nAnd when the broken hearted people\nLiving in the world agree,\nThere will be an answer, let it be.\nFor though they may be parted there is\nStill a chance that they will see\nThere will be an answer, let it be.\n{c: Chorus}\nLet it be, let it be, let it be, let it be,\nYeah there will be an answer, let it be!\n{c: Chorus}\nLet it be, let it be, let it be, let it be,\nWhisper words of wisdom, let it be !\n{c: Solo}\n{c: Chorus}\nLet it be, let it be, let it be, let it be,\nWhisper words of wisdom, let it be !\n{c: Verse 3}\nAnd when the night is cloudy,\nThere is still a light that shines on me,\nShine on until tomorrow, let it be.\nI wake up to the sound of music\nMother Mary comes to me\nSpeaking words of wisdom, let it be.\n{c: Chorus}\nLet it be, let it be, let it be, let it be,\nYeah there will be an answer, let it be !\n{c: Chorus}\nLet it be, let it be, let it be, let it be,\nWhisper words of wisdom, let it be !",
       "updatedAt": "2026-06-04T12:47:52.841Z"
     },
     "Tennessee Whiskey": {
@@ -210,7 +233,7 @@
       "artist": "Chris Stapleton",
       "notes": "",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nI used to spend my nights out in a bar room\nLiquor was the only love I've known\nBut you rescued me from reachin' for the bottom\nAnd brought me back from being too far gone\nChorus\nYou're as smooth as Tennessee whiskey\nYou're as sweet as strawberry wine\nYou're as warm as a glass of brandy\nAnd honey, I stay stoned on your love all the time\nVerse 2\n{pause:8}\nI've looked for love in all the same old places\nFound the bottom of a bottle always dry\nBut when you poured out your heart I didn't waste it\nCause there's nothing like your love to get me high\nChorus\n{pause:8}\nYou're as smooth as Tennessee whiskey\nYou're as sweet as strawberry wine\nYou're as warm as a glass of brandy\nAnd honey, I stay stoned on your love all the time\nYou're as smooth as Tennessee whiskey\nYou're as sweet as strawberry wine\nYou're as warm as a glass of brandy\nAnd honey, I stay stoned on your love all the time\nYou're as smooth as Tennessee whiskey\nas Tennessee whiskey, as Tennessee whiskey\nYou're as smooth as Tennessee whiskey\nas Tennessee whiskey\n\nas Tennessee whiskey",
+      "lyrics": "{c: Verse 1}\nI used to spend my nights out in a bar room\nLiquor was the only love I've known\nBut you rescued me from reachin' for the bottom\nAnd brought me back from being too far gone\n{c: Chorus}\nYou're as smooth as Tennessee whiskey\nYou're as sweet as strawberry wine\nYou're as warm as a glass of brandy\nAnd honey, I stay stoned on your love all the time\n{c: Verse 2}\nI've looked for love in all the same old places\nFound the bottom of a bottle always dry\nBut when you poured out your heart I didn't waste it\nCause there's nothing like your love to get me high\n{c: Chorus}\nYou're as smooth as Tennessee whiskey\nYou're as sweet as strawberry wine\nYou're as warm as a glass of brandy\nAnd honey, I stay stoned on your love all the time\nYou're as smooth as Tennessee whiskey\nYou're as sweet as strawberry wine\nYou're as warm as a glass of brandy\nAnd honey, I stay stoned on your love all the time\nYou're as smooth as Tennessee whiskey\nas Tennessee whiskey, as Tennessee whiskey\nYou're as smooth as Tennessee whiskey\nas Tennessee whiskey\n\nas Tennessee whiskey",
       "updatedAt": "2026-06-04T12:57:07.657Z"
     },
     "My Girl": {
@@ -220,7 +243,7 @@
       "artist": "The Temptations",
       "notes": "",
       "structure": "Verse 1 | Pre-Chorus | Chorus | Verse 2 | Pre-Chorus | Chorus |",
-      "lyrics": "Verse 1\n{pause:8}\nI've got sunshine on a cloudy day\nWhen it's cold outside, I've got the month of May\nPre-Chorus\nI guess you'd say\nWhat can make me feel this way?\nChorus\nMy girl, my girl, my girl\nTalkin' 'bout my girl, my girl\nVerse 2\n{pause:8}\nI've got so much honey, the bees envy me\nI've got a sweeter song than the birds in the trees\nPre-Chorus\nWell, I guess you'd say\nWhat can make me feel this way?\nChorus\nMy girl, my girl, my girl\nTalkin' 'bout my girl, my girl",
+      "lyrics": "{c: Verse 1}\nI've got sunshine on a cloudy day\nWhen it's cold outside, I've got the month of May\n{c: Pre-Chorus}\nI guess you'd say\nWhat can make me feel this way?\n{c: Chorus}\nMy girl, my girl, my girl\nTalkin' 'bout my girl, my girl\n{c: Verse 2}\nI've got so much honey, the bees envy me\nI've got a sweeter song than the birds in the trees\n{c: Pre-Chorus}\nWell, I guess you'd say\nWhat can make me feel this way?\n{c: Chorus}\nMy girl, my girl, my girl\nTalkin' 'bout my girl, my girl",
       "updatedAt": "2026-06-04T12:49:01.167Z"
     },
     "You Really Got Me": {
@@ -230,7 +253,7 @@
       "artist": "The Kinks",
       "notes": "",
       "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Solo | Verse 3 | Chorus",
-      "lyrics": "Verse 1\n{pause:8}\nGirl, you really got me goin'\nYou got me so I don't know what I'm doin'\nYeah, you really got me now\nYou got me so I can't sleep at night\nChorus\nYeah, you really got me now\nYou got me so I don't know what I'm doin', now\nOh yeah, you really got me now\nYou got me so I can't sleep at night\nYou Really Got Me\nYou Really Got Me\nYou Really Got Me\nVerse 2\n{pause:8}\nSee, don't ever set me free\nI always wanna be by your side\nGirl, you really got me now\nYou got me so I can't sleep at night\nChorus\nYeah, you really got me now\nYou got me so I don't know what I'm doin', now\nOh yeah, you really got me now\nYou got me so I can't sleep at night\nYou Really Got Me\nYou Really Got Me\nYou Really Got Me\nOh no...\nSolo\nVerse 3\n{pause:8}\nSee, don't ever set me free\nI always wanna be by your side\nGirl, you really got me now\nYou got me so I can't sleep at night\nChorus\nYeah, you really got me now\nYou got me so I don't know what I'm doin', now\nOh yeah, you really got me now\nYou got me so I can't sleep at night\nYou Really Got Me\nYou Really Got Me\nYou Really Got Me",
+      "lyrics": "{c: Verse 1}\nGirl, you really got me goin'\nYou got me so I don't know what I'm doin'\nYeah, you really got me now\nYou got me so I can't sleep at night\n{c: Chorus}\nYeah, you really got me now\nYou got me so I don't know what I'm doin', now\nOh yeah, you really got me now\nYou got me so I can't sleep at night\nYou Really Got Me\nYou Really Got Me\nYou Really Got Me\n{c: Verse 2}\nSee, don't ever set me free\nI always wanna be by your side\nGirl, you really got me now\nYou got me so I can't sleep at night\n{c: Chorus}\nYeah, you really got me now\nYou got me so I don't know what I'm doin', now\nOh yeah, you really got me now\nYou got me so I can't sleep at night\nYou Really Got Me\nYou Really Got Me\nYou Really Got Me\nOh no...\n{c: Solo}\n{c: Verse 3}\nSee, don't ever set me free\nI always wanna be by your side\nGirl, you really got me now\nYou got me so I can't sleep at night\n{c: Chorus}\nYeah, you really got me now\nYou got me so I don't know what I'm doin', now\nOh yeah, you really got me now\nYou got me so I can't sleep at night\nYou Really Got Me\nYou Really Got Me\nYou Really Got Me",
       "updatedAt": "2026-06-04T13:00:29.676Z"
     },
     "Buddy Holly": {
@@ -240,97 +263,106 @@
       "artist": "Weezer",
       "notes": "Don't forget to stop on the word Front in Verse 1 and Help in Verse 2",
       "structure": "Verse 1 | Pre Chorus | Chorus | Verse 2 | Pre Chorus | Chorus | Bridge | Solo | Chorus Out",
-      "lyrics": "Verse 1\n{pause:8}\nWhat's with these homies, dissing my girl?\nWhy do they gotta front?\nWhat did we ever do to these guys\nThat made them so violent?\nPre Chorus\nWoo-hoo, but you know I'm yours\nWoo-hoo, and I know you're mine\nWoo-hoo, and that's for all time\nChorus\n{pause:8}\nOo-ee-oo I look just like Buddy Holly\nOh-oh, and you're Mary Tyler Moore\nI don't care what they say about us anyway\nI don't care bout that\nVerse 2\n{pause:8}\nDon't you ever fear, I'm always near\nI know that you need help\nYour tongue is twisted, your eyes are slit\nYou need a guardian\nPre Chorus\nWoo-hoo, but you know I'm yours\nWoo-hoo, and I know you're mine\nWoo-hoo, and that's for all time\nChorus\n{pause:8}\nOo-ee-oo I look just like Buddy Holly\nOh-oh, and you're Mary Tyler Moore\nI don't care what they say about us anyway\nI don't care bout that\nI don't care bout that\nBridge\n{pause:8}\nBang, bang a knock on the door\nAnother big bang and you're down on the floor\nOh no! What do we do?\nDon't look now but I lost my shoe\nI can't run and I can't kick\nWhat's a matter babe are you feeling sick?\nwhat's a matter, what's a matter, what's a matter you?\nWhat's a matter babe, are you feeling blue? oh-oh!\nAnd that's for all time And that's for all time\nChorus Out\n{pause:8}\nOo-ee-oo I look just like Buddy Holly\nOh-oh, and you're Mary Tyler Moore\nI don't care what they say about us anyway\nI don't care bout that\nI don't care bout that\nI don't care bout that\nI don't care bout that",
+      "lyrics": "{c: Verse 1}\nWhat's with these homies, dissing my girl?\nWhy do they gotta front?\nWhat did we ever do to these guys\nThat made them so violent?\n{c: Pre Chorus}\nWoo-hoo, but you know I'm yours\nWoo-hoo, and I know you're mine\nWoo-hoo, and that's for all time\n{c: Chorus}\nOo-ee-oo I look just like Buddy Holly\nOh-oh, and you're Mary Tyler Moore\nI don't care what they say about us anyway\nI don't care bout that\n{c: Verse 2}\nDon't you ever fear, I'm always near\nI know that you need help\nYour tongue is twisted, your eyes are slit\nYou need a guardian\n{c: Pre Chorus}\nWoo-hoo, but you know I'm yours\nWoo-hoo, and I know you're mine\nWoo-hoo, and that's for all time\n{c: Chorus}\nOo-ee-oo I look just like Buddy Holly\nOh-oh, and you're Mary Tyler Moore\nI don't care what they say about us anyway\nI don't care bout that\nI don't care bout that\n{c: Bridge}\nBang, bang a knock on the door\nAnother big bang and you're down on the floor\nOh no! What do we do?\nDon't look now but I lost my shoe\nI can't run and I can't kick\nWhat's a matter babe are you feeling sick?\nwhat's a matter, what's a matter, what's a matter you?\nWhat's a matter babe, are you feeling blue? oh-oh!\nAnd that's for all time And that's for all time\n{c: Chorus Out}\nOo-ee-oo I look just like Buddy Holly\nOh-oh, and you're Mary Tyler Moore\nI don't care what they say about us anyway\nI don't care bout that\nI don't care bout that\nI don't care bout that\nI don't care bout that",
       "updatedAt": "2026-06-04T12:42:51.944Z"
     },
     "Santa Monica": {
       "title": "Santa Monica",
       "key": "G",
       "tempo": 100,
+      "timeSig": "4/4",
       "artist": "EverClear",
       "notes": "",
-      "structure": "Verse 1 | Verse 2 | Chorus  | Verse 3 | Verse 4 | Chorus Out",
-      "lyrics": "Verse 1\n{pause:8}\nI am still living with your ghost\nlonely and dreaming of the west coast\nI don't want to be your downtime\nI don't want to be your stupid game\nVerse 2\n{pause:8}\nwith my big black boots and an old suitcase\nI do believe I'll find myself a new place\nI don't want to be the bad guy\nI don't want to do your sleepwalk dance anymore\nI just want to see some palm trees\ngo and try to shake away this disease\nChorus\n{pause:8}\nwe can live beside the ocean\nleave the fire behind\nswim out past the breakers\nwatch the world die\nVerse 3\n{pause:8}\nI am still dreaming of your face\nhungry and hollow for all the things you took away\nI don't want to be your good time\nI don't want to be your fall-back crutch anymore\nVerse 4\n{pause:8}\nI'll walk right out into a brand new day\ninsane and rising in my own weird way\nI don't want to be the bad guy\nI don't want to do your sleepwalk dance anymore\nI just want to feel some sunshine\nI just want to find some place to be alone\nChorus\n{pause:8}\nwe can live beside the ocean\nleave the fire behind\nswim out past the breakers\nand watch the world die",
-      "updatedAt": "2026-06-04T12:50:17.178Z"
+      "structure": "Intro | Verse 1 | Verse 2 | Chorus | Verse 3 | Verse 4 | Chorus | Outro",
+      "lyrics": "{c: Intro}{bars:3}\n\n{c: Verse 1}{bars:8}\nI am still living with your ghost\nlonely and dreaming of the west coast\nI don't want to be your downtime\nI don't want to be your stupid game\n\n{c: Verse 2}{bars:11}\nwith my big black boots and an old suitcase\nI do believe I'll find myself a new place\nI don't want to be the bad guy\nI don't want to do your sleepwalk dance anymore\nI just want to see some palm trees\ngo and try to shake away this disease\n\n{c: Chorus}{bars:12}\nwe can live beside the ocean\nleave the fire behind\nswim out past the breakers\nwatch the world die\n\n{c: Verse 3}{bars:8}\nI am still dreaming of your face\nhungry and hollow for all the things you took away\nI don't want to be your good time\nI don't want to be your fall-back crutch anymore\n\n{c: Verse 4}{bars:11}\nI'll walk right out into a brand new day\ninsane and rising in my own weird way\nI don't want to be the bad guy\nI don't want to do your sleepwalk dance anymore\nI just want to feel some sunshine\nI just want to find some place to be alone\n\n{c: Chorus}{bars:16}\nwe can live beside the ocean\nleave the fire behind\nswim out past the breakers\nand watch the world die\n\n{c: Outro}{bars:8}\nYeah watch the world die\nYeah watch the world die\nYeah watch the world die\nYeah watch the world die",
+      "wpm": 50,
+      "speedMode": "duration",
+      "duration": "1:30",
+      "updatedAt": "2026-07-20T19:42:37.812Z"
     },
     "A Million Miles Apart": {
       "title": "A Million Miles Apart",
       "key": "G",
       "tempo": 80,
+      "timeSig": "4/4",
       "artist": "Flannel Trappe",
       "notes": "Verse: G Bm Em D C Dsus Am(G)\nChorus: G D Em C G D Em",
-      "structure": "Verse 1 | Chorus | Verse 2 | Chorus",
-      "lyrics": "[Verse 1]\nIts not long ago a thought of you would bring me joy\nFeels like yesterday a sunny spot a place to lay\nWhite fluff on a stem a hunt for luck for little boy\nPicnics on the rock a smokey fire, a place to play\n[Chorus]\nWhy did it have to fall apart? Where did it all go wrong\nYou feel a million miles apart and old and broken down\n[Verse 2]\nSpent time yesterday the fwo of us just like before\nGreen Grass int he fields a dusty road so much appeal\nYears gone by so close a thankful gem to file away\nPlease don’t leave me now I’ll get it right, Come back for more",
+      "structure": "Verse 1 | Chorus | Solo | Verse 2 | Chorus | Solo",
+      "lyrics": "{c: Verse 1}{bars:16}\n\nIts not long ago a thought of you would bring me joy\nFeels like yesterday a sunny spot a place to lay\nWhite fluff on a stem a hunt for luck for little boy\nPicnics on the rock a smokey fire, a place to play\n\n{c: Chorus}{bars:8}\n\nWhy did it have to fall apart? Where did it all go wrong\nYou feel a million miles apart and old and broken down\n\n{c: Solo}{bars:8}\n\n{c: Verse 2}{bars:16}\n\nSpent time yesterday the fwo of us just like before\nGreen Grass int he fields a dusty road so much appeal\nYears gone by so close a thankful gem to file away\nPlease don\u2019t leave me now I\u2019ll get it right, Come back for more\n\n{c: Chorus}{bars:8}\n\nWhy did it have to fall apart? Where did it all go wrong\nYou feel a million miles apart and old and broken down\n\n{c: Solo}{bars:8}",
       "wpm": 50,
-      "speedMode": "rate",
-      "duration": "3:30",
-      "updatedAt": "2026-07-14T20:08:30.869Z"
+      "speedMode": "duration",
+      "duration": "3:18",
+      "updatedAt": "2026-07-21T13:14:35.494Z"
     },
     "Can't Come Along": {
       "title": "Can't Come Along",
       "key": "Am",
-      "tempo": 80,
+      "tempo": 130,
+      "timeSig": "4/4",
       "artist": "Flannel Trappe",
       "notes": "Verse: B D A G\nChorus: B D A G",
-      "structure": "Verse 1 | Verse 2 | Chorus | Verse 3 | Chorus | Break | Chorus x2",
-      "lyrics": "[Verse 1]\nI found this one out on my own\nKnowledge always find a home\nFocusing on yourself you freeze\nRaising thoughts again we’re free\n[Verse 2]\nDismiss the plethora of noise\nAnd focus on a path of joy\nJust like the river on its way\nEnjoy the journey of today\n[Chorus]\nBroken again so you cant come along\nHopeful again but you cant come along\nLost in your mind an you cant come along\nYou’re lost in yourselves without me\n[Verse 3]\nI see the curtain on your eyes\nNothing at this point would surprise you (or me)\nDistrust disdain will split and cry\nMeet my gaze and say I love you!",
+      "structure": "Intro | Verse 1 | Solo | Verse 2 | Chorus | Verse 3 | Chorus | Chorus | Bridge | Solo 2 | Chorus",
+      "lyrics": "{c: Intro}{bars:8}\n\n{c: Verse 1}{bars:16}\n\nI found this one out on my own\nKnowledge always find a home\nFocusing on yourself you freeze\nRaising thoughts again we\u2019re free\n\n{c: Solo}{bars:8}\n\n{c: Verse 2}{bars:16}\n\nDismiss the plethora of noise\nAnd focus on a path of joy\nJust like the river on its way\nEnjoy the journey of today\n\n{c: Chorus}{bars:8}\n\nBroken again so you cant come along\nHopeful again but you cant come along\nLost in your mind an you cant come along\nYou\u2019re lost in yourselves without me\n\n{c: Verse 3}{bars:16}\n\nI see the curtain on your eyes\nNothing at this point would surprise you (or me)\nDistrust disdain will split and cry\nMeet my gaze and say I love you!\n\n{c: Chorus}{bars:8}\n\nBroken again so you cant come along\nHopeful again but you cant come along\nLost in your mind an you cant come along\nYou\u2019re lost in yourselves without me\n\n{c: Chorus}{bars:8}\n\nBroken again so you cant come along\nHopeful again but you cant come along\nLost in your mind an you cant come along\nYou\u2019re lost in yourselves without me\n\n{c: Bridge}{bars:8}\n\n{c: Solo 2}{bars:8}\n\n{c: Chorus}{bars:8}\n\nBroken again so you cant come along\nHopeful again but you cant come along\nLost in your mind an you cant come along\nYou\u2019re lost in yourselves without me",
       "wpm": 50,
-      "speedMode": "rate",
-      "duration": "3:30",
-      "updatedAt": "2026-07-14T20:08:16.109Z"
+      "speedMode": "duration",
+      "duration": "1:30",
+      "updatedAt": "2026-07-21T13:38:15.134Z"
     },
     "Land of The Toads": {
       "title": "Land of The Toads",
       "key": "G",
-      "tempo": 80,
+      "tempo": 130,
+      "timeSig": "4/4",
       "artist": "Flannel Trappe",
-      "notes": "Verse: G E C G - G E B D\nChorus: D G C G - D B E B A G",
-      "structure": "Verse 1 | Verse 2 | Chorus | Verse 3",
-      "lyrics": "[Verse 1]\nIn the land of the toadies you long to be free\nBut the lessons of society keep closing in on me\nFar away we dream to dream\nFar away from the toadies\n\n[Verse 2]\nIn the land of the cronies you long to believe\nThat there is a prerogative; believe like you and me\nFar away we dream to dream\nFar a way from the toadies\n\n[Chorus]\nThis is all our fault and you’re to blame\nA chicken to a fox and what a shame\nA waste, a pain, A shame, a name sake\n\n[Verse 3]\nIn the land of the prophet far above you and me\nFrom the back of the hollow of our own humanity\nWe believe that we are seen \nNot in the land of the toadies…",
+      "notes": "Verse: G E C G - G E B D\nChorus: D G C G - E B E B A G",
+      "structure": "Verse 1 | Verse 2 | Chorus | Solo | Verse 3 | Chorus | Verse 4",
+      "lyrics": "{c: Verse 1}{bars:8}\n\nIn the land of the toadies you long to be free\nBut the lessons of society keep closing in on me\nFar away we dream to dream\nFar away from the toadies\n\n{c: Verse 2}{bars:8}\n\nIn the land of the cronies you long to believe\nThat there is a prerogative; believe like you and me\nFar away we dream to dream\nFar a way from the toadies\n\n{c: Chorus}{bars:10}\n\nThis is all our fault and you\u2019re to blame\nA chicken to a fox and what a shame\nA waste, a pain, A shame, a name sake\n\n{c: Solo}{bars:8}\n\n{c: Verse 3}{bars:8}\n\nIn the land of the prophet far above you and me\nFrom the back of the hollow of our own humanity\nWe believe that we are seen \nNot in the land of the toadies\u2026\n\n{c: Chorus}{bars:10}\n\nThis is all our fault and you\u2019re to blame\nA chicken to a fox and what a shame\nA waste, a pain, A shame, a name sake\n\n{c: Verse 4}{bars:8}\n\nIn the land of the toadies you long to be free\nBut the lessons of society keep closing in on me\nFar away we dream to dream\nFar away from the toadies",
       "wpm": 50,
-      "speedMode": "rate",
-      "duration": "3:30",
-      "updatedAt": "2026-07-14T13:34:41.948Z"
+      "speedMode": "duration",
+      "duration": "1:30",
+      "updatedAt": "2026-07-21T13:38:46.754Z"
     },
     "Place Don't want You": {
       "title": "Place Don't want You",
       "key": "F",
-      "tempo": 80,
+      "tempo": 92,
+      "timeSig": "4/4",
       "artist": "Flannel Trappe",
       "notes": "",
-      "structure": "Verse 1 | Chorus | Verse 2 | Chorus | Break | Chorus x2",
-      "lyrics": "[Verse 1]\nI hear the choking in your voice\nI feel it too, but you’ve got more to lose\nI see the tears in your eyes\nFears I wanna sooth but there's no easy truth\n[Chorus]\nWhat I can say to you, but this place don’t want you\nGame stole from you\nI’ll follow you if you want to leave \nyou don't owe anyone a goddam thing\nHow can I comfort you if this place don’t want you? \nSame its come to…\nI’ll follow you if you want to fight \nHand in hand on the front lines\n[Verse 2]\nSeeds sown will show a simple truth\nSlowly tended to now their bearing fruit\nTendrils of rot between the lies\nStrangling itself\nDrawing on the lies?",
+      "structure": "Verse 1 | Chorus | Breakdown | Verse 2 | Chorus | Breakdown | Solo | Chorus | Chorus | Breakdown",
+      "lyrics": "{c: Verse 1}{bars:8}\n\nI hear the choking in your voice\nI feel it too, but you\u2019ve got more to lose\nI see the tears in your eyes\nFears I wanna sooth but there's no easy truth\n\n{c: Chorus}{bars:10}\n\nWhat I can say to you, but this place don\u2019t want you\nGame stole from you\nI\u2019ll follow you if you want to leave \nyou don't owe anyone a goddam thing\nHow can I comfort you if this place don\u2019t want you? \nSame its come to\u2026\nI\u2019ll follow you if you want to fight \nHand in hand on the front lines\n\n{c: Breakdown}{bars:4}\n\n{c: Verse 2}{bars:8}\n\nSeeds sown will show a simple truth\nSlowly tended to now their bearing fruit\nTendrils of rot between the lies\nStrangling itself\nDrawing on the lies?\n\n{c: Chorus}{bars:10}\n\nWhat I can say to you, but this place don\u2019t want you\nGame stole from you\nI\u2019ll follow you if you want to leave \nyou don't owe anyone a goddam thing\nHow can I comfort you if this place don\u2019t want you? \nSame its come to\u2026\nI\u2019ll follow you if you want to fight \nHand in hand on the front lines\n\n{c: Breakdown}{bars:4}\n\n{c: Solo}{bars:8}\n\n{c: Chorus}{bars:10}\n\nWhat I can say to you, but this place don\u2019t want you\nGame stole from you\nI\u2019ll follow you if you want to leave \nyou don't owe anyone a goddam thing\nHow can I comfort you if this place don\u2019t want you? \nSame its come to\u2026\nI\u2019ll follow you if you want to fight \nHand in hand on the front lines\n\n{c: Chorus}{bars:10}\n\nWhat I can say to you, but this place don\u2019t want you\nGame stole from you\nI\u2019ll follow you if you want to leave \nyou don't owe anyone a goddam thing\nHow can I comfort you if this place don\u2019t want you? \nSame its come to\u2026\nI\u2019ll follow you if you want to fight \nHand in hand on the front lines\n\n{c: Breakdown}{bars:4}",
       "wpm": 50,
-      "speedMode": "rate",
-      "duration": "3:30",
-      "updatedAt": "2026-07-14T20:09:45.690Z"
+      "speedMode": "duration",
+      "duration": "3:18",
+      "updatedAt": "2026-07-21T12:39:30.191Z"
     },
     "Sins To Be Paid": {
       "title": "Sins To Be Paid",
       "key": "E",
-      "tempo": 80,
+      "tempo": 90,
+      "timeSig": "4/4",
       "artist": "Flannel Trappe",
       "notes": "Key Change on the last Double Chorus",
-      "structure": "Verse 1 | Pre-Chorus | Chorus | Verse 2 | Pre-Chorus | Chorus | Bridge | Pre- Chorus  | Chorus x2",
-      "lyrics": "[Verse 1]\nDo you care not? \nFor the suffering you have wrought\nWhat is one more lie?\nWhat is more life?\n[Pre-Chorus]\nSo bottoms up and look alive\nWe’ve got an appetite\nAnd we’re eating cake tonight\n[Chorus] \nLook over your shoulder\nI know you’re afraid\nWatch your back\nYour sins need paid\nLook over your shoulder\nI know you’re afraid\nOf the shadows\nOf your grave\n[Verse 2]\nJustice for all they said\nBut we found none instead\nWhat is worth a life?\nWhat is worth a sacrifice?\n[Pre-Chorus]  \nSo bottoms up and look alive\nWe’ve got an appetite\nAnd we’re eating cake tonight\n[Chorus]\nSame lyrics as first chorus\n[Bridge]\nShow me something\n(no more empathy)\nShow me something good\n(no more apathy)\nShow me something good goddamn you\n(it is getting desperate, it’s getting deadly)\nShow me something\n(did you enjoy your)\nShow me something good\n(life of luxury?)\nShow me something good goddamn you\n(did you feel? can you sleep?)\nThere is nothing good within you\n[Pre-chorus]\n[Final Double Chorus] - key change\nSame lyrics as first chorus, mostly",
+      "structure": "Intro | Verse 2 | Pre Chorus | Chorus | Verse 2 | Pre Chorus | Chorus | Bridge | Pre Chorus | Chorus | Chorus | Outro",
+      "lyrics": "{c: Intro}{bars:4}\n\n{c: Verse 2}{bars:8}\n\nDo you care not? \nFor the suffering you have wrought\nWhat is one more lie?\nWhat is more life?\n\n{c: Pre Chorus}{bars:6}\n\nSo bottoms up and look alive\nWe\u2019ve got an appetite\nAnd we\u2019re eating cake tonight\n\n{c: Chorus}{bars:9}\n\nLook over your shoulder\nI know you\u2019re afraid\nWatch your back\nYour sins need paid\nLook over your shoulder\nI know you\u2019re afraid\nOf the shadows\nOf your grave\n\n{c: Verse 2}{bars:8}\n\nJustice for all they said\nBut we found none instead\nWhat is worth a life?\nWhat is worth a sacrifice?\n\n{c: Pre Chorus}{bars:2}\n \nSo bottoms up and look alive\nWe\u2019ve got an appetite\nAnd we\u2019re eating cake tonight\n\n{c: Chorus}{bars:8}\n\nLook over your shoulder\nI know you\u2019re afraid\nWatch your back\nYour sins need paid\nLook over your shoulder\nI know you\u2019re afraid\nOf the shadows\nOf your grave\n\n{c: Bridge}{bars:12}\n\nShow me something\n(no more empathy)\nShow me something good\n(no more apathy)\nShow me something good goddamn you\n(it is getting desperate, it\u2019s getting deadly)\nShow me something\n(did you enjoy your)\nShow me something good\n(life of luxury?)\nShow me something good goddamn you\n(did you feel? can you sleep?)\nThere is nothing good within you\n\n{c: Pre Chorus}{bars:5}\n\n{c: Chorus}{bars:8}\n\nLook over your shoulder\nI know you\u2019re afraid\nWatch your back\nYour sins need paid\nLook over your shoulder\nI know you\u2019re afraid\nOf the shadows\nOf your grave\n\n{c: Chorus}{bars:8}\n\nLook over your shoulder\nI know you\u2019re afraid\nWatch your back\nYour sins need paid\nLook over your shoulder\nI know you\u2019re afraid\nOf the shadows\nOf your grave\n\n{c: Outro}{bars:2}",
       "wpm": 50,
-      "speedMode": "rate",
-      "duration": "3:30",
-      "updatedAt": "2026-07-14T20:09:18.637Z"
+      "speedMode": "duration",
+      "duration": "1:30",
+      "updatedAt": "2026-07-21T13:40:05.107Z"
     },
     "Africa": {
       "title": "Africa",
       "key": "C",
       "tempo": 92,
       "timeSig": "4/4",
-      "artist": "Weezer",
+      "artist": "Toto",
       "notes": "",
-      "structure": "Intro | Verse 1 | Chorus | Interlude | Verse 2 | Chorus | Interlude | Solo | Chorus | Outro",
-      "lyrics": "{c: Intro}{bars:12}\n\n{c: Verse 1}{bars:18}\n\nI hear the drums echoing tonight\nBut she hears only whispers of some quiet conversation\nShe's coming in the twelve thirty flight\nThe moonlit wings reflect the stars that guide me towards salvation\nI stopped an old man along the way\nHoping to find some old forgotten words or ancient melodies\nHe turned to me as if to say\nHurry, boy, it's waiting there for you!\n\n{c: Chorus}{bars:9}\n\nIt's gonna take a lot to drag me away from you\nThere's nothing that a hundred men or more could ever do\nI bless the rains down in Africa\nGonna take some time to do the things we never had\n\n{c: Interlude}{bars:4}\n\n{c: Verse 2}{bars:13}\n\nThe wild dogs cry out in the night\nAs they grow restless longing for some solitary company\nI know that I must do what's right\nSure as Kilimanjaro rises like Olympus above the Serengeti\nI seek to cure what's deep inside\nFrightened of this thing that I've become\n\n{c: Chorus}{bars:9}\n\nIt's gonna take a lot to drag me away from you\nThere's nothing that a hundred men or more could ever do\nI bless the rains down in Africa\nGonna take some time to do the things we never had\n\n{c: Interlude}{bars:4}\n\n{c: Solo}{bars:9}\n\n{c: Chorus}{bars:17}\n\nHurry boy, she's waiting there for you\n\nIt's gonna take a lot to drag me away from you\nThere's nothing that a hundred men or more could ever do\nI bless the rains down in Africa\nI bless the rains down in Africa\nI bless the rains down in Africa\nI bless the rains down in Africa\nI bless the rains down in Africa\nGonna take some time to do the things we never had\n\n{c: Outro}{bars:18}",
+      "structure": "Intro Verse 1 | Chorus 1 | Interlude | Verse 2 | Chorus 2 | Interlude Solo | Chorus 3 | Outro",
+      "lyrics": "{c: Intro Verse 1}{bars:56}\n\"Hurry, boy, ___ it\u2019s waiting there ___ for you\"\n\n{c: Chorus 1}{bars:18}\n___ It\u2019s gonna take a lot ___ to drag ___ me away\n___ ___ from you ___ There\u2019s nothing that a\nhundred ___ men ___ or ___ more ___ could ever ___ do ___\nI bless the rains ___ down in Africa ___\nGonna take some time ___ to do the things we never\n\n{c: Interlude}{bars:11}\nhad, ___ ___ ___ ___ ___ ___ ___ oohhoo\n\n{c: Verse 2}{bars:26}\n___ ___ company\nI know ___ that I ___ must do ___ what\u2019s right ___\n___ ___ Serengeti\nFrightened of ___ this thing that I\u2019ve ___ become ___\n\n{c: Chorus 2}{bars:18}\nIt\u2019s gonna take a lot ___ to drag me away ___ from you\n___ There\u2019s nothing that a hundred men or more\n___ could ever do ___ I bless the rains ___ down in A\nfrica ___ Gonna take some time ___ to do the\nthings we never had, ___ ___ ___ ___ ___ ___ ___ ___ ___ ooh\n\n{c: Interlude Solo}{bars:21}\nhoo Hurry, boy, ___ she\u2019s\n\n{c: Chorus 3}{bars:35}\nwaiting there ___ for you ___ It\u2019s gonna take a lot\n___ to drag me away ___ from you ___ There\u2019s nothing that a\nhundred men or more ___ could ever do ___\nI bless the rains ___ down in Africa ___\nI bless the rains ___ down in Africa ___\nI bless the rains ___ down in Africa ___\nI bless the rains ___ down in Africa ___\nI bless the rains ___ down in Africa ___\nGonna take some time ___ to do the things we never\n\n{c: Outro}{bars:5}\nhad, ___ ___ ___ ___ ___ ___ ___ ___ ___ oohhoo",
       "wpm": 50,
       "speedMode": "duration",
-      "duration": "9:42",
-      "updatedAt": "2026-07-21T19:27:35.079Z"
+      "duration": "1:30",
+      "updatedAt": "2026-07-21T15:52:25.940Z"
     }
   },
   "setlists": {
@@ -369,16 +401,16 @@
       "Zombie"
     ],
     "Fishtank Set List": [
-      "Brain Stew",
+      "Crazy Little Thing Called Love",
       "Santa Monica",
+      "Brain Stew",
       "Creep",
       "Can't Come Along",
       "Place Don't want You",
-      "A Million Miles Apart",
       "Land of The Toads",
+      "A Million Miles Apart",
       "Sins To Be Paid",
       "Blister in the sun",
-      "Crazy Little Thing Called Love",
       "Say it aint so",
       "Zombie"
     ]
