@@ -83,6 +83,12 @@
         .drawer-body .file-wrap .btn{margin:0;}
         .drawer-body .file-wrap input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
         .drawer-body input[type=text]{width:100%;margin-bottom:0.5rem;}
+        .q-move{display:flex;flex-direction:column;gap:2px;margin-right:0.4rem;}
+        .q-move button{width:34px;height:26px;padding:0;font-size:0.8rem;line-height:1;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:6px;cursor:pointer;touch-action:manipulation;}
+        .q-move button:active{transform:scale(0.92);}
+        .q-move button:hover{background:var(--primary);border-color:var(--primary);color:#fff;}
+        .qa-step{touch-action:manipulation;user-select:none;}
+        .qa-step:active{transform:scale(0.94);}
         input.derived{background:var(--surface-2);border-style:dashed;opacity:0.9;}
         .bars-badge{display:inline-block;margin-left:0.6rem;padding:0.1rem 0.45rem;font-size:0.68rem;font-weight:700;font-style:normal;letter-spacing:0.02em;border-radius:50px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);vertical-align:middle;}
         .perf-section-heading.section-active{color:var(--accent);border-left-color:var(--accent);}
@@ -326,16 +332,20 @@
     <div class="drawer-body">
 
         <div class="drawer-group">
-            <div class="drawer-group-title">&#9729;&#65039; Cloud Sync</div>
+            <button type="button" id="helpBtn" class="btn btn-outline">&#10067; How to Use This App</button>
+        </div>
+
+        <div class="drawer-group">
+            <div class="drawer-group-title">&#9729;&#65039; Cloud Library</div>
             <div class="drawer-hint" style="display:flex;align-items:center;gap:0.45rem;">
                 <span id="syncDot" style="width:9px;height:9px;border-radius:50%;background:var(--text-faint);flex-shrink:0;"></span>
                 <span id="syncStatus">Starting…</span>
             </div>
+            <button type="button" id="syncPushBtn" class="btn btn-success">&#11014;&#65039; Upload to Cloud</button>
             <button type="button" id="syncPullBtn" class="btn btn-secondary">&#8635; Reload from Cloud</button>
-            <button type="button" id="syncPushBtn" class="btn btn-purple">&#11014;&#65039; Upload This Device's Library</button>
-            <button type="button" id="syncToggleBtn" class="btn btn-secondary">&#9208; Pause Sync</button>
+            <button type="button" id="syncBackupBtn" class="btn btn-secondary">&#128190; Save Local Backup (.json)</button>
             <div class="drawer-hint" style="margin-top:0.5rem;opacity:0.75;">
-                Edits sync automatically across devices. Works offline &mdash; changes upload when you reconnect.
+                The cloud only changes when you press <strong>Upload</strong>. Every upload and reload saves a local backup file first. Saving a song stays on this device until you upload.
             </div>
         </div>
 
@@ -368,33 +378,6 @@
             <div class="file-wrap">
                 <button type="button" class="btn btn-secondary">&#128229; Import Library (.json)</button>
                 <input type="file" id="importSetListFile" accept=".json">
-            </div>
-        </div>
-
-        <div class="drawer-group">
-            <div class="drawer-group-title">&#9729;&#65039; Shared Band Library</div>
-            <div class="drawer-hint">Loads a shared <strong>.json</strong> (e.g. a GitHub <em>raw</em> URL) into your library. Read-only &mdash; your local edits never push back.</div>
-            <input type="text" id="sharedUrlInput" placeholder="https://raw.githubusercontent.com/user/repo/main/library.json" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
-            <button type="button" id="loadSharedBtn" class="btn btn-success">&#11015;&#65039; Load Shared Library</button>
-            <button type="button" id="forgetSharedBtn" class="btn btn-secondary">&#10005; Forget Saved URL</button>
-            <div class="drawer-hint" id="sharedUrlStatus" style="margin-top:0.35rem;"></div>
-        </div>
-
-        <div class="drawer-group">
-            <div class="drawer-group-title">&#128640; Publish to GitHub</div>
-            <div class="drawer-hint">Commits your whole library straight to the repo &mdash; no download, no upload. Needs a GitHub token with <strong>Contents: write</strong> on this repo only.</div>
-            <input type="text" id="ghRepoInput" placeholder="owner/repo" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
-            <input type="text" id="ghPathInput" placeholder="library.json" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
-            <input type="text" id="ghBranchInput" placeholder="main" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
-            <input type="password" id="ghTokenInput" placeholder="GitHub token (github_pat_... or ghp_...)" autocomplete="off" style="font-size:0.8rem;padding:0.5rem 0.6rem;">
-            <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-weight:600;color:var(--text-muted);margin:0 0 0.5rem;">
-                <input type="checkbox" id="ghRememberToken" style="width:auto;"> Remember token on this device
-            </label>
-            <button type="button" id="ghPushBtn" class="btn btn-success">&#128640; Publish Library to GitHub</button>
-            <button type="button" id="ghForgetBtn" class="btn btn-secondary">&#10005; Forget Token</button>
-            <div class="drawer-hint" id="ghStatus" style="margin-top:0.35rem;"></div>
-            <div class="drawer-hint" style="margin-top:0.5rem;opacity:0.75;">
-                <strong>Security:</strong> the token is stored in this browser only and is never sent anywhere except github.com. Use a <em>fine-grained</em> token limited to this one repo. Don't enable "remember" on a shared device.
             </div>
         </div>
 
@@ -467,6 +450,13 @@
                             <option value="12/8">12/8</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="songSpeedMode">Scroll Mode</label>
+                        <select id="songSpeedMode" style="width:100%;">
+                            <option value="duration">Song Duration</option>
+                            <option value="rate">Rate (manual)</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="songArtist">Artist / Author</label>
@@ -501,12 +491,11 @@
                     </div>
                     <div class="insert-bar">
                         <span class="insert-bar-label">Insert break at cursor:</span>
-                        <button type="button" id="insertBarsBtn" class="btn btn-outline insert-btn">&#127925; Measures</button>
-                        <button type="button" id="insertPauseBtn" class="btn btn-outline insert-btn">&#9201; Seconds</button>
+                        <button type="button" id="insertBarsBtn" class="btn btn-outline insert-btn">&#127925; Add Measures Break</button>
                         <span class="hint" style="margin:0;">Click where you want it, then pick one.</span>
                     </div>
                     <textarea id="songLyrics" placeholder="{c: Verse 1}&#10;[E] Amazing [A] grace how [E] sweet the sound..."></textarea>
-                    <div class="hint">Breaks hold the auto-scroll at that spot, then resume automatically. <strong>Measures</strong> uses this song's tempo &amp; time signature (best for intros, solos, turnarounds). <strong>Seconds</strong> is a fixed hold.</div>
+                    <div class="hint">A measures break holds the auto-scroll for the given number of bars at this song's tempo, then resumes &mdash; best for intros, solos, and turnarounds.</div>
                 </div>
 
                 <div class="action-row">
@@ -531,7 +520,8 @@
                         <button type="button" id="newSetListBtn" class="btn btn-success" style="padding:0.45rem 0.85rem;font-size:0.8rem;">+ Create</button>
                         <button type="button" id="renameSetListBtn" class="btn btn-secondary" style="padding:0.45rem 0.85rem;font-size:0.8rem;">Rename</button>
                     </div>
-                    <div class="hint" style="margin-bottom:0.85rem;">Drag rows to reorder. In Performance Mode, use the Set List panel to jump between songs.</div>
+                    <div class="hint" style="margin-bottom:0.5rem;">Drag rows or use the &#9650;/&#9660; buttons to reorder. Changes save to this device instantly &mdash; press <strong>Upload to Cloud</strong> in the menu to share them.</div>
+                    <div id="slSavedBanner" style="display:none;margin-bottom:0.75rem;padding:0.5rem 0.75rem;border-radius:var(--radius);background:rgba(22,163,74,0.15);border:1px solid var(--accent);color:var(--accent);font-size:0.8rem;font-weight:600;">&#10003; Set list order saved to this device</div>
                     <div class="sl-add-row">
                         <select id="setlistAddSelect"></select>
                         <button type="button" id="setlistAddBtn" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">+ Add</button>
@@ -582,6 +572,47 @@
 <!-- DOCK -->
 
 <!-- BREAK VALUE MODAL -->
+<!-- HOW-TO / HELP -->
+<div class="modal-overlay" id="helpModal">
+    <div class="modal-box" style="max-width:640px;max-height:85vh;overflow-y:auto;text-align:left;">
+        <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>How to Use This App</span>
+            <button type="button" id="helpCloseX" class="drawer-close">&times;</button>
+        </div>
+        <div class="modal-body" style="font-size:0.9rem;line-height:1.6;">
+
+            <h3 style="color:var(--accent);margin:0.5rem 0 0.3rem;font-size:1rem;">The two modes</h3>
+            <p style="margin:0 0 0.8rem;"><strong>Edit</strong> is where you build songs. <strong>Performance</strong> is the big-text, auto-scrolling view you use on stage. Switch with the buttons at the top.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Building a song</h3>
+            <p style="margin:0 0 0.8rem;">Fill in the title, tempo and time signature, then type or paste lyrics. Use the <strong>section buttons</strong> (Intro, Verse, Chorus&hellip;) to drop in headers &mdash; tick <em>&ldquo;with bars&rdquo;</em> first to also set how many measures each section runs. The <strong>Scroll Mode</strong> field picks how auto-scroll is paced, and saves with the song.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Bar-timed scrolling (the good part)</h3>
+            <p style="margin:0 0 0.8rem;">When sections have bar counts like <code>{c: Verse 1}{bars:16}</code>, the app knows exactly when each section plays and keeps it under the reading line at the right moment. The song&rsquo;s duration is then <em>calculated</em> from the bars and tempo &mdash; no guessing. Sections without bar counts fall back to even pacing, so you can add them gradually.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Measure breaks</h3>
+            <p style="margin:0 0 0.8rem;">Use <strong>Add Measures Break</strong> to hold the scroll for a set number of bars &mdash; handy for intros, solos and turnarounds.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Set lists</h3>
+            <p style="margin:0 0 0.8rem;">In the Edit view, create a set list, add songs, and drag rows (or use the &#9650;/&#9660; buttons) to reorder. Order saves to your device instantly. Open a set list from the <strong>Open</strong> dropdown to perform it &mdash; use <strong>Prev / Next</strong> or the <strong>Set List</strong> button to move between songs. Open a single song instead and the set-list controls stay out of the way.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Performance controls</h3>
+            <p style="margin:0 0 0.8rem;">Press <strong>Play</strong> to start scrolling. The <strong>&#9202; metronome</strong> clicks at the song&rsquo;s tempo. The <strong>&#127908; count-in</strong> listens for four drumstick clicks to auto-start. Tap <strong>&#9776; Quick Actions</strong> for tempo, font size and width. Tap <strong>Settings</strong> on the dock to expand more controls.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Importing a Songsterr tab</h3>
+            <p style="margin:0 0 0.8rem;">In the menu, <strong>Import Tab PDF</strong> reads a Songsterr tab and builds the song &mdash; title, artist, tempo, sections, bar counts and lyrics. Works on tabs that have section labels (Intro/Verse/Chorus).</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Cloud library &amp; backups</h3>
+            <p style="margin:0 0 0.4rem;">Your library lives on this device. The cloud only changes when you press <strong>Upload to Cloud</strong>, and <strong>Reload from Cloud</strong> pulls the shared copy down. Both save a local <code>.json</code> backup file first, so an accidental overwrite is always recoverable. Nothing syncs automatically.</p>
+            <p style="margin:0 0 0.8rem;opacity:0.8;font-size:0.85rem;">Tip: keep the occasional backup file somewhere safe. It&rsquo;s your ultimate safety net.</p>
+
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="helpCloseBtn" class="btn btn-success">Got it</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="breakModal">
     <div class="modal-box">
         <div class="modal-title" id="breakModalTitle">Add Break</div>
@@ -634,9 +665,9 @@
 
     <div class="qa-row">
         <span class="qa-label">Tempo</span>
-        <button type="button" id="qaBpmMinus" class="btn btn-outline" style="width:38px;height:38px;padding:0;font-size:1.1rem;">&minus;</button>
-        <input type="number" id="qaBpm" min="30" max="300" style="width:76px;text-align:center;font-size:1.05rem;font-weight:700;padding:0.4rem;">
-        <button type="button" id="qaBpmPlus" class="btn btn-outline" style="width:38px;height:38px;padding:0;font-size:1.1rem;">+</button>
+        <button type="button" id="qaBpmMinus" class="btn btn-outline qa-step" style="width:56px;height:56px;padding:0;font-size:1.6rem;">&minus;</button>
+        <input type="number" id="qaBpm" inputmode="numeric" min="30" max="300" style="width:96px;text-align:center;font-size:1.5rem;font-weight:700;padding:0.5rem;">
+        <button type="button" id="qaBpmPlus" class="btn btn-outline qa-step" style="width:56px;height:56px;padding:0;font-size:1.6rem;">+</button>
         <span id="qaTimeSigLabel" style="font-size:0.8rem;color:var(--text-muted);font-weight:600;"></span>
     </div>
 
@@ -674,10 +705,10 @@
                 <span id="scrollStatusText">Paused</span>
             </div>
         </div>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-            <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;" id="dockHintLabel">Settings</span>
-            <span class="dock-chevron">&#9650;</span>
-        </div>
+        <button type="button" id="dockToggleBtn" class="btn btn-outline" style="display:flex;align-items:center;gap:0.4rem;padding:0.6rem 1rem;font-size:0.9rem;font-weight:700;min-height:44px;">
+            <span id="dockHintLabel">Settings</span>
+            <span class="dock-chevron" style="font-size:0.85rem;">&#9650;</span>
+        </button>
     </div>
 
     <!-- ALWAYS-VISIBLE SET LIST NAV (outside the collapsible body) -->
@@ -701,15 +732,13 @@
             <input type="range" id="clickSensitivity" min="5" max="50" value="18" step="1" style="flex:1;min-width:60px;">
             <span id="listenStatusText" style="font-size:0.75rem;font-weight:600;color:var(--text-muted);min-width:90px;">Not listening</span>
         </div>
-        <!-- Scroll speed mode selector -->
-        <div class="dock-row">
-            <label for="speedMode" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Mode:</label>
-            <select id="speedMode" style="font-size:0.8rem;padding:0.35rem 0.6rem;">
-                <option value="duration" selected>Song Duration</option>
-                <option value="rate">Rate (manual)</option>
-            </select>
-            <button type="button" id="saveSpeedBtn" class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.75rem;" title="Save speed settings to this song">&#128190; Save</button>
-        </div>
+        <!-- Scroll mode is chosen in the Edit view now. This hidden select
+             stays the value the scroll engine reads; it mirrors the song. -->
+        <select id="speedMode" style="display:none;">
+            <option value="duration" selected>Song Duration</option>
+            <option value="rate">Rate (manual)</option>
+        </select>
+        <button type="button" id="saveSpeedBtn" style="display:none;">Save</button>
         <!-- Rate-mode slider -->
         <div class="dock-row" id="rateRow" style="display:none;">
             <label for="wpmSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Scroll Speed:</label>
@@ -722,19 +751,13 @@
             <input type="text" id="durationInput" placeholder="3:45" value="1:30" style="width:80px;font-size:0.85rem;padding:0.35rem 0.5rem;text-align:center;">
             <span id="durationNote" style="font-size:0.75rem;color:var(--text-faint);">min:sec &mdash; scrolls whole song over this time</span>
         </div>
-        <!-- Font -->
-        <div class="dock-row">
-            <label for="fontSizeSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Font:</label>
-            <input type="range" id="fontSizeSlider" min="14" max="36" value="20" style="flex:1;min-width:80px;">
-            <span id="fontSizeDisplay" style="font-size:0.8rem;font-weight:600;color:var(--text);min-width:36px;">20px</span>
-        </div>
-        <!-- Width -->
-        <div class="dock-row">
-            <label for="colWidthSlider" style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Width:</label>
-            <input type="range" id="colWidthSlider" min="20" max="100" value="100" step="1" style="flex:1;min-width:80px;">
-            <span id="colWidthDisplay" style="font-size:0.8rem;font-weight:600;color:var(--text);min-width:36px;">100%</span>
-            <button type="button" id="fitScreenBtn" class="btn btn-outline" style="padding:0.3rem 0.6rem;font-size:0.75rem;">&#8596;</button>
-        </div>
+        <!-- Font & Width now live in Quick Actions only. These hidden inputs
+             remain the single source of truth that Quick Actions drives. -->
+        <input type="range" id="fontSizeSlider" min="14" max="36" value="20" style="display:none;">
+        <span id="fontSizeDisplay" style="display:none;">20px</span>
+        <input type="range" id="colWidthSlider" min="20" max="100" value="100" step="1" style="display:none;">
+        <span id="colWidthDisplay" style="display:none;">100%</span>
+        <button type="button" id="fitScreenBtn" style="display:none;">&#8596;</button>
     </div>
 </div>
 
@@ -769,15 +792,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // no connection at all. Writes go to localStorage first (instant, offline
     // safe) and are then queued to Supabase in the background.
     function getLib()  { try { return JSON.parse(localStorage.getItem(K_LIB))  || {}; } catch(e) { return {}; } }
-    function saveLib(o){
-        localStorage.setItem(K_LIB, JSON.stringify(o));
-        if(typeof queueSongSync==='function') queueSongSync(o);
-    }
+    function saveLib(o){ localStorage.setItem(K_LIB, JSON.stringify(o)); }
     function getAllSL() { try { return JSON.parse(localStorage.getItem(K_SLS))  || {}; } catch(e) { return {}; } }
-    function saveAllSL(o){
-        localStorage.setItem(K_SLS, JSON.stringify(o));
-        if(typeof queueSetlistSync==='function') queueSetlistSync(o);
-    }
+    function saveAllSL(o){ localStorage.setItem(K_SLS, JSON.stringify(o)); }
     function getActSLName() { return localStorage.getItem(K_ACTSL) || ''; }
     function setActSLName(n){ localStorage.setItem(K_ACTSL, n); }
     function getActSL() { var n=getActSLName(); return n ? (getAllSL()[n]||[]) : []; }
@@ -797,6 +814,11 @@ document.addEventListener('DOMContentLoaded', function() {
         flds.notes.value     = song.notes     || '';
         flds.structure.value = song.structure || '';
         flds.lyrics.value    = song.lyrics    || '';
+        var mode = song.speedMode || 'duration';
+        var em = document.getElementById('songSpeedMode');
+        var dm = document.getElementById('speedMode');
+        if(em) em.value = mode;
+        if(dm) dm.value = mode;      // keep the scroll engine's hidden select in sync
     }
 
     /* ---- DOM REFS ---- */
@@ -927,6 +949,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (val.indexOf('song::') === 0) {
             var song = getLib()[val.slice(6)];
             if (song) {
+                perfIsSingleSong=true;
                 loadSong(song);
                 if(inPerf){ loadWpmForCurrentSong(); renderPerfView(); renderSLPanel();
                     requestAnimationFrame(function(){ window.scrollTo(0,0); applyColWidth(parseInt(colWidthSlider.value,10)); });
@@ -934,6 +957,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else if (val.indexOf('setlist::') === 0) {
             var name = val.slice(9);
+            perfIsSingleSong=false;
             setActSLName(name);
             curIdx = 0;
             refreshSLBuilderUI();
@@ -958,6 +982,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /* ---- SET LIST BUILDER ---- */
+    // Briefly confirm a reorder saved, so it's obvious the change persisted.
+    var _slSavedTimer=null;
+    function flashSLSaved(){
+        var b=document.getElementById('slSavedBanner');
+        if(!b) return;
+        b.style.display='block';
+        if(_slSavedTimer) clearTimeout(_slSavedTimer);
+        _slSavedTimer=setTimeout(function(){ b.style.display='none'; }, 2200);
+    }
+
     function refreshSLBuilderUI() {
         refreshActSLDropdown();
         refreshAddDropdown();
@@ -1033,11 +1067,27 @@ document.addEventListener('DOMContentLoaded', function() {
                   '<div class="q-meta">'+(song.key?'Key: '+esc(song.key):'')+
                     (song.tempo?' &middot; '+song.tempo+' BPM':'')+'</div>'+
                 '</div>'+
+                '<div class="q-move">'+
+                  '<button class="q-up" title="Move up">&#9650;</button>'+
+                  '<button class="q-down" title="Move down">&#9660;</button>'+
+                '</div>'+
                 '<button class="q-remove" title="Remove">&#10005;</button>';
             li.querySelector('.q-remove').addEventListener('click', function(e){
                 e.stopPropagation();
                 var q=getActSL(); q.splice(idx,1); saveActSL(q);
                 refreshSLBuilderUI(); refreshHeaderDropdown();
+            });
+            li.querySelector('.q-up').addEventListener('click', function(e){
+                e.stopPropagation();
+                if(idx===0) return;
+                var q=getActSL(); var m=q.splice(idx,1)[0]; q.splice(idx-1,0,m);
+                saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown(); flashSLSaved();
+            });
+            li.querySelector('.q-down').addEventListener('click', function(e){
+                e.stopPropagation();
+                var q=getActSL(); if(idx>=q.length-1) return;
+                var m=q.splice(idx,1)[0]; q.splice(idx+1,0,m);
+                saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown(); flashSLSaved();
             });
             li.addEventListener('dragstart', onDragStart);
             li.addEventListener('dragover',  onDragOver);
@@ -1058,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var dest=parseInt(this.dataset.index,10);
         if(dragSrc===null||dragSrc===dest) return;
         var q=getActSL(); var moved=q.splice(dragSrc,1)[0]; q.splice(dest,0,moved);
-        saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown();
+        saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown(); flashSLSaved();
     }
     function onDragEnd(){ dragSrc=null; slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){ el.classList.remove('dragging','drag-over'); }); }
 
@@ -1106,15 +1156,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // initialised yet (i.e. user hasn't opened performance mode this session).
     function currentSpeedSettings(existing){
         existing=existing||{};
+        var editMode=document.getElementById('songSpeedMode');
         var sEl=document.getElementById('speedMode');
         var wEl=document.getElementById('wpmSlider');
         var dEl=document.getElementById('durationInput');
+        // The Edit-view Scroll Mode is authoritative; fall back to the hidden
+        // dock select, then to the song's stored value.
+        var mode = editMode ? editMode.value
+                 : (sEl ? sEl.value : (existing.speedMode||'duration'));
         return {
-            speedMode: sEl ? sEl.value : (existing.speedMode||'duration'),
+            speedMode: mode,
             wpm:       wEl ? parseInt(wEl.value,10) : (existing.wpm||50),
             duration:  dEl ? dEl.value.trim() : (existing.duration||'1:30')
         };
     }
+
+    // Keep the hidden dock select mirrored when the Edit-view mode changes,
+    // so switching mode takes effect without needing to re-open the song.
+    (function(){
+        var em=document.getElementById('songSpeedMode');
+        var dm=document.getElementById('speedMode');
+        if(em && dm) em.addEventListener('change', function(){
+            dm.value=em.value;
+            if(typeof syncSpeedModeUI==='function') syncSpeedModeUI();
+        });
+    })();
 
     saveBtn.addEventListener('click', function(){
         var title=flds.title.value.trim(); if(!title){ alert('A valid song title is required.'); return; }
@@ -1232,13 +1298,9 @@ document.addEventListener('DOMContentLoaded', function() {
         sharedUrlStatus.style.color=color||'var(--text-faint)';
     }
 
-    // Restore a previously used URL, or fall back to the band default.
-    (function initSharedUrl(){
-        var saved=localStorage.getItem(K_SHAREDURL);
-        sharedUrlInput.value = saved || DEFAULT_SHARED_URL;
-    })();
+    // (Shared-URL loading was removed in favour of cloud reload.)
 
-    loadSharedBtn.addEventListener('click', async function(){
+    if(loadSharedBtn) loadSharedBtn.addEventListener('click', async function(){
         var url=sharedUrlInput.value.trim();
         if(!url){ setSharedStatus('Enter a URL first.', 'var(--danger)'); return; }
         // Helpful nudge: convert a github.com "blob" URL to a raw URL automatically
@@ -1270,10 +1332,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    forgetSharedBtn.addEventListener('click', function(){
+    if(forgetSharedBtn) forgetSharedBtn.addEventListener('click', function(){
         localStorage.removeItem(K_SHAREDURL);
-        sharedUrlInput.value=DEFAULT_SHARED_URL;
-        setSharedStatus('Saved URL cleared \u2014 reset to default.', 'var(--text-muted)');
+        if(sharedUrlInput) sharedUrlInput.value=DEFAULT_SHARED_URL;
+        setSharedStatus('Saved URL cleared.', 'var(--text-muted)');
     });
 
     /* ---- CLOUD FETCH ---- */
@@ -1592,6 +1654,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /* ---- SET LIST PERFORMANCE PANEL ---- */
     var curIdx=0; var panelOpen=false;
+    // True when performance mode was opened for a SINGLE song (not a set list).
+    // In that case the whole set-list UI (nav cluster, Set List button, panel)
+    // is hidden — there is no list to navigate.
+    var perfIsSingleSong=false;
 
     function renderSLPanel(){
         var queue=getActSL(); var lib=getLib(); var name=getActSLName();
@@ -1612,12 +1678,19 @@ document.addEventListener('DOMContentLoaded', function() {
             li.addEventListener('click',function(){ jumpTo(idx); });
             slPanelList.appendChild(li);
         });
-        if(queue.length){
+        if(queue.length && !perfIsSingleSong){
             slNavLabel.textContent=(curIdx+1)+' / '+queue.length+'  \u2022  '+(queue[curIdx]||'');
             slNavCluster.style.display='flex';
         } else { slNavCluster.style.display='none'; }
         prevBtn.disabled=curIdx===0;
         nextBtn.disabled=curIdx>=queue.length-1;
+        // For a single song there is no set list to show — make sure the
+        // slide-out panel is closed and stays out of the way.
+        if(perfIsSingleSong && panelOpen){
+            panelOpen=false;
+            slPanel.classList.remove('open');
+            perfLayout.classList.remove('panel-open');
+        }
     }
 
     function jumpTo(idx){
@@ -2121,8 +2194,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     dockHandle.addEventListener('click', function(e){
-        // Don't toggle if user tapped one of the buttons inside the handle
-        if(e.target.closest('button')) return;
+        // Don't toggle if user tapped one of the control buttons inside the
+        // handle — EXCEPT the dedicated Settings toggle button.
+        var btn=e.target.closest('button');
+        if(btn && btn.id!=='dockToggleBtn') return;
         setDockExpanded(!dockExpanded);
     });
 
@@ -2558,7 +2633,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     insertBarsBtn.addEventListener('click',  function(){ openBreakModal('bars'); });
-    insertPauseBtn.addEventListener('click', function(){ openBreakModal('pause'); });
+    if(insertPauseBtn) insertPauseBtn.addEventListener('click', function(){ openBreakModal('pause'); });
 
     breakMinus.addEventListener('click', function(){
         breakValueInput.value = Math.max(1, (parseInt(breakValueInput.value,10)||1) - 1);
@@ -3141,190 +3216,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /* ════════════════════════════════════════════════════════
-       PUBLISH TO GITHUB
-       Commits the full library straight to the repo via the
-       GitHub Contents API, replacing the export → rename →
-       upload loop with a single button.
-
-       The API needs the file's current SHA to update it, so we
-       GET the file first, then PUT the new content with that SHA.
-       Content must be base64, and btoa() breaks on non-ASCII, so
-       we UTF-8 encode before encoding.
-    ════════════════════════════════════════════════════════ */
-    var ghRepoInput     = document.getElementById('ghRepoInput');
-    var ghPathInput     = document.getElementById('ghPathInput');
-    var ghBranchInput   = document.getElementById('ghBranchInput');
-    var ghTokenInput    = document.getElementById('ghTokenInput');
-    var ghRememberToken = document.getElementById('ghRememberToken');
-    var ghPushBtn       = document.getElementById('ghPushBtn');
-    var ghForgetBtn     = document.getElementById('ghForgetBtn');
-    var ghStatus        = document.getElementById('ghStatus');
-
-    function setGhStatus(msg, color){
-        if(!ghStatus) return;
-        ghStatus.textContent = msg;
-        ghStatus.style.color = color || 'var(--text-faint)';
-    }
-
-    // btoa() throws on characters above U+00FF, so encode to UTF-8 bytes first.
-    function utf8ToBase64(str){
-        var bytes = new TextEncoder().encode(str);
-        var bin = '';
-        bytes.forEach(function(b){ bin += String.fromCharCode(b); });
-        return btoa(bin);
-    }
-
-    // Derive owner/repo + branch from the shared raw URL, so the fields
-    // pre-fill sensibly the first time.
-    function ghDefaultsFromSharedUrl(){
-        var m = (DEFAULT_SHARED_URL||'').match(
-            /raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)$/);
-        if(!m) return {repo:'', branch:'main', path:'library.json'};
-        return {repo:m[1]+'/'+m[2], branch:m[3], path:m[4]};
-    }
-
-    (function initGhFields(){
-        if(!ghRepoInput) return;
-        var d = ghDefaultsFromSharedUrl();
-        ghRepoInput.value   = localStorage.getItem(K_GH_REPO)   || d.repo;
-        ghPathInput.value   = localStorage.getItem(K_GH_PATH)   || d.path;
-        ghBranchInput.value = localStorage.getItem(K_GH_BRANCH) || d.branch;
-        var savedTok = localStorage.getItem(K_GH_TOKEN);
-        if(savedTok){
-            ghTokenInput.value = savedTok;
-            ghRememberToken.checked = true;
-            setGhStatus('Token remembered on this device.', 'var(--text-muted)');
-        }
-    })();
-
-    async function ghGetExistingSha(repo, path, branch, token){
-        var url = 'https://api.github.com/repos/'+repo+'/contents/'+
-                  encodeURIComponent(path).replace(/%2F/g,'/')+
-                  '?ref='+encodeURIComponent(branch);
-        var res = await fetch(url, {
-            headers:{ 'Authorization':'Bearer '+token,
-                      'Accept':'application/vnd.github+json' }
-        });
-        if(res.status===404) return null;          // first publish, no SHA yet
-        if(!res.ok){
-            var t = await res.text();
-            throw new Error('Could not read the file ('+res.status+'). '+ghExplain(res.status, t));
-        }
-        var j = await res.json();
-        return j.sha || null;
-    }
-
-    function ghExplain(status, body){
-        if(status===401) return 'The token was rejected — check it was copied in full and has not expired.';
-        if(status===403) return 'Access denied — the token likely lacks Contents: write on this repo.';
-        if(status===404) return 'Repo or branch not found — check owner/repo and the branch name.';
-        if(status===409) return 'The file changed on GitHub since this page loaded. Try again.';
-        if(status===422) return 'GitHub rejected the commit (usually a stale SHA). Try again.';
-        try{ var j=JSON.parse(body); if(j.message) return j.message; }catch(e){}
-        return '';
-    }
-
-    async function ghPublish(){
-        var repo   = ghRepoInput.value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
-        var path   = (ghPathInput.value.trim()   || 'library.json').replace(/^\//,'');
-        var branch = ghBranchInput.value.trim()  || 'main';
-        var token  = ghTokenInput.value.trim();
-
-        if(!/^[^\/]+\/[^\/]+$/.test(repo)){
-            setGhStatus('Repository must look like owner/repo (e.g. sjanes9/Setlist-App).','var(--danger)'); return;
-        }
-        if(!token){ setGhStatus('Enter a GitHub token first.','var(--danger)'); return; }
-
-        var lib = getLib();
-        if(!Object.keys(lib).length){ setGhStatus('Your library is empty — nothing to publish.','var(--danger)'); return; }
-
-        var pkg = {type:'SET_LIST_EXPORT', version:'2.4',
-                   exportedAt:new Date().toISOString(),
-                   songs:lib, setlists:getAllSL()};
-        var body = JSON.stringify(pkg, null, 2);
-
-        var songCount = Object.keys(lib).length;
-        var slCount   = Object.keys(getAllSL()).length;
-        if(!confirm('Publish '+songCount+' song(s) and '+slCount+' set list(s) to\n\n'+
-                    repo+' → '+branch+' → '+path+'\n\nThis overwrites the file for everyone who pulls it.')) {
-            setGhStatus('Publish cancelled.','var(--text-muted)'); return;
-        }
-
-        ghPushBtn.disabled = true;
-        setGhStatus('Checking existing file\u2026','var(--text-muted)');
-        try{
-            var sha = await ghGetExistingSha(repo, path, branch, token);
-            setGhStatus(sha ? 'Committing update\u2026' : 'Creating file\u2026','var(--text-muted)');
-
-            var payload = {
-                message: 'Update library ('+songCount+' songs, '+slCount+' set lists)',
-                content: utf8ToBase64(body),
-                branch:  branch
-            };
-            if(sha) payload.sha = sha;
-
-            var res = await fetch('https://api.github.com/repos/'+repo+'/contents/'+
-                                  encodeURIComponent(path).replace(/%2F/g,'/'), {
-                method:'PUT',
-                headers:{ 'Authorization':'Bearer '+token,
-                          'Accept':'application/vnd.github+json',
-                          'Content-Type':'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if(!res.ok){
-                var txt = await res.text();
-                throw new Error('Publish failed ('+res.status+'). '+ghExplain(res.status, txt));
-            }
-            var out = await res.json();
-            var shortSha = (out.commit && out.commit.sha) ? out.commit.sha.slice(0,7) : '';
-            setGhStatus('\u2713 Published '+songCount+' songs & '+slCount+' set lists'+
-                        (shortSha?(' \u2014 commit '+shortSha):'')+'. Bandmates can pull now.','var(--accent)');
-
-            // Remember the destination (token only if asked)
-            localStorage.setItem(K_GH_REPO, repo);
-            localStorage.setItem(K_GH_PATH, path);
-            localStorage.setItem(K_GH_BRANCH, branch);
-            if(ghRememberToken.checked) localStorage.setItem(K_GH_TOKEN, token);
-            else localStorage.removeItem(K_GH_TOKEN);
-        }catch(err){
-            setGhStatus(err && err.message ? err.message : String(err), 'var(--danger)');
-        }finally{
-            ghPushBtn.disabled = false;
-        }
-    }
-
-    if(ghPushBtn) ghPushBtn.addEventListener('click', ghPublish);
-    if(ghForgetBtn) ghForgetBtn.addEventListener('click', function(){
-        localStorage.removeItem(K_GH_TOKEN);
-        ghTokenInput.value='';
-        ghRememberToken.checked=false;
-        setGhStatus('Token cleared from this device.','var(--text-muted)');
-    });
-
-    /* ════════════════════════════════════════════════════════
-       SUPABASE SYNC — offline-first, two-way
+       SUPABASE CLOUD LIBRARY — MANUAL PUBLISH
        ────────────────────────────────────────────────────────
-       Design:
-         • localStorage is the READ source of truth, so the app
-           works with no connection (essential on stage).
-         • Writes hit localStorage instantly, then queue to the
-           cloud. If offline, the queue drains when back online.
-         • Realtime subscriptions pull other people's edits in.
-         • Conflicts resolve last-write-wins by updated_at.
+       The cloud is a snapshot you control, NOT a live mirror.
+       It changes in exactly two situations:
+         • Upload to Cloud  — pushes this device's whole library up
+         • Reload from Cloud — pulls the cloud copy down to this device
+       Nothing syncs automatically. Saving a song touches localStorage
+       only. This keeps behaviour predictable on stage — no background
+       writes, no surprise edits mid-set.
     ════════════════════════════════════════════════════════ */
     var SUPABASE_URL  = 'https://srtzeeggjiikezunfoyf.supabase.co';
     var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydHplZWdnamlpa2V6dW5mb3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDMwNzMsImV4cCI6MjEwMDIxOTA3M30.7mvllyczD2CFmqkrntk3OmRp657RHkqi0bUEjuG88MU';
 
-    var K_DEVICE   = 'song_manager_device_id';
-    var K_SYNC_ON  = 'song_manager_sync_enabled';
-    var K_PENDING  = 'song_manager_pending_sync';
+    var K_DEVICE = 'song_manager_device_id';
+    var sb = null;
 
-    var sb = null;              // Supabase client
-    var syncEnabled = localStorage.getItem(K_SYNC_ON) !== 'false';
-    var syncBusy = false;
-    var applyingRemote = false; // guards against echoing remote changes back
-
-    // A stable per-device id so we can ignore our own realtime echoes
     var deviceId = localStorage.getItem(K_DEVICE);
     if(!deviceId){
         deviceId = 'dev_' + Math.random().toString(36).slice(2,10);
@@ -3340,228 +3247,63 @@ document.addEventListener('DOMContentLoaded', function() {
         var hd  = document.getElementById('syncDotHeader');
         if(el)  el.textContent = msg;
         if(dot) dot.style.background = colour;
-        if(hd){ hd.style.background = colour; hd.title = 'Cloud sync: '+msg; }
+        if(hd){ hd.style.background = colour; hd.title = 'Cloud: '+msg; }
     }
 
-    // ---- Row <-> app-object mapping -------------------------
     function songToRow(t, s){
         return {
-            title: t,
-            artist: s.artist || null,
-            key: s.key || null,
-            tempo: s.tempo || null,
-            time_sig: s.timeSig || '4/4',
-            notes: s.notes || null,
-            structure: s.structure || null,
+            title: t, artist: s.artist || null, key: s.key || null,
+            tempo: s.tempo || null, time_sig: s.timeSig || '4/4',
+            notes: s.notes || null, structure: s.structure || null,
             lyrics: s.lyrics || null,
             wpm: (s.wpm===undefined||s.wpm===null) ? null : s.wpm,
-            speed_mode: s.speedMode || null,
-            duration: s.duration || null,
+            speed_mode: s.speedMode || null, duration: s.duration || null,
             updated_by: deviceId
         };
     }
     function rowToSong(r){
         return {
-            title: r.title, artist: r.artist || '', key: r.key || 'C',
-            tempo: r.tempo || 80, timeSig: r.time_sig || '4/4',
-            notes: r.notes || '', structure: r.structure || '',
-            lyrics: r.lyrics || '',
-            wpm: r.wpm, speedMode: r.speed_mode, duration: r.duration,
-            updatedAt: r.updated_at
+            title:r.title, artist:r.artist||'', key:r.key||'C',
+            tempo:r.tempo||80, timeSig:r.time_sig||'4/4',
+            notes:r.notes||'', structure:r.structure||'', lyrics:r.lyrics||'',
+            wpm:r.wpm, speedMode:r.speed_mode, duration:r.duration,
+            updatedAt:r.updated_at
         };
     }
 
-    // ---- Pending queue (survives reloads / offline) ---------
-    function getPending(){
-        try { return JSON.parse(localStorage.getItem(K_PENDING)) || {songs:{}, setlists:{}}; }
-        catch(e){ return {songs:{}, setlists:{}}; }
-    }
-    function setPending(p){ localStorage.setItem(K_PENDING, JSON.stringify(p)); }
-    function pendingCount(){
-        var p=getPending();
-        return Object.keys(p.songs).length + Object.keys(p.setlists).length;
-    }
-
-    var lastLibSnapshot = null, lastSLSnapshot = null;
-
-    // Queue only what actually changed, so a save doesn't push 25 songs.
-    function queueSongSync(lib){
-        if(applyingRemote) return;
-        var p=getPending(), changed=0;
-        Object.keys(lib).forEach(function(t){
-            var prev = lastLibSnapshot ? lastLibSnapshot[t] : undefined;
-            if(!prev || JSON.stringify(prev)!==JSON.stringify(lib[t])){
-                p.songs[t]='upsert'; changed++;
-            }
-        });
-        if(lastLibSnapshot){
-            Object.keys(lastLibSnapshot).forEach(function(t){
-                if(!(t in lib)){ p.songs[t]='delete'; changed++; }
-            });
-        }
-        lastLibSnapshot = JSON.parse(JSON.stringify(lib));
-        if(changed){ setPending(p); drainQueue(); }
-    }
-
-    function queueSetlistSync(all){
-        if(applyingRemote) return;
-        var p=getPending(), changed=0;
-        Object.keys(all).forEach(function(n){
-            var prev = lastSLSnapshot ? lastSLSnapshot[n] : undefined;
-            if(!prev || JSON.stringify(prev)!==JSON.stringify(all[n])){
-                p.setlists[n]='upsert'; changed++;
-            }
-        });
-        if(lastSLSnapshot){
-            Object.keys(lastSLSnapshot).forEach(function(n){
-                if(!(n in all)){ p.setlists[n]='delete'; changed++; }
-            });
-        }
-        lastSLSnapshot = JSON.parse(JSON.stringify(all));
-        if(changed){ setPending(p); drainQueue(); }
-    }
-
-    // ---- Push the queue to Supabase -------------------------
-    async function drainQueue(){
-        if(!sb || !syncEnabled || syncBusy) return;
-        if(!navigator.onLine){ setSyncStatus('Offline \u2014 '+pendingCount()+' change(s) queued','warn'); return; }
-        var p=getPending();
-        var songKeys=Object.keys(p.songs), slKeys=Object.keys(p.setlists);
-        if(!songKeys.length && !slKeys.length){ setSyncStatus('All changes saved','ok'); return; }
-
-        syncBusy=true;
-        setSyncStatus('Syncing '+(songKeys.length+slKeys.length)+' change(s)\u2026','warn');
+    // Save a timestamped .json copy locally. Used as an automatic backup
+    // right before an upload, so an accidental overwrite is always recoverable.
+    function downloadLocalBackup(reason){
         try{
-            var lib=getLib(), all=getAllSL();
-
-            var upserts = songKeys.filter(function(t){ return p.songs[t]==='upsert' && lib[t]; })
-                                  .map(function(t){ return songToRow(t, lib[t]); });
-            if(upserts.length){
-                var r1 = await sb.from('songs').upsert(upserts, {onConflict:'title'});
-                if(r1.error) throw r1.error;
-            }
-            var songDeletes = songKeys.filter(function(t){ return p.songs[t]==='delete'; });
-            if(songDeletes.length){
-                var r2 = await sb.from('songs').delete().in('title', songDeletes);
-                if(r2.error) throw r2.error;
-            }
-
-            var slUpserts = slKeys.filter(function(n){ return p.setlists[n]==='upsert' && all[n]; })
-                                  .map(function(n){ return {name:n, songs:all[n], updated_by:deviceId}; });
-            if(slUpserts.length){
-                var r3 = await sb.from('setlists').upsert(slUpserts, {onConflict:'name'});
-                if(r3.error) throw r3.error;
-            }
-            var slDeletes = slKeys.filter(function(n){ return p.setlists[n]==='delete'; });
-            if(slDeletes.length){
-                var r4 = await sb.from('setlists').delete().in('name', slDeletes);
-                if(r4.error) throw r4.error;
-            }
-
-            setPending({songs:{}, setlists:{}});
-            setSyncStatus('All changes saved','ok');
-        }catch(err){
-            setSyncStatus('Sync error: '+(err.message||err)+' (will retry)','err');
-        }finally{
-            syncBusy=false;
-        }
+            var pkg = {type:'SET_LIST_EXPORT', version:'2.5',
+                       exportedAt:new Date().toISOString(),
+                       reason: reason||'backup',
+                       songs:getLib(), setlists:getAllSL()};
+            var blob = new Blob([JSON.stringify(pkg,null,2)], {type:'application/json'});
+            var url  = URL.createObjectURL(blob);
+            var a=document.createElement('a');
+            var stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+            a.href=url; a.download='library-backup-'+stamp+'.json';
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a);
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+            return true;
+        }catch(e){ return false; }
     }
 
-    // ---- Pull everything down -------------------------------
-    async function pullAll(silent){
-        if(!sb || !syncEnabled) return;
-        if(!navigator.onLine){ setSyncStatus('Offline \u2014 using local copy','warn'); return; }
-        if(!silent) setSyncStatus('Loading from cloud\u2026','warn');
-        try{
-            var sres = await sb.from('songs').select('*');
-            if(sres.error) throw sres.error;
-            var lres = await sb.from('setlists').select('*');
-            if(lres.error) throw lres.error;
-
-            var lib={}, all={};
-            (sres.data||[]).forEach(function(r){ lib[r.title]=rowToSong(r); });
-            (lres.data||[]).forEach(function(r){ all[r.name]=r.songs||[]; });
-
-            var localLib=getLib(), localSL=getAllSL();
-
-            // FIRST-RUN GUARD: an empty cloud must never wipe a populated
-            // device. This is the "I just enabled sync" case — the local
-            // library is the real data and needs uploading, not replacing.
-            if(!Object.keys(lib).length && !Object.keys(all).length &&
-               (Object.keys(localLib).length || Object.keys(localSL).length)){
-                setSyncStatus('Cloud is empty — use "Upload This Device\'s Library" to publish '+
-                              Object.keys(localLib).length+' song(s).','warn');
-                return;
-            }
-
-            // Don't clobber local-only work that hasn't synced yet
-            var p=getPending();
-            Object.keys(p.songs).forEach(function(t){
-                if(p.songs[t]==='upsert' && localLib[t]) lib[t]=localLib[t];
-                if(p.songs[t]==='delete') delete lib[t];
-            });
-            Object.keys(p.setlists).forEach(function(n){
-                if(p.setlists[n]==='upsert' && localSL[n]) all[n]=localSL[n];
-                if(p.setlists[n]==='delete') delete all[n];
-            });
-
-            applyingRemote=true;
-            localStorage.setItem(K_LIB, JSON.stringify(lib));
-            localStorage.setItem(K_SLS, JSON.stringify(all));
-            lastLibSnapshot=JSON.parse(JSON.stringify(lib));
-            lastSLSnapshot =JSON.parse(JSON.stringify(all));
-            applyingRemote=false;
-
-            refreshHeaderDropdown(); refreshSLBuilderUI();
-            setSyncStatus('Synced \u2014 '+Object.keys(lib).length+' songs, '+
-                          Object.keys(all).length+' set lists','ok');
-        }catch(err){
-            applyingRemote=false;
-            setSyncStatus('Could not load: '+(err.message||err),'err');
-        }
-    }
-
-    // ---- Realtime: other devices' edits ---------------------
-    function subscribeRealtime(){
-        if(!sb) return;
-        sb.channel('library-changes')
-          .on('postgres_changes', {event:'*', schema:'public', table:'songs'}, function(payload){
-              var row = payload.new || payload.old;
-              if(row && row.updated_by===deviceId) return;   // our own echo
-              applyingRemote=true;
-              var lib=getLib();
-              if(payload.eventType==='DELETE') delete lib[payload.old.title];
-              else lib[payload.new.title]=rowToSong(payload.new);
-              localStorage.setItem(K_LIB, JSON.stringify(lib));
-              lastLibSnapshot=JSON.parse(JSON.stringify(lib));
-              applyingRemote=false;
-              refreshHeaderDropdown(); refreshSLBuilderUI();
-              setSyncStatus('Updated from another device','ok');
-          })
-          .on('postgres_changes', {event:'*', schema:'public', table:'setlists'}, function(payload){
-              var row = payload.new || payload.old;
-              if(row && row.updated_by===deviceId) return;
-              applyingRemote=true;
-              var all=getAllSL();
-              if(payload.eventType==='DELETE') delete all[payload.old.name];
-              else all[payload.new.name]=payload.new.songs||[];
-              localStorage.setItem(K_SLS, JSON.stringify(all));
-              lastSLSnapshot=JSON.parse(JSON.stringify(all));
-              applyingRemote=false;
-              refreshHeaderDropdown(); refreshSLBuilderUI();
-              setSyncStatus('Set list updated from another device','ok');
-          })
-          .subscribe();
-    }
-
-    // ---- Push everything currently local (one-time migration)
-    async function pushAllLocal(){
-        if(!sb){ setSyncStatus('Sync is off.','err'); return; }
+    async function uploadToCloud(){
+        if(!sb){ setSyncStatus('Cloud unavailable right now.','err'); return; }
+        if(!navigator.onLine){ setSyncStatus('You are offline.','err'); return; }
         var lib=getLib(), all=getAllSL();
         var n=Object.keys(lib).length, m=Object.keys(all).length;
-        if(!n && !m){ setSyncStatus('Nothing local to upload.','warn'); return; }
+        if(!n && !m){ setSyncStatus('Nothing to upload.','warn'); return; }
         if(!confirm('Upload '+n+' song(s) and '+m+' set list(s) to the cloud?\n\n'+
-                    'Anything with the same name already up there will be overwritten.')) return;
+                    'This overwrites the cloud copy. A local backup file will be '+
+                    'saved to this device first.')) return;
+
+        // Automatic safety backup BEFORE we touch the cloud (item #10)
+        downloadLocalBackup('pre-upload');
+
         setSyncStatus('Uploading\u2026','warn');
         try{
             if(n){
@@ -3574,71 +3316,84 @@ document.addEventListener('DOMContentLoaded', function() {
                 var r2=await sb.from('setlists').upsert(srows,{onConflict:'name'});
                 if(r2.error) throw r2.error;
             }
-            setPending({songs:{}, setlists:{}});
-            lastLibSnapshot=JSON.parse(JSON.stringify(lib));
-            lastSLSnapshot =JSON.parse(JSON.stringify(all));
-            setSyncStatus('\u2713 Uploaded '+n+' songs & '+m+' set lists','ok');
+            setSyncStatus('\u2713 Uploaded '+n+' songs & '+m+' set lists (backup saved)','ok');
         }catch(err){
             setSyncStatus('Upload failed: '+(err.message||err),'err');
         }
     }
 
-    // ---- Boot ----------------------------------------------
+    async function reloadFromCloud(){
+        if(!sb){ setSyncStatus('Cloud unavailable right now.','err'); return; }
+        if(!navigator.onLine){ setSyncStatus('You are offline \u2014 using local copy.','warn'); return; }
+        setSyncStatus('Loading from cloud\u2026','warn');
+        try{
+            var sres=await sb.from('songs').select('*');
+            if(sres.error) throw sres.error;
+            var lres=await sb.from('setlists').select('*');
+            if(lres.error) throw lres.error;
+
+            var lib={}, all={};
+            (sres.data||[]).forEach(function(r){ lib[r.title]=rowToSong(r); });
+            (lres.data||[]).forEach(function(r){ all[r.name]=r.songs||[]; });
+
+            if(!Object.keys(lib).length && !Object.keys(all).length){
+                setSyncStatus('Cloud is empty \u2014 nothing to load. Upload first.','warn');
+                return;
+            }
+            if(!confirm('Replace this device\'s library with the cloud copy?\n\n'+
+                        'Cloud has '+Object.keys(lib).length+' song(s) and '+
+                        Object.keys(all).length+' set list(s).\n\n'+
+                        'A local backup of your current library will be saved first.')) {
+                setSyncStatus('Reload cancelled.','warn'); return;
+            }
+            downloadLocalBackup('pre-reload');
+
+            saveLib(lib);
+            saveAllSL(all);
+            refreshHeaderDropdown(); refreshSLBuilderUI();
+            setSyncStatus('\u2713 Loaded '+Object.keys(lib).length+' songs & '+
+                          Object.keys(all).length+' set lists from cloud','ok');
+        }catch(err){
+            setSyncStatus('Could not load: '+(err.message||err),'err');
+        }
+    }
+
     function initSync(){
         if(typeof window.supabase==='undefined'){
-            setSyncStatus('Cloud library unavailable (offline mode)','warn');
+            setSyncStatus('Cloud unavailable (offline mode)','warn');
             return;
         }
         try{
-            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-                realtime:{ params:{ eventsPerSecond:2 } }
-            });
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+            setSyncStatus('Ready \u2014 cloud updates only when you press Upload','');
         }catch(e){
-            setSyncStatus('Could not start sync: '+e.message,'err');
-            return;
+            setSyncStatus('Could not start cloud: '+e.message,'err');
         }
-        lastLibSnapshot=JSON.parse(JSON.stringify(getLib()));
-        lastSLSnapshot =JSON.parse(JSON.stringify(getAllSL()));
-
-        if(syncEnabled){
-            pullAll();
-            subscribeRealtime();
-            drainQueue();
-        } else {
-            setSyncStatus('Sync paused','warn');
-        }
-
-        window.addEventListener('online', function(){
-            setSyncStatus('Back online \u2014 syncing\u2026','warn');
-            drainQueue(); pullAll(true);
-        });
-        window.addEventListener('offline', function(){
-            setSyncStatus('Offline \u2014 changes saved locally','warn');
-        });
-        // Catch anything the queue missed
-        setInterval(function(){ if(pendingCount()) drainQueue(); }, 30000);
     }
 
-    // Wire up the drawer controls
-    var syncToggleBtn = document.getElementById('syncToggleBtn');
     var syncPullBtn   = document.getElementById('syncPullBtn');
     var syncPushBtn   = document.getElementById('syncPushBtn');
-    if(syncPullBtn) syncPullBtn.addEventListener('click', function(){ pullAll(); });
-    if(syncPushBtn) syncPushBtn.addEventListener('click', pushAllLocal);
-    if(syncToggleBtn){
-        function paintSyncToggle(){
-            syncToggleBtn.textContent = syncEnabled ? '\u23F8 Pause Sync' : '\u25B6 Resume Sync';
-            syncToggleBtn.className   = syncEnabled ? 'btn btn-secondary' : 'btn btn-success';
-        }
-        paintSyncToggle();
-        syncToggleBtn.addEventListener('click', function(){
-            syncEnabled=!syncEnabled;
-            localStorage.setItem(K_SYNC_ON, syncEnabled ? 'true' : 'false');
-            paintSyncToggle();
-            if(syncEnabled){ pullAll(); drainQueue(); }
-            else setSyncStatus('Sync paused \u2014 changes stay on this device','warn');
-        });
-    }
+    var syncBackupBtn = document.getElementById('syncBackupBtn');
+    if(syncPullBtn)   syncPullBtn.addEventListener('click', reloadFromCloud);
+    if(syncPushBtn)   syncPushBtn.addEventListener('click', uploadToCloud);
+    if(syncBackupBtn) syncBackupBtn.addEventListener('click', function(){
+        if(downloadLocalBackup('manual')) setSyncStatus('\u2713 Local backup saved.','ok');
+    });
+
+    // How-To / Help modal
+    var helpModal    = document.getElementById('helpModal');
+    var helpBtn      = document.getElementById('helpBtn');
+    var helpCloseBtn = document.getElementById('helpCloseBtn');
+    var helpCloseX   = document.getElementById('helpCloseX');
+    function openHelp(){ if(helpModal) helpModal.classList.add('open'); if(typeof closeDrawer==='function') closeDrawer(); }
+    function closeHelp(){ if(helpModal) helpModal.classList.remove('open'); }
+    if(helpBtn)      helpBtn.addEventListener('click', openHelp);
+    if(helpCloseBtn) helpCloseBtn.addEventListener('click', closeHelp);
+    if(helpCloseX)   helpCloseX.addEventListener('click', closeHelp);
+    if(helpModal)    helpModal.addEventListener('click', function(e){ if(e.target===helpModal) closeHelp(); });
+    document.addEventListener('keydown', function(e){
+        if(e.key==='Escape' && helpModal && helpModal.classList.contains('open')) closeHelp();
+    });
 
     initSync();
 
