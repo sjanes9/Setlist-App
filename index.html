@@ -443,12 +443,15 @@
                         <select id="songTimeSig" style="width:100%;">
                             <option value="4/4">4/4</option>
                             <option value="3/4">3/4</option>
-                            <option value="6/8">6/8</option>
+                            <option value="2/2">2/2</option>
                             <option value="2/4">2/4</option>
                             <option value="5/4">5/4</option>
+                            <option value="6/8">6/8</option>
                             <option value="7/8">7/8</option>
                             <option value="12/8">12/8</option>
+                            <option value="__custom__">Custom&hellip;</option>
                         </select>
+                        <input type="text" id="songTimeSigCustom" placeholder="e.g., 9/8" autocomplete="off" style="width:100%;margin-top:0.5rem;display:none;" pattern="[0-9]{1,2}/[0-9]{1,2}">
                     </div>
                     <div class="form-group">
                         <label for="songSpeedMode">Scroll Mode</label>
@@ -479,7 +482,7 @@
                     <div class="insert-bar">
                         <span class="insert-bar-label">Add section:</span>
                         <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.75rem;font-weight:600;color:var(--text-muted);margin:0;white-space:nowrap;" title="Ask for the section length in measures, so the scroll can follow the song's real timing">
-                            <input type="checkbox" id="sectionBarsToggle" style="width:auto;"> with bars
+                            <input type="checkbox" id="sectionBarsToggle" checked style="width:auto;"> with bars
                         </label>
                         <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Intro">Intro</button>
                         <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Verse">Verse</button>
@@ -809,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function() {
         flds.title.value     = song.title     || '';
         flds.key.value       = song.key       || 'C';
         flds.tempo.value     = song.tempo     || '80';
-        flds.timeSig.value   = song.timeSig   || '4/4';
+        setTimeSigUI(song.timeSig || '4/4');
         flds.artist.value    = song.artist    || '';
         flds.notes.value     = song.notes     || '';
         flds.structure.value = song.structure || '';
@@ -1182,13 +1185,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     })();
 
+    // Show/hide the custom time-signature field, and recompute anything that
+    // depends on the time signature when it changes.
+    (function(){
+        var sel=document.getElementById('songTimeSig');
+        var cf =document.getElementById('songTimeSigCustom');
+        if(!sel) return;
+        sel.addEventListener('change', function(){
+            if(cf) cf.style.display = (sel.value==='__custom__') ? 'block' : 'none';
+            if(sel.value==='__custom__' && cf){ cf.focus(); }
+            if(typeof refreshBarDependentUI==='function') refreshBarDependentUI();
+        });
+        if(cf) cf.addEventListener('input', function(){
+            if(typeof refreshBarDependentUI==='function') refreshBarDependentUI();
+        });
+    })();
+
     saveBtn.addEventListener('click', function(){
         var title=flds.title.value.trim(); if(!title){ alert('A valid song title is required.'); return; }
         var lib=getLib();
         var existing=lib[title]||{};
         var spd=currentSpeedSettings(existing);
         lib[title]={title:title, key:flds.key.value.trim()||'C', tempo:parseInt(flds.tempo.value,10)||80,
-            timeSig:flds.timeSig.value||'4/4',
+            timeSig:effectiveTimeSig(),
             artist:flds.artist.value.trim(), notes:flds.notes.value.trim(),
             structure:flds.structure.value.trim(), lyrics:flds.lyrics.value.trim(),
             // scroll-speed settings saved with the song
@@ -1211,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var title=flds.title.value.trim(); if(!title){ alert('Enter a song title before exporting.'); return; }
         var existing=getLib()[title]||{};
         var data={title:title,key:flds.key.value.trim()||'C',tempo:parseInt(flds.tempo.value,10)||80,
-            timeSig:flds.timeSig.value||'4/4',
+            timeSig:effectiveTimeSig(),
             artist:flds.artist.value.trim(),notes:flds.notes.value.trim(),
             structure:flds.structure.value.trim(),lyrics:flds.lyrics.value.trim(),
             wpm:existing.wpm,speedMode:existing.speedMode,duration:existing.duration,version:'2.3'};
@@ -1391,9 +1410,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Rewrite the {pause:N} values in the lyrics field to match the current
     // (possibly adjusted) pauseMarkers, then save back to the song library so
     // the new lengths persist.  Markers are matched to {pause:} lines in order.
+    // The effective time signature: the dropdown value, or the custom text
+    // field when "Custom" is selected. Everything reads through this.
+    function effectiveTimeSig(){
+        var sel=flds.timeSig ? flds.timeSig.value : '4/4';
+        if(sel==='__custom__'){
+            var cf=document.getElementById('songTimeSigCustom');
+            var v=cf ? cf.value.trim() : '';
+            return /^[0-9]{1,2}\/[0-9]{1,2}$/.test(v) ? v : '4/4';
+        }
+        return sel || '4/4';
+    }
+    // Set the time-signature UI from a stored value, choosing Custom when the
+    // value isn't one of the preset options.
+    function setTimeSigUI(ts){
+        ts = ts || '4/4';
+        var sel=flds.timeSig, cf=document.getElementById('songTimeSigCustom');
+        if(!sel) return;
+        var known=Array.prototype.some.call(sel.options,function(o){ return o.value===ts; });
+        if(known && ts!=='__custom__'){
+            sel.value=ts;
+            if(cf){ cf.style.display='none'; cf.value=''; }
+        } else {
+            sel.value='__custom__';
+            if(cf){ cf.value=ts; cf.style.display='block'; }
+        }
+    }
+
     // Beats per bar from the song's time signature (e.g. "6/8" -> 6).
     function beatsPerBar(){
-        var ts=(flds.timeSig && flds.timeSig.value) ? flds.timeSig.value : '4/4';
+        var ts=effectiveTimeSig();
         var n=parseInt(ts.split('/')[0],10);
         return (n>0)?n:4;
     }
@@ -2561,12 +2607,12 @@ document.addEventListener('DOMContentLoaded', function() {
         var v = parseInt(breakValueInput.value,10) || 1;
         if(pendingBreakUnit==='section'){
             var bpmS = parseInt(flds.tempo.value,10) || 80;
-            var tsS  = flds.timeSig.value || '4/4';
+            var tsS  = effectiveTimeSig();
             breakModalHint.textContent = pendingSectionLabel+' runs '+v+' bars \u2014 '+
                 barsToSeconds(v).toFixed(1)+'s at '+bpmS+' BPM in '+tsS+'.';
         } else if(pendingBreakUnit==='bars'){
             var bpm = parseInt(flds.tempo.value,10) || 80;
-            var ts  = flds.timeSig.value || '4/4';
+            var ts  = effectiveTimeSig();
             var secs = barsToSeconds(v);
             breakModalHint.textContent = v+' bars at '+bpm+' BPM in '+ts+' = '+secs.toFixed(1)+' seconds';
         } else {
@@ -2795,7 +2841,7 @@ document.addEventListener('DOMContentLoaded', function() {
         qaWidth.value    = colWidthSlider.value;
         qaWidthVal.textContent = colWidthSlider.value+'%';
         qaBpm.value      = parseInt(flds.tempo.value,10)||80;
-        qaTimeSigLabel.textContent = (flds.timeSig.value||'4/4');
+        qaTimeSigLabel.textContent = effectiveTimeSig();
         qaMetroToggle.textContent = metRunning ? 'Stop' : 'Start';
         qaSheet.classList.add('open');
         qaBackdrop.classList.add('open');
@@ -3200,7 +3246,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(parsed.title)  flds.title.value  = parsed.title;
                 if(parsed.artist) flds.artist.value = parsed.artist;
                 if(parsed.tempo)  flds.tempo.value  = parsed.tempo;
-                flds.timeSig.value = parsed.timeSig || '4/4';
+                setTimeSigUI(parsed.timeSig || '4/4');
                 flds.lyrics.value  = lyrics;
                 syncStructureFromLyrics();
 
