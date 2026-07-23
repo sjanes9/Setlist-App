@@ -345,7 +345,7 @@
             <button type="button" id="syncPullBtn" class="btn btn-secondary">&#8635; Reload from Cloud</button>
             <button type="button" id="syncBackupBtn" class="btn btn-secondary">&#128190; Save Local Backup (.json)</button>
             <div class="drawer-hint" style="margin-top:0.5rem;opacity:0.75;">
-                The cloud only changes when you press <strong>Upload</strong>. Every upload and reload saves a local backup file first. Saving a song stays on this device until you upload.
+                The cloud only changes when you press <strong>Upload</strong> &mdash; which asks for a passcode first. Every upload and reload saves a local backup file first. Saving a song stays on this device until you upload.
             </div>
         </div>
 
@@ -606,7 +606,7 @@
             <p style="margin:0 0 0.8rem;">In the menu, <strong>Import Tab PDF</strong> reads a Songsterr tab and builds the song &mdash; title, artist, tempo, sections, bar counts and lyrics. Works on tabs that have section labels (Intro/Verse/Chorus).</p>
 
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Cloud library &amp; backups</h3>
-            <p style="margin:0 0 0.4rem;">Your library lives on this device. The cloud only changes when you press <strong>Upload to Cloud</strong>, and <strong>Reload from Cloud</strong> pulls the shared copy down. Both save a local <code>.json</code> backup file first, so an accidental overwrite is always recoverable. Nothing syncs automatically.</p>
+            <p style="margin:0 0 0.4rem;">Your library lives on this device. The cloud only changes when you press <strong>Upload to Cloud</strong>, which asks for a passcode so a stray tap can&rsquo;t overwrite the band&rsquo;s copy. <strong>Reload from Cloud</strong> pulls the shared copy down. Both save a local <code>.json</code> backup file first, so an accidental overwrite is always recoverable. Nothing syncs automatically.</p>
             <p style="margin:0 0 0.8rem;opacity:0.8;font-size:0.85rem;">Tip: keep the occasional backup file somewhere safe. It&rsquo;s your ultimate safety net.</p>
 
         </div>
@@ -3275,6 +3275,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var SUPABASE_URL  = 'https://srtzeeggjiikezunfoyf.supabase.co';
     var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydHplZWdnamlpa2V6dW5mb3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDMwNzMsImV4cCI6MjEwMDIxOTA3M30.7mvllyczD2CFmqkrntk3OmRp657RHkqi0bUEjuG88MU';
 
+    // ── UPLOAD PASSCODE ─────────────────────────────────────
+    // Asked for before any upload to the cloud. This guards against an
+    // ACCIDENTAL overwrite — it is not security: this file is public, so
+    // anyone can read this value. Change the number below to change it.
+    var UPLOAD_PASSCODE = '2874';
+    // ────────────────────────────────────────────────────────
+
     var K_DEVICE = 'song_manager_device_id';
     var sb = null;
 
@@ -3343,6 +3350,15 @@ document.addEventListener('DOMContentLoaded', function() {
         var lib=getLib(), all=getAllSL();
         var n=Object.keys(lib).length, m=Object.keys(all).length;
         if(!n && !m){ setSyncStatus('Nothing to upload.','warn'); return; }
+
+        // Passcode gate — stops a stray tap from overwriting the shared library.
+        var entered = prompt('Enter the upload passcode to publish to the cloud:');
+        if(entered===null){ setSyncStatus('Upload cancelled.','warn'); return; }
+        if(entered.trim()!==UPLOAD_PASSCODE){
+            setSyncStatus('Wrong passcode \u2014 nothing was uploaded.','err');
+            return;
+        }
+
         if(!confirm('Upload '+n+' song(s) and '+m+' set list(s) to the cloud?\n\n'+
                     'This overwrites the cloud copy. A local backup file will be '+
                     'saved to this device first.')) return;
