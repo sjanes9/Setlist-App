@@ -3423,4 +3423,478 @@ document.addEventListener('DOMContentLoaded', function() {
        Nothing syncs automatically. Saving a song touches localStorage
        only. This keeps behaviour predictable on stage — no background
        writes, no surprise edits mid-set.
-    ═════════════════════════════════════════════════════
+    ════════════════════════════════════════════════════════ */
+    var SUPABASE_URL  = 'https://srtzeeggjiikezunfoyf.supabase.co';
+    var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydHplZWdnamlpa2V6dW5mb3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDMwNzMsImV4cCI6MjEwMDIxOTA3M30.7mvllyczD2CFmqkrntk3OmRp657RHkqi0bUEjuG88MU';
+
+    // ── UPLOAD PASSCODE ─────────────────────────────────────
+    // Asked for before any upload to the cloud. This guards against an
+    // ACCIDENTAL overwrite — it is not security: this file is public, so
+    // anyone can read this value. Change the number below to change it.
+    var UPLOAD_PASSCODE = '2874';
+    // ────────────────────────────────────────────────────────
+
+    var K_DEVICE = 'song_manager_device_id';
+    var sb = null;
+
+    var deviceId = localStorage.getItem(K_DEVICE);
+    if(!deviceId){
+        deviceId = 'dev_' + Math.random().toString(36).slice(2,10);
+        localStorage.setItem(K_DEVICE, deviceId);
+    }
+
+    function setSyncStatus(msg, tone){
+        var colour = tone==='ok'   ? 'var(--accent)' :
+                     tone==='warn' ? '#f59e0b' :
+                     tone==='err'  ? 'var(--danger)' : 'var(--text-faint)';
+        var el  = document.getElementById('syncStatus');
+        var dot = document.getElementById('syncDot');
+        var hd  = document.getElementById('syncDotHeader');
+        if(el)  el.textContent = msg;
+        if(dot) dot.style.background = colour;
+        if(hd){ hd.style.background = colour; hd.title = 'Cloud: '+msg; }
+    }
+
+    function songToRow(t, s){
+        return {
+            title: t, artist: s.artist || null, key: s.key || null,
+            tempo: s.tempo || null, time_sig: s.timeSig || '4/4',
+            notes: s.notes || null, structure: s.structure || null,
+            lyrics: s.lyrics || null,
+            wpm: (s.wpm===undefined||s.wpm===null) ? null : s.wpm,
+            speed_mode: s.speedMode || null, duration: s.duration || null,
+            updated_by: deviceId
+        };
+    }
+    function rowToSong(r){
+        return {
+            title:r.title, artist:r.artist||'', key:r.key||'C',
+            tempo:r.tempo||80, timeSig:r.time_sig||'4/4',
+            notes:r.notes||'', structure:r.structure||'', lyrics:r.lyrics||'',
+            wpm:r.wpm, speedMode:r.speed_mode, duration:r.duration,
+            updatedAt:r.updated_at
+        };
+    }
+
+    // Save a timestamped .json copy locally. Used as an automatic backup
+    // right before an upload, so an accidental overwrite is always recoverable.
+    function downloadLocalBackup(reason){
+        try{
+            var pkg = {type:'SET_LIST_EXPORT', version:'2.5',
+                       exportedAt:new Date().toISOString(),
+                       reason: reason||'backup',
+                       songs:getLib(), setlists:getAllSL()};
+            var blob = new Blob([JSON.stringify(pkg,null,2)], {type:'application/json'});
+            var url  = URL.createObjectURL(blob);
+            var a=document.createElement('a');
+            var stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+            a.href=url; a.download='library-backup-'+stamp+'.json';
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a);
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+            return true;
+        }catch(e){ return false; }
+    }
+
+    async function uploadToCloud(){
+        if(!sb){ setSyncStatus('Cloud unavailable right now.','err'); return; }
+        if(!navigator.onLine){ setSyncStatus('You are offline.','err'); return; }
+        var lib=getLib(), all=getAllSL();
+        var n=Object.keys(lib).length, m=Object.keys(all).length;
+        if(!n && !m){ setSyncStatus('Nothing to upload.','warn'); return; }
+
+        // Passcode gate — stops a stray tap from overwriting the shared library.
+        var entered = prompt('Enter the upload passcode to publish to the cloud:');
+        if(entered===null){ setSyncStatus('Upload cancelled.','warn'); return; }
+        if(entered.trim()!==UPLOAD_PASSCODE){
+            setSyncStatus('Wrong passcode \u2014 nothing was uploaded.','err');
+            return;
+        }
+
+        if(!confirm('Upload '+n+' song(s) and '+m+' set list(s) to the cloud?\n\n'+
+                    'This overwrites the cloud copy. A local backup file will be '+
+                    'saved to this device first.')) return;
+
+        // Automatic safety backup BEFORE we touch the cloud (item #10)
+        downloadLocalBackup('pre-upload');
+
+        setSyncStatus('Uploading\u2026','warn');
+        try{
+            if(n){
+                var rows=Object.keys(lib).map(function(t){ return songToRow(t, lib[t]); });
+                var r1=await sb.from('songs').upsert(rows,{onConflict:'title'});
+                if(r1.error) throw r1.error;
+            }
+            if(m){
+                var srows=Object.keys(all).map(function(k){ return {name:k, songs:all[k], updated_by:deviceId}; });
+                var r2=await sb.from('setlists').upsert(srows,{onConflict:'name'});
+                if(r2.error) throw r2.error;
+            }
+            setSyncStatus('\u2713 Uploaded '+n+' songs & '+m+' set lists (backup saved)','ok');
+        }catch(err){
+            setSyncStatus('Upload failed: '+(err.message||err),'err');
+        }
+    }
+
+    async function reloadFromCloud(){
+        if(!sb){ setSyncStatus('Cloud unavailable right now.','err'); return; }
+        if(!navigator.onLine){ setSyncStatus('You are offline \u2014 using local copy.','warn'); return; }
+        setSyncStatus('Loading from cloud\u2026','warn');
+        try{
+            var sres=await sb.from('songs').select('*');
+            if(sres.error) throw sres.error;
+            var lres=await sb.from('setlists').select('*');
+            if(lres.error) throw lres.error;
+
+            var lib={}, all={};
+            (sres.data||[]).forEach(function(r){ lib[r.title]=rowToSong(r); });
+            (lres.data||[]).forEach(function(r){ all[r.name]=r.songs||[]; });
+
+            if(!Object.keys(lib).length && !Object.keys(all).length){
+                setSyncStatus('Cloud is empty \u2014 nothing to load. Upload first.','warn');
+                return;
+            }
+            if(!confirm('Replace this device\'s library with the cloud copy?\n\n'+
+                        'Cloud has '+Object.keys(lib).length+' song(s) and '+
+                        Object.keys(all).length+' set list(s).\n\n'+
+                        'A local backup of your current library will be saved first.')) {
+                setSyncStatus('Reload cancelled.','warn'); return;
+            }
+            downloadLocalBackup('pre-reload');
+
+            saveLib(lib);
+            saveAllSL(all);
+            refreshHeaderDropdown(); refreshSLBuilderUI();
+            setSyncStatus('\u2713 Loaded '+Object.keys(lib).length+' songs & '+
+                          Object.keys(all).length+' set lists from cloud','ok');
+        }catch(err){
+            setSyncStatus('Could not load: '+(err.message||err),'err');
+        }
+    }
+
+    function initSync(){
+        if(typeof window.supabase==='undefined'){
+            setSyncStatus('Cloud unavailable (offline mode)','warn');
+            return;
+        }
+        try{
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+            setSyncStatus('Ready \u2014 cloud updates only when you press Upload','');
+        }catch(e){
+            setSyncStatus('Could not start cloud: '+e.message,'err');
+        }
+    }
+
+    var syncPullBtn   = document.getElementById('syncPullBtn');
+    var syncPushBtn   = document.getElementById('syncPushBtn');
+    var syncBackupBtn = document.getElementById('syncBackupBtn');
+    if(syncPullBtn)   syncPullBtn.addEventListener('click', reloadFromCloud);
+    if(syncPushBtn)   syncPushBtn.addEventListener('click', uploadToCloud);
+    if(syncBackupBtn) syncBackupBtn.addEventListener('click', function(){
+        if(downloadLocalBackup('manual')) setSyncStatus('\u2713 Local backup saved.','ok');
+    });
+
+    // How-To / Help modal
+    var helpModal    = document.getElementById('helpModal');
+    var helpBtn      = document.getElementById('helpBtn');
+    var helpCloseBtn = document.getElementById('helpCloseBtn');
+    var helpCloseX   = document.getElementById('helpCloseX');
+    function openHelp(){ if(helpModal) helpModal.classList.add('open'); if(typeof closeDrawer==='function') closeDrawer(); }
+    function closeHelp(){ if(helpModal) helpModal.classList.remove('open'); }
+    if(helpBtn)      helpBtn.addEventListener('click', openHelp);
+    if(helpCloseBtn) helpCloseBtn.addEventListener('click', closeHelp);
+    if(helpCloseX)   helpCloseX.addEventListener('click', closeHelp);
+    if(helpModal)    helpModal.addEventListener('click', function(e){ if(e.target===helpModal) closeHelp(); });
+    document.addEventListener('keydown', function(e){
+        if(e.key==='Escape' && helpModal && helpModal.classList.contains('open')) closeHelp();
+    });
+
+    // Set List Builder page (item #2)
+    var slBuilderView   = document.getElementById('setlistBuilderView');
+    var openSLBuilderBtn= document.getElementById('openSLBuilderBtn');
+    var slBackBtn       = document.getElementById('slBackBtn');
+    function openSLBuilder(){
+        if(!slBuilderView) return;
+        stopScroll();
+        editorView.style.display='none';
+        perfView.style.display='none';
+        scrollDock.style.display='none';
+        document.querySelector('.container').classList.remove('perf-mode');
+        slBuilderView.style.display='block';
+        var contSL=document.querySelector('.container');
+        contSL.classList.add('edit-mode');
+        var hdrSL=document.querySelector('header');
+        hdrSL.classList.add('edit-bar');
+        hdrSL.classList.remove('perf-bar');
+        document.body.classList.add('edit-bar-on');
+        document.body.classList.remove('perf-bar-on');
+        appTitle.textContent='Set List Builder';
+        editBtn.classList.remove('active'); perfBtn.classList.remove('active');
+        refreshSLBuilderUI();
+        if(typeof closeDrawer==='function') closeDrawer();
+        window.scrollTo(0,0);
+    }
+    function backToEditor(){
+        if(slBuilderView) slBuilderView.style.display='none';
+        editBtn.click();
+        window.scrollTo(0,0);
+    }
+    if(openSLBuilderBtn) openSLBuilderBtn.addEventListener('click', openSLBuilder);
+    if(slBackBtn)        slBackBtn.addEventListener('click', backToEditor);
+
+    initSync();
+
+    /* ---- INIT ---- */
+    // The editor is the landing view, so apply its bottom-bar + styling now.
+    (function initEditorChrome(){
+        var cont=document.querySelector('.container');
+        var hdr =document.querySelector('header');
+        if(cont) cont.classList.add('edit-mode');
+        if(hdr)  hdr.classList.add('edit-bar');
+        document.body.classList.add('edit-bar-on');
+    })();
+
+    refreshHeaderDropdown();
+    refreshSLBuilderUI();
+
+}); // DOMContentLoaded
+</script>
+</body>
+</html>═══ */
+    var SUPABASE_URL  = 'https://srtzeeggjiikezunfoyf.supabase.co';
+    var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydHplZWdnamlpa2V6dW5mb3lmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDMwNzMsImV4cCI6MjEwMDIxOTA3M30.7mvllyczD2CFmqkrntk3OmRp657RHkqi0bUEjuG88MU';
+
+    // ── UPLOAD PASSCODE ─────────────────────────────────────
+    // Asked for before any upload to the cloud. This guards against an
+    // ACCIDENTAL overwrite — it is not security: this file is public, so
+    // anyone can read this value. Change the number below to change it.
+    var UPLOAD_PASSCODE = '2874';
+    // ────────────────────────────────────────────────────────
+
+    var K_DEVICE = 'song_manager_device_id';
+    var sb = null;
+
+    var deviceId = localStorage.getItem(K_DEVICE);
+    if(!deviceId){
+        deviceId = 'dev_' + Math.random().toString(36).slice(2,10);
+        localStorage.setItem(K_DEVICE, deviceId);
+    }
+
+    function setSyncStatus(msg, tone){
+        var colour = tone==='ok'   ? 'var(--accent)' :
+                     tone==='warn' ? '#f59e0b' :
+                     tone==='err'  ? 'var(--danger)' : 'var(--text-faint)';
+        var el  = document.getElementById('syncStatus');
+        var dot = document.getElementById('syncDot');
+        var hd  = document.getElementById('syncDotHeader');
+        if(el)  el.textContent = msg;
+        if(dot) dot.style.background = colour;
+        if(hd){ hd.style.background = colour; hd.title = 'Cloud: '+msg; }
+    }
+
+    function songToRow(t, s){
+        return {
+            title: t, artist: s.artist || null, key: s.key || null,
+            tempo: s.tempo || null, time_sig: s.timeSig || '4/4',
+            notes: s.notes || null, structure: s.structure || null,
+            lyrics: s.lyrics || null,
+            wpm: (s.wpm===undefined||s.wpm===null) ? null : s.wpm,
+            speed_mode: s.speedMode || null, duration: s.duration || null,
+            updated_by: deviceId
+        };
+    }
+    function rowToSong(r){
+        return {
+            title:r.title, artist:r.artist||'', key:r.key||'C',
+            tempo:r.tempo||80, timeSig:r.time_sig||'4/4',
+            notes:r.notes||'', structure:r.structure||'', lyrics:r.lyrics||'',
+            wpm:r.wpm, speedMode:r.speed_mode, duration:r.duration,
+            updatedAt:r.updated_at
+        };
+    }
+
+    // Save a timestamped .json copy locally. Used as an automatic backup
+    // right before an upload, so an accidental overwrite is always recoverable.
+    function downloadLocalBackup(reason){
+        try{
+            var pkg = {type:'SET_LIST_EXPORT', version:'2.5',
+                       exportedAt:new Date().toISOString(),
+                       reason: reason||'backup',
+                       songs:getLib(), setlists:getAllSL()};
+            var blob = new Blob([JSON.stringify(pkg,null,2)], {type:'application/json'});
+            var url  = URL.createObjectURL(blob);
+            var a=document.createElement('a');
+            var stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+            a.href=url; a.download='library-backup-'+stamp+'.json';
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a);
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+            return true;
+        }catch(e){ return false; }
+    }
+
+    async function uploadToCloud(){
+        if(!sb){ setSyncStatus('Cloud unavailable right now.','err'); return; }
+        if(!navigator.onLine){ setSyncStatus('You are offline.','err'); return; }
+        var lib=getLib(), all=getAllSL();
+        var n=Object.keys(lib).length, m=Object.keys(all).length;
+        if(!n && !m){ setSyncStatus('Nothing to upload.','warn'); return; }
+
+        // Passcode gate — stops a stray tap from overwriting the shared library.
+        var entered = prompt('Enter the upload passcode to publish to the cloud:');
+        if(entered===null){ setSyncStatus('Upload cancelled.','warn'); return; }
+        if(entered.trim()!==UPLOAD_PASSCODE){
+            setSyncStatus('Wrong passcode \u2014 nothing was uploaded.','err');
+            return;
+        }
+
+        if(!confirm('Upload '+n+' song(s) and '+m+' set list(s) to the cloud?\n\n'+
+                    'This overwrites the cloud copy. A local backup file will be '+
+                    'saved to this device first.')) return;
+
+        // Automatic safety backup BEFORE we touch the cloud (item #10)
+        downloadLocalBackup('pre-upload');
+
+        setSyncStatus('Uploading\u2026','warn');
+        try{
+            if(n){
+                var rows=Object.keys(lib).map(function(t){ return songToRow(t, lib[t]); });
+                var r1=await sb.from('songs').upsert(rows,{onConflict:'title'});
+                if(r1.error) throw r1.error;
+            }
+            if(m){
+                var srows=Object.keys(all).map(function(k){ return {name:k, songs:all[k], updated_by:deviceId}; });
+                var r2=await sb.from('setlists').upsert(srows,{onConflict:'name'});
+                if(r2.error) throw r2.error;
+            }
+            setSyncStatus('\u2713 Uploaded '+n+' songs & '+m+' set lists (backup saved)','ok');
+        }catch(err){
+            setSyncStatus('Upload failed: '+(err.message||err),'err');
+        }
+    }
+
+    async function reloadFromCloud(){
+        if(!sb){ setSyncStatus('Cloud unavailable right now.','err'); return; }
+        if(!navigator.onLine){ setSyncStatus('You are offline \u2014 using local copy.','warn'); return; }
+        setSyncStatus('Loading from cloud\u2026','warn');
+        try{
+            var sres=await sb.from('songs').select('*');
+            if(sres.error) throw sres.error;
+            var lres=await sb.from('setlists').select('*');
+            if(lres.error) throw lres.error;
+
+            var lib={}, all={};
+            (sres.data||[]).forEach(function(r){ lib[r.title]=rowToSong(r); });
+            (lres.data||[]).forEach(function(r){ all[r.name]=r.songs||[]; });
+
+            if(!Object.keys(lib).length && !Object.keys(all).length){
+                setSyncStatus('Cloud is empty \u2014 nothing to load. Upload first.','warn');
+                return;
+            }
+            if(!confirm('Replace this device\'s library with the cloud copy?\n\n'+
+                        'Cloud has '+Object.keys(lib).length+' song(s) and '+
+                        Object.keys(all).length+' set list(s).\n\n'+
+                        'A local backup of your current library will be saved first.')) {
+                setSyncStatus('Reload cancelled.','warn'); return;
+            }
+            downloadLocalBackup('pre-reload');
+
+            saveLib(lib);
+            saveAllSL(all);
+            refreshHeaderDropdown(); refreshSLBuilderUI();
+            setSyncStatus('\u2713 Loaded '+Object.keys(lib).length+' songs & '+
+                          Object.keys(all).length+' set lists from cloud','ok');
+        }catch(err){
+            setSyncStatus('Could not load: '+(err.message||err),'err');
+        }
+    }
+
+    function initSync(){
+        if(typeof window.supabase==='undefined'){
+            setSyncStatus('Cloud unavailable (offline mode)','warn');
+            return;
+        }
+        try{
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+            setSyncStatus('Ready \u2014 cloud updates only when you press Upload','');
+        }catch(e){
+            setSyncStatus('Could not start cloud: '+e.message,'err');
+        }
+    }
+
+    var syncPullBtn   = document.getElementById('syncPullBtn');
+    var syncPushBtn   = document.getElementById('syncPushBtn');
+    var syncBackupBtn = document.getElementById('syncBackupBtn');
+    if(syncPullBtn)   syncPullBtn.addEventListener('click', reloadFromCloud);
+    if(syncPushBtn)   syncPushBtn.addEventListener('click', uploadToCloud);
+    if(syncBackupBtn) syncBackupBtn.addEventListener('click', function(){
+        if(downloadLocalBackup('manual')) setSyncStatus('\u2713 Local backup saved.','ok');
+    });
+
+    // How-To / Help modal
+    var helpModal    = document.getElementById('helpModal');
+    var helpBtn      = document.getElementById('helpBtn');
+    var helpCloseBtn = document.getElementById('helpCloseBtn');
+    var helpCloseX   = document.getElementById('helpCloseX');
+    function openHelp(){ if(helpModal) helpModal.classList.add('open'); if(typeof closeDrawer==='function') closeDrawer(); }
+    function closeHelp(){ if(helpModal) helpModal.classList.remove('open'); }
+    if(helpBtn)      helpBtn.addEventListener('click', openHelp);
+    if(helpCloseBtn) helpCloseBtn.addEventListener('click', closeHelp);
+    if(helpCloseX)   helpCloseX.addEventListener('click', closeHelp);
+    if(helpModal)    helpModal.addEventListener('click', function(e){ if(e.target===helpModal) closeHelp(); });
+    document.addEventListener('keydown', function(e){
+        if(e.key==='Escape' && helpModal && helpModal.classList.contains('open')) closeHelp();
+    });
+
+    // Set List Builder page (item #2)
+    var slBuilderView   = document.getElementById('setlistBuilderView');
+    var openSLBuilderBtn= document.getElementById('openSLBuilderBtn');
+    var slBackBtn       = document.getElementById('slBackBtn');
+    function openSLBuilder(){
+        if(!slBuilderView) return;
+        stopScroll();
+        editorView.style.display='none';
+        perfView.style.display='none';
+        scrollDock.style.display='none';
+        document.querySelector('.container').classList.remove('perf-mode');
+        slBuilderView.style.display='block';
+        var contSL=document.querySelector('.container');
+        contSL.classList.add('edit-mode');
+        var hdrSL=document.querySelector('header');
+        hdrSL.classList.add('edit-bar');
+        hdrSL.classList.remove('perf-bar');
+        document.body.classList.add('edit-bar-on');
+        document.body.classList.remove('perf-bar-on');
+        appTitle.textContent='Set List Builder';
+        editBtn.classList.remove('active'); perfBtn.classList.remove('active');
+        refreshSLBuilderUI();
+        if(typeof closeDrawer==='function') closeDrawer();
+        window.scrollTo(0,0);
+    }
+    function backToEditor(){
+        if(slBuilderView) slBuilderView.style.display='none';
+        editBtn.click();
+        window.scrollTo(0,0);
+    }
+    if(openSLBuilderBtn) openSLBuilderBtn.addEventListener('click', openSLBuilder);
+    if(slBackBtn)        slBackBtn.addEventListener('click', backToEditor);
+
+    initSync();
+
+    /* ---- INIT ---- */
+    // The editor is the landing view, so apply its bottom-bar + styling now.
+    (function initEditorChrome(){
+        var cont=document.querySelector('.container');
+        var hdr =document.querySelector('header');
+        if(cont) cont.classList.add('edit-mode');
+        if(hdr)  hdr.classList.add('edit-bar');
+        document.body.classList.add('edit-bar-on');
+    })();
+
+    refreshHeaderDropdown();
+    refreshSLBuilderUI();
+
+}); // DOMContentLoaded
+</script>
+</body>
+</html>
