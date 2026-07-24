@@ -150,6 +150,31 @@
         .mode-btn{background:none;border:none;padding:0.45rem 1.1rem;font-size:0.875rem;font-weight:600;border-radius:50px;cursor:pointer;transition:all var(--transition);color:var(--text-muted);white-space:nowrap;}
         .mode-btn.active{background:var(--surface);color:var(--primary);box-shadow:0 2px 6px rgba(0,0,0,0.1);}
         [data-theme="dark"] .mode-btn.active{box-shadow:0 2px 6px rgba(0,0,0,0.4);}
+        /* ── EDITOR BOTTOM BAR (mirrors the performance dock) ── */
+        /* The controls that used to sit in the page header now live in a
+           fixed bar at the bottom, so they stay reachable while scrolling
+           a long lyric sheet — same idea as Performance Mode's dock. */
+        header.edit-bar{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:1400;
+            margin:0;padding:0.6rem 1rem;border-bottom:none;border-top:1px solid var(--border);
+            background:var(--surface);box-shadow:0 -6px 24px rgba(0,0,0,0.28);
+            display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;justify-content:center;}
+        header.edit-bar #appTitle{font-size:1rem;margin:0;white-space:nowrap;}
+        header.edit-bar .header-controls{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;justify-content:center;}
+        header.edit-bar .lib-group{display:flex;align-items:center;gap:0.4rem;}
+        header.edit-bar select{font-size:0.85rem;padding:0.4rem 0.6rem;}
+        header.edit-bar .theme-toggle{padding:0.4rem 0.7rem;font-size:0.8rem;}
+        /* Leave room so the bar never covers the end of the form */
+        body.edit-bar-on .container{margin-bottom:8.5rem;}
+        @media(max-width:640px){
+            header.edit-bar{padding:0.5rem 0.6rem;gap:0.5rem;}
+            header.edit-bar #appTitle{display:none;}
+            body.edit-bar-on .container{margin-bottom:11rem;}
+        }
+        /* ── EDITOR STYLED LIKE PERFORMANCE MODE (item #4) ── */
+        .container.edit-mode{max-width:100%;border-radius:0;box-shadow:none;padding:1.5rem 2rem;}
+        .edit-mode .fetch-box{background:var(--surface);border:1px solid var(--border-subtle);border-style:solid;}
+        .edit-mode #songLyrics{font-family:var(--perf-font, inherit);}
+        .edit-mode .form-group label{font-size:0.8rem;letter-spacing:0.02em;text-transform:uppercase;color:var(--text-muted);font-weight:700;}
         .fetch-box{background:var(--surface-2);padding:1.25rem;border-radius:var(--radius);margin-bottom:1.5rem;border:1px dashed var(--border);transition:background-color var(--transition),border-color var(--transition);}
         .fetch-box>label{color:var(--primary);font-size:0.9rem;margin-bottom:0.25rem;}
         .fetch-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:0.75rem;margin-top:0.5rem;align-items:end;}
@@ -332,6 +357,7 @@
     <div class="drawer-body">
 
         <div class="drawer-group">
+            <button type="button" id="openSLBuilderBtn" class="btn btn-purple">&#127925; Set List Builder</button>
             <button type="button" id="helpBtn" class="btn btn-outline">&#10067; How to Use This App</button>
         </div>
 
@@ -506,34 +532,42 @@
                     <button type="button" id="openDrawerInline" class="btn btn-secondary">&#9776; More Actions</button>
                 </div>
 
-                <hr class="section-divider">
-
-                <!-- SET LIST BUILDER -->
-                <div class="sl-builder">
-                    <div class="sl-builder-hdr">
-                        <h3>&#127925; Show Set List Builder</h3>
-                        <button type="button" id="deleteSetListBtn" class="btn btn-danger" style="padding:0.4rem 0.85rem;font-size:0.8rem;">&#128465; Delete Set List</button>
-                    </div>
-                    <div class="form-group">
-                        <label for="activeSetlistSelect" style="font-size:0.8rem;color:var(--text-muted);">Active Set List</label>
-                        <select id="activeSetlistSelect" style="width:100%;font-size:0.875rem;padding:0.45rem 0.75rem;"></select>
-                    </div>
-                    <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.85rem;flex-wrap:wrap;">
-                        <input type="text" id="setlistNameInput" placeholder="Type a name, then + Create or Rename&#8230;" autocomplete="off" style="flex:1;min-width:140px;padding:0.45rem 0.75rem;font-size:0.875rem;">
-                        <button type="button" id="newSetListBtn" class="btn btn-success" style="padding:0.45rem 0.85rem;font-size:0.8rem;">+ Create</button>
-                        <button type="button" id="renameSetListBtn" class="btn btn-secondary" style="padding:0.45rem 0.85rem;font-size:0.8rem;">Rename</button>
-                    </div>
-                    <div class="hint" style="margin-bottom:0.5rem;">Drag rows or use the &#9650;/&#9660; buttons to reorder. Changes save to this device instantly &mdash; press <strong>Upload to Cloud</strong> in the menu to share them.</div>
-                    <div id="slSavedBanner" style="display:none;margin-bottom:0.75rem;padding:0.5rem 0.75rem;border-radius:var(--radius);background:rgba(22,163,74,0.15);border:1px solid var(--accent);color:var(--accent);font-size:0.8rem;font-weight:600;">&#10003; Set list order saved to this device</div>
-                    <div class="sl-add-row">
-                        <select id="setlistAddSelect"></select>
-                        <button type="button" id="setlistAddBtn" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">+ Add</button>
-                    </div>
-                    <ul class="sl-queue" id="setlistQueue">
-                        <li class="sl-empty" id="setlistEmptyHint">No songs in this set list yet.</li>
-                    </ul>
-                </div>
             </form>
+        </div>
+
+        <!-- SET LIST BUILDER (its own page) -->
+        <div id="setlistBuilderView" style="display:none;">
+            <div class="fetch-box">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                    <h2 style="margin:0;font-size:1.15rem;color:var(--text);">&#127925; Set List Builder</h2>
+                    <button type="button" id="slBackBtn" class="btn btn-secondary">&#8592; Back to Editor</button>
+                </div>
+            <!-- SET LIST BUILDER -->
+            <div class="sl-builder">
+                <div class="sl-builder-hdr">
+                    <h3>&#127925; Show Set List Builder</h3>
+                    <button type="button" id="deleteSetListBtn" class="btn btn-danger" style="padding:0.4rem 0.85rem;font-size:0.8rem;">&#128465; Delete Set List</button>
+                </div>
+                <div class="form-group">
+                    <label for="activeSetlistSelect" style="font-size:0.8rem;color:var(--text-muted);">Active Set List</label>
+                    <select id="activeSetlistSelect" style="width:100%;font-size:0.875rem;padding:0.45rem 0.75rem;"></select>
+                </div>
+                <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.85rem;flex-wrap:wrap;">
+                    <input type="text" id="setlistNameInput" placeholder="Type a name, then + Create or Rename&#8230;" autocomplete="off" style="flex:1;min-width:140px;padding:0.45rem 0.75rem;font-size:0.875rem;">
+                    <button type="button" id="newSetListBtn" class="btn btn-success" style="padding:0.45rem 0.85rem;font-size:0.8rem;">+ Create</button>
+                    <button type="button" id="renameSetListBtn" class="btn btn-secondary" style="padding:0.45rem 0.85rem;font-size:0.8rem;">Rename</button>
+                </div>
+                <div class="hint" style="margin-bottom:0.5rem;">Drag rows or use the &#9650;/&#9660; buttons to reorder. Changes save to this device instantly &mdash; press <strong>Upload to Cloud</strong> in the menu to share them.</div>
+                <div id="slSavedBanner" style="display:none;margin-bottom:0.75rem;padding:0.5rem 0.75rem;border-radius:var(--radius);background:rgba(22,163,74,0.15);border:1px solid var(--accent);color:var(--accent);font-size:0.8rem;font-weight:600;">&#10003; Set list order saved to this device</div>
+                <div class="sl-add-row">
+                    <select id="setlistAddSelect"></select>
+                    <button type="button" id="setlistAddBtn" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">+ Add</button>
+                </div>
+                <ul class="sl-queue" id="setlistQueue">
+                    <li class="sl-empty" id="setlistEmptyHint">No songs in this set list yet.</li>
+                </ul>
+            </div>
+            </div>
         </div>
 
         <!-- PERFORMANCE VIEW -->
@@ -682,6 +716,9 @@
         </label>
         <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin:0;">
             <input type="checkbox" id="qaMetroFlash" style="width:auto;"> Screen flash
+        </label>
+        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin:0;">
+            <input type="checkbox" id="qaMetroAuto" style="width:auto;"> Start with Play
         </label>
     </div>
 
@@ -1387,13 +1424,23 @@ document.addEventListener('DOMContentLoaded', function() {
         perfBtn.classList.remove('active'); perfBtn.setAttribute('aria-selected','false');
         perfView.style.display='none'; scrollDock.style.display='none';
         editorView.style.display='block'; appTitle.textContent='Song Editor';
-        document.querySelector('.container').classList.remove('perf-mode');
+        var slv=document.getElementById('setlistBuilderView'); if(slv) slv.style.display='none';
+        var cont=document.querySelector('.container');
+        cont.classList.remove('perf-mode');
+        cont.classList.add('edit-mode');                       // perf-style look (#4)
+        document.querySelector('header').classList.add('edit-bar');  // sticky bottom bar (#3)
+        document.body.classList.add('edit-bar-on');
     });
     perfBtn.addEventListener('click', function(){
         if(!flds.title.value.trim()){ alert('Load a song first.'); return; }
         editBtn.classList.remove('active'); editBtn.setAttribute('aria-selected','false');
         perfBtn.classList.add('active');  perfBtn.setAttribute('aria-selected','true');
         editorView.style.display='none';
+        var slv2=document.getElementById('setlistBuilderView'); if(slv2) slv2.style.display='none';
+        var cont2=document.querySelector('.container');
+        cont2.classList.remove('edit-mode');
+        document.querySelector('header').classList.remove('edit-bar');
+        document.body.classList.remove('edit-bar-on');
         perfView.style.display='block'; scrollDock.style.display='flex'; setDockExpanded(false);
         appTitle.textContent='Performance Mode';
         document.querySelector('.container').classList.add('perf-mode');
@@ -2080,13 +2127,23 @@ document.addEventListener('DOMContentLoaded', function() {
     function stopScroll(){
         scrolling=false; paused=false; activePause=null;
         highlightSection(null);
+
         if(rafId){ cancelAnimationFrame(rafId); rafId=null; } lastTs=null;
         clearPauseUI();
         playBtn.textContent='\u25B6 Play Auto-Scroll'; playBtn.className='btn btn-success';
         statusEl.classList.remove('active'); statusTxt.textContent='Paused';
     }
 
-    playBtn.addEventListener('click',  function(){ scrolling?stopScroll():startScroll(); });
+    playBtn.addEventListener('click',  function(){
+        var wasScrolling = scrolling;
+        if(wasScrolling) stopScroll(); else startScroll();
+        // Tie the metronome to Play when the option is on (#1). Checked after
+        // the scroll state flips so it always matches what the button just did.
+        if(metroAutoStart){
+            if(wasScrolling){ if(metRunning) stopMetronome(); }
+            else            { if(!metRunning) startMetronome(); }
+        }
+    });
     resetBtn.addEventListener('click', function(){ stopScroll(); curScrollY=0; window.scrollTo({top:0,behavior:'smooth'}); });
 
     /* ---- SLIDERS & SPEED CONTROLS ---- */
@@ -2825,6 +2882,16 @@ document.addEventListener('DOMContentLoaded', function() {
     var qaMetroToggle  = document.getElementById('qaMetroToggle');
     var qaMetroSound   = document.getElementById('qaMetroSound');
     var qaMetroFlash   = document.getElementById('qaMetroFlash');
+    var qaMetroAuto    = document.getElementById('qaMetroAuto');
+    var K_METRO_AUTO   = 'song_manager_metro_auto';
+    var metroAutoStart = localStorage.getItem(K_METRO_AUTO)==='true';
+    if(qaMetroAuto){
+        qaMetroAuto.checked = metroAutoStart;
+        qaMetroAuto.addEventListener('change', function(){
+            metroAutoStart = qaMetroAuto.checked;
+            localStorage.setItem(K_METRO_AUTO, metroAutoStart ? 'true' : 'false');
+        });
+    }
     var qaSaveBtn      = document.getElementById('qaSaveBtn');
     var qaCloseBtn     = document.getElementById('qaCloseBtn');
 
@@ -3457,9 +3524,48 @@ document.addEventListener('DOMContentLoaded', function() {
         if(e.key==='Escape' && helpModal && helpModal.classList.contains('open')) closeHelp();
     });
 
+    // Set List Builder page (item #2)
+    var slBuilderView   = document.getElementById('setlistBuilderView');
+    var openSLBuilderBtn= document.getElementById('openSLBuilderBtn');
+    var slBackBtn       = document.getElementById('slBackBtn');
+    function openSLBuilder(){
+        if(!slBuilderView) return;
+        stopScroll();
+        editorView.style.display='none';
+        perfView.style.display='none';
+        scrollDock.style.display='none';
+        document.querySelector('.container').classList.remove('perf-mode');
+        slBuilderView.style.display='block';
+        var contSL=document.querySelector('.container');
+        contSL.classList.add('edit-mode');
+        document.querySelector('header').classList.add('edit-bar');
+        document.body.classList.add('edit-bar-on');
+        appTitle.textContent='Set List Builder';
+        editBtn.classList.remove('active'); perfBtn.classList.remove('active');
+        refreshSLBuilderUI();
+        if(typeof closeDrawer==='function') closeDrawer();
+        window.scrollTo(0,0);
+    }
+    function backToEditor(){
+        if(slBuilderView) slBuilderView.style.display='none';
+        editBtn.click();
+        window.scrollTo(0,0);
+    }
+    if(openSLBuilderBtn) openSLBuilderBtn.addEventListener('click', openSLBuilder);
+    if(slBackBtn)        slBackBtn.addEventListener('click', backToEditor);
+
     initSync();
 
     /* ---- INIT ---- */
+    // The editor is the landing view, so apply its bottom-bar + styling now.
+    (function initEditorChrome(){
+        var cont=document.querySelector('.container');
+        var hdr =document.querySelector('header');
+        if(cont) cont.classList.add('edit-mode');
+        if(hdr)  hdr.classList.add('edit-bar');
+        document.body.classList.add('edit-bar-on');
+    })();
+
     refreshHeaderDropdown();
     refreshSLBuilderUI();
 
