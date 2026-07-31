@@ -352,6 +352,10 @@
             flex-shrink:0;
         }
         .dock-collapsed .dock-chevron{transform:rotate(180deg);}
+        .dock-settings-btn{display:flex;align-items:center;justify-content:center;gap:0.25rem;
+            width:auto;min-width:44px;min-height:44px;padding:0.5rem 0.6rem;flex-shrink:0;}
+        .dock-settings-icon{font-size:1.15rem;line-height:1;}
+        /* When expanded the label reads "Settings" as text; collapsed shows the gear */
         /* The expandable controls body */
         .dock-body{
             overflow:hidden;
@@ -764,8 +768,14 @@
     </div>
 
     <div class="qa-row">
+        <span class="qa-label">Count-In</span>
+        <button type="button" id="listenBtn" class="btn btn-outline live-btn" title="Listen for a 4-count to auto-start" style="padding:0.5rem 0.9rem;">&#127908; Count-In</button>
+        <span class="hint" style="margin:0;">Listens for 4 clicks, then auto-starts.</span>
+    </div>
+
+    <div class="qa-row">
         <span class="qa-label">Metronome</span>
-        <button type="button" id="qaMetroToggle" class="btn btn-outline">Start</button>
+        <button type="button" id="metronomeBtn" class="btn btn-outline live-btn" title="Toggle metronome" style="padding:0.5rem 0.9rem;">&#9202; Metronome</button>
         <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin:0;">
             <input type="checkbox" id="qaMetroSound" checked style="width:auto;"> Sound
         </label>
@@ -791,18 +801,16 @@
             <!-- Primary controls always visible in handle -->
             <button type="button" id="playScrollBtn" class="btn btn-success" style="padding:0.45rem 1rem;font-size:0.85rem;">&#9654; Play</button>
             <button type="button" id="resetScrollBtn" class="btn btn-secondary" style="padding:0.45rem 0.75rem;font-size:0.85rem;">&#8679;</button>
-            <button type="button" id="metronomeBtn" class="btn btn-outline live-btn" title="Metronome">&#9202;</button>
+            <button type="button" id="quickActionsBtn" class="btn btn-outline live-btn" title="Metronome, count-in &amp; more">&#9776;</button>
             <span class="met-dots" id="metDots" style="display:none;"></span>
-            <button type="button" id="listenBtn" class="btn btn-outline live-btn" title="Listen for a 4-count to auto-start">&#127908;</button>
-            <button type="button" id="quickActionsBtn" class="btn btn-outline live-btn" title="Quick Actions">&#9776;</button>
             <div class="scroll-status" id="scrollStatus">
                 <span class="dot"></span>
                 <span id="scrollStatusText">Paused</span>
             </div>
         </div>
-        <button type="button" id="dockToggleBtn" class="btn btn-outline" style="display:flex;align-items:center;gap:0.4rem;padding:0.6rem 1rem;font-size:0.9rem;font-weight:700;min-height:44px;">
-            <span id="dockHintLabel">Settings</span>
-            <span class="dock-chevron" style="font-size:0.85rem;">&#9650;</span>
+        <button type="button" id="dockToggleBtn" class="btn btn-outline dock-settings-btn" title="Settings" aria-label="Settings">
+            <span id="dockHintLabel" class="dock-settings-icon">&#9881;</span>
+            <span class="dock-chevron">&#9650;</span>
         </button>
     </div>
 
@@ -2371,7 +2379,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function setDockExpanded(open){
         dockExpanded = open;
         dockEl.classList.toggle('dock-collapsed', !open);
-        dockHintLabel.textContent = open ? 'Hide' : 'Settings';
+        dockHintLabel.innerHTML = '\u2699';  // gear icon stays; chevron shows state
         // Dock height changed -> the header bar above it must move too
         requestAnimationFrame(publishDockHeight);
         setTimeout(publishDockHeight, 300);   // after the CSS transition
@@ -2994,7 +3002,9 @@ document.addEventListener('DOMContentLoaded', function() {
         qaWidthVal.textContent = colWidthSlider.value+'%';
         qaBpm.value      = parseInt(flds.tempo.value,10)||80;
         qaTimeSigLabel.textContent = effectiveTimeSig();
-        qaMetroToggle.textContent = metRunning ? 'Stop' : 'Start';
+        if(qaMetroToggle) qaMetroToggle.textContent = metRunning ? 'Stop' : 'Start';
+        // The metronome button in QA reflects running state via its glow class.
+        if(metronomeBtn) metronomeBtn.classList.toggle('live-on', metRunning);
         qaSheet.classList.add('open');
         qaBackdrop.classList.add('open');
     }
@@ -3128,7 +3138,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setBpm(parseInt(qaBpm.value,10)||80);      // clamp once they're done
     });
 
-    qaMetroToggle.addEventListener('click', function(){
+    if(qaMetroToggle) qaMetroToggle.addEventListener('click', function(){
         metRunning ? stopMetronome() : startMetronome();
     });
     qaMetroSound.addEventListener('change', function(){ metSoundOn=qaMetroSound.checked; });
