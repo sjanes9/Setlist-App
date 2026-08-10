@@ -6,6 +6,7 @@
     <title>Song Manager, Performer &amp; Scroller</title>
     <style>
         :root {
+            --dock-h:84px;   /* live dock height; JS refines this at runtime */
             --primary:#2563eb; --primary-hover:#1d4ed8;
             --accent:#16a34a;  --accent-hover:#15803d;
             --danger:#ef4444;  --danger-hover:#dc2626;
@@ -177,7 +178,7 @@
         /* In PERFORMANCE mode the header bar sits directly ABOVE the scroll
            dock rather than on top of it. The dock reports its own height via
            --dock-h so this stays correct whether the dock is collapsed or open. */
-        header.edit-bar.perf-bar{bottom:var(--dock-h,64px);padding-bottom:0.6rem;box-shadow:0 -4px 16px rgba(0,0,0,0.22);}
+        header.edit-bar.perf-bar{bottom:var(--dock-h,84px);padding-bottom:0.6rem;box-shadow:0 -4px 16px rgba(0,0,0,0.22);}
         body.perf-bar-on .container{margin-bottom:0;}
 
         /* ── PHONE LAYOUT ───────────────────────────────────────
@@ -185,9 +186,10 @@
            Collapse to a single compact row, shrink the chrome, and let
            the Open dropdown take the leftover width. */
         @media(max-width:640px){
-            header.edit-bar{padding:0.4rem 0.5rem;gap:0.4rem;flex-wrap:nowrap;}
+            header.edit-bar{padding:0.4rem 0.5rem;gap:0.4rem;flex-wrap:nowrap !important;align-items:center;}
             header.edit-bar #appTitle{display:none;}
-            header.edit-bar .header-controls{flex:1;flex-wrap:nowrap;gap:0.35rem;min-width:0;}
+            header.edit-bar .header-left{flex-shrink:0;}
+            header.edit-bar .header-controls{flex:1;flex-wrap:nowrap !important;gap:0.35rem;min-width:0;}
             /* The theme toggle is a luxury on a phone — icon only */
             header.edit-bar .theme-toggle{padding:0.35rem 0.5rem;font-size:0.75rem;flex-shrink:0;}
             header.edit-bar .theme-toggle #themeLabel{display:none;}
@@ -1560,6 +1562,8 @@ document.addEventListener('DOMContentLoaded', function() {
         perfIsSingleSong = (libSelect.value.indexOf('setlist::') !== 0);
         perfView.style.display='block'; scrollDock.style.display='flex'; setDockExpanded(false);
         requestAnimationFrame(publishDockHeight);
+        setTimeout(publishDockHeight, 60);
+        setTimeout(publishDockHeight, 250);
         appTitle.textContent='Performance Mode';
         document.querySelector('.container').classList.add('perf-mode');
         renderPerfView(); renderSLPanel(); loadWpmForCurrentSong();
@@ -2412,11 +2416,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Publish the dock's real height so the header bar can sit directly above
     // it in performance mode (kept current on toggle, resize and rotation).
+    // Publish the dock's real rendered height so the performance-mode header
+    // bar can sit directly ABOVE it. Uses the bounding rect (accurate even
+    // mid-transition) and is driven by a ResizeObserver so it updates the
+    // instant the dock's size changes — no guessing at timing.
     function publishDockHeight(){
         var dock=document.getElementById('scrollDock');
-        if(!dock) return;
-        var h = (dock.style.display==='none') ? 0 : dock.offsetHeight;
+        if(!dock){ document.documentElement.style.setProperty('--dock-h','0px'); return; }
+        var visible = dock.style.display!=='none' &&
+                      getComputedStyle(dock).display!=='none';
+        var h = visible ? Math.ceil(dock.getBoundingClientRect().height) : 0;
         document.documentElement.style.setProperty('--dock-h', h+'px');
+    }
+    // A ResizeObserver fires whenever the dock actually changes size, which is
+    // exactly when the header bar above it needs to move. This is far more
+    // reliable than firing timers and hoping layout has settled.
+    if(typeof ResizeObserver!=='undefined'){
+        var _dockRO=new ResizeObserver(function(){ publishDockHeight(); });
+        var _dockEl=document.getElementById('scrollDock');
+        if(_dockEl) _dockRO.observe(_dockEl);
     }
     window.addEventListener('resize', function(){
         publishDockHeight();
