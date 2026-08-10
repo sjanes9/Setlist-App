@@ -46,6 +46,13 @@
         body{font-family:'Georgia','Times New Roman',serif;background-color:var(--bg);color:var(--text);line-height:1.6;padding:2rem;transition:background-color var(--transition),color var(--transition);}
         .container{max-width:900px;margin:0 auto 7rem;background:var(--surface);padding:2rem;border-radius:var(--radius-lg);box-shadow:var(--shadow-card);transition:background-color var(--transition),max-width var(--transition),padding var(--transition);}.container.perf-mode{max-width:100%;border-radius:0;box-shadow:none;padding:1.5rem 2rem;}
         header{margin-bottom:2rem;border-bottom:2px solid var(--border-subtle);padding-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+        .header-left{display:flex;align-items:center;gap:0.5rem;flex-shrink:0;}
+        header #appTitle{flex:0 0 auto;}
+        /* In the fixed bottom bar, three balanced zones: menu | title | controls */
+        header.edit-bar{justify-content:space-between;}
+        header.edit-bar .header-left{order:1;}
+        header.edit-bar #appTitle{order:2;}
+        header.edit-bar .header-controls{order:3;}
         h1{font-size:1.75rem;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
         .header-controls{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
         .lib-group{display:flex;align-items:center;gap:0.5rem;}
@@ -471,8 +478,10 @@
 
 <div class="container">
     <header>
-        <button type="button" class="drawer-btn" id="openDrawerBtn" title="Library &amp; file actions" aria-label="Open actions menu">&#9776;</button>
-        <span id="syncDotHeader" title="Cloud sync status" style="width:8px;height:8px;border-radius:50%;background:var(--text-faint);flex-shrink:0;margin-right:0.15rem;"></span>
+        <div class="header-left">
+            <button type="button" class="drawer-btn" id="openDrawerBtn" title="Library &amp; file actions" aria-label="Open actions menu">&#9776;</button>
+            <span id="syncDotHeader" title="Cloud sync status" style="width:8px;height:8px;border-radius:50%;background:var(--text-faint);flex-shrink:0;"></span>
+        </div>
         <h1 id="appTitle">Song Editor</h1>
         <div class="header-controls">
             <button class="theme-toggle" id="themeToggleBtn">
@@ -542,8 +551,11 @@
                         <label for="songSpeedMode">Scroll Mode</label>
                         <select id="songSpeedMode" style="width:100%;">
                             <option value="duration">Song Duration</option>
+                            <option value="totalbars">Total Bars (whole song)</option>
                             <option value="rate">Rate (manual)</option>
                         </select>
+                        <input type="number" id="songTotalBars" min="1" max="2000" placeholder="e.g., 120 bars" autocomplete="off" style="width:100%;margin-top:0.5rem;display:none;">
+                        <span class="hint" id="songTotalBarsNote" style="display:none;">Scrolls evenly across the whole song. Duration is figured from bars &times; tempo &times; time signature &mdash; no per-section bar tags needed.</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -588,7 +600,6 @@
 
                 <div class="action-row">
                     <button type="button" id="saveLocalBtn" class="btn btn-success">&#128190; Save to Library</button>
-                    <button type="button" id="openDrawerInline" class="btn btn-secondary">&#9776; More Actions</button>
                 </div>
 
             </form>
@@ -767,10 +778,18 @@
         <span id="qaTimeSigLabel" style="font-size:0.8rem;color:var(--text-muted);font-weight:600;"></span>
     </div>
 
-    <div class="qa-row">
+    <div class="qa-row" style="flex-wrap:wrap;">
         <span class="qa-label">Count-In</span>
         <button type="button" id="listenBtn" class="btn btn-outline live-btn" title="Listen for a 4-count to auto-start" style="padding:0.5rem 0.9rem;">&#127908; Count-In</button>
-        <span class="hint" style="margin:0;">Listens for 4 clicks, then auto-starts.</span>
+        <select id="qaCountInMode" style="font-size:0.85rem;padding:0.4rem 0.6rem;">
+            <option value="clicks">4 Drumstick Clicks</option>
+            <option value="voice">Voice "1 2 3 4" (Chrome)</option>
+        </select>
+        <span id="qaListenStatus" style="font-size:0.78rem;font-weight:600;color:var(--text-muted);">Not listening</span>
+        <div style="display:flex;align-items:center;gap:0.4rem;flex:1;min-width:160px;">
+            <label for="qaClickSens" style="font-size:0.78rem;color:var(--text-muted);margin:0;white-space:nowrap;">Sensitivity</label>
+            <input type="range" id="qaClickSens" min="5" max="50" value="18" step="1" style="flex:1;min-width:80px;">
+        </div>
     </div>
 
     <div class="qa-row">
@@ -801,17 +820,16 @@
             <!-- Primary controls always visible in handle -->
             <button type="button" id="playScrollBtn" class="btn btn-success" style="padding:0.45rem 1rem;font-size:0.85rem;">&#9654; Play</button>
             <button type="button" id="resetScrollBtn" class="btn btn-secondary" style="padding:0.45rem 0.75rem;font-size:0.85rem;">&#8679;</button>
-            <button type="button" id="quickActionsBtn" class="btn btn-outline live-btn" title="Metronome, count-in &amp; more">&#9776;</button>
             <span class="met-dots" id="metDots" style="display:none;"></span>
             <div class="scroll-status" id="scrollStatus">
                 <span class="dot"></span>
                 <span id="scrollStatusText">Paused</span>
             </div>
         </div>
-        <button type="button" id="dockToggleBtn" class="btn btn-outline dock-settings-btn" title="Settings" aria-label="Settings">
-            <span id="dockHintLabel" class="dock-settings-icon">&#9881;</span>
-            <span class="dock-chevron">&#9650;</span>
-        </button>
+        <button type="button" id="quickActionsBtn" class="btn btn-outline live-btn dock-menu-btn" title="Menu — tempo, duration, count-in, metronome" aria-label="Open menu">&#9776;</button>
+        <!-- Hidden legacy toggle: the dock body no longer expands, but some code
+             still references this. Kept inert so nothing throws. -->
+        <button type="button" id="dockToggleBtn" style="display:none;"><span id="dockHintLabel"></span></button>
     </div>
 
     <!-- ALWAYS-VISIBLE SET LIST NAV (outside the collapsible body) -->
@@ -823,7 +841,7 @@
     </div>
 
     <!-- EXPANDABLE BODY -->
-    <div class="dock-body">
+    <div class="dock-body" style="display:none;">
         <!-- Count-In listener settings -->
         <div class="dock-row" id="countInRow">
             <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);white-space:nowrap;margin-bottom:0;">Count-In:</label>
@@ -839,6 +857,7 @@
              stays the value the scroll engine reads; it mirrors the song. -->
         <select id="speedMode" style="display:none;">
             <option value="duration" selected>Song Duration</option>
+            <option value="totalbars">Total Bars</option>
             <option value="rate">Rate (manual)</option>
         </select>
         <button type="button" id="saveSpeedBtn" style="display:none;">Save</button>
@@ -922,6 +941,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var dm = document.getElementById('speedMode');
         if(em) em.value = mode;
         if(dm) dm.value = mode;      // keep the scroll engine's hidden select in sync
+        var tbEl=document.getElementById('songTotalBars');
+        if(tbEl) tbEl.value = song.totalBars || '';
+        if(typeof syncTotalBarsUI==='function') syncTotalBarsUI();
     }
 
     /* ---- DOM REFS ---- */
@@ -1267,11 +1289,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // dock select, then to the song's stored value.
         var mode = editMode ? editMode.value
                  : (sEl ? sEl.value : (existing.speedMode||'duration'));
+        var tbEl=document.getElementById('songTotalBars');
         return {
             speedMode: mode,
             wpm:       wEl ? parseInt(wEl.value,10) : (existing.wpm||50),
-            duration:  dEl ? dEl.value.trim() : (existing.duration||'1:30')
+            duration:  dEl ? dEl.value.trim() : (existing.duration||'1:30'),
+            totalBars: tbEl && tbEl.value ? parseInt(tbEl.value,10) : (existing.totalBars||null)
         };
+    }
+
+    // Show or hide the Total Bars field based on the editor Scroll Mode.
+    function syncTotalBarsUI(){
+        var em=document.getElementById('songSpeedMode');
+        var tb=document.getElementById('songTotalBars');
+        var note=document.getElementById('songTotalBarsNote');
+        var show = em && em.value==='totalbars';
+        if(tb)   tb.style.display   = show ? 'block' : 'none';
+        if(note) note.style.display = show ? 'block' : 'none';
     }
 
     // Keep the hidden dock select mirrored when the Edit-view mode changes,
@@ -1281,7 +1315,16 @@ document.addEventListener('DOMContentLoaded', function() {
         var dm=document.getElementById('speedMode');
         if(em && dm) em.addEventListener('change', function(){
             dm.value=em.value;
+            syncTotalBarsUI();
             if(typeof syncSpeedModeUI==='function') syncSpeedModeUI();
+            if(typeof refreshBarDependentUI==='function') refreshBarDependentUI();
+        });
+    })();
+    // Recompute when the bars number changes
+    (function(){
+        var tb=document.getElementById('songTotalBars');
+        if(tb) tb.addEventListener('input', function(){
+            if(typeof refreshBarDependentUI==='function') refreshBarDependentUI();
         });
     })();
 
@@ -1311,7 +1354,7 @@ document.addEventListener('DOMContentLoaded', function() {
             artist:flds.artist.value.trim(), notes:flds.notes.value.trim(),
             structure:flds.structure.value.trim(), lyrics:flds.lyrics.value.trim(),
             // scroll-speed settings saved with the song
-            wpm:spd.wpm, speedMode:spd.speedMode, duration:spd.duration,
+            wpm:spd.wpm, speedMode:spd.speedMode, duration:spd.duration, totalBars:spd.totalBars,
             updatedAt:new Date().toISOString()};
         saveLib(lib); refreshHeaderDropdown(); refreshSLBuilderUI();
         libSelect.value='song::'+title; alert('"'+title+'" saved successfully.');
@@ -1511,6 +1554,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('header').classList.add('perf-bar');
         document.body.classList.add('edit-bar-on');
         document.body.classList.add('perf-bar-on');
+        // Decide single-song vs set list from the CURRENT dropdown selection,
+        // not a leftover flag. Entering perf via this button must reflect what
+        // is actually open. Anything that isn't a set list is a single song.
+        perfIsSingleSong = (libSelect.value.indexOf('setlist::') !== 0);
         perfView.style.display='block'; scrollDock.style.display='flex'; setDockExpanded(false);
         requestAnimationFrame(publishDockHeight);
         appTitle.textContent='Performance Mode';
@@ -1978,7 +2025,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if(L.lineCount===0){ pxPerMs = 0.03; return; }
 
         var timePerLineSec;
-        if(speedMode.value==='duration'){
+        if(speedMode.value==='totalbars'){
+            // Whole-song bars: total time = bars x seconds-per-bar, spread evenly.
+            var tb = parseInt((document.getElementById('songTotalBars')||{}).value,10);
+            if(!tb || tb<1) tb = 1;
+            var totalSec = Math.max(tb * secondsPerBar() - totalPauseSeconds(), 1);
+            timePerLineSec = totalSec / L.lineCount;
+        } else if(speedMode.value==='duration'){
             var durSec   = parseDuration(durationInput.value);
             var movingSec= Math.max(durSec - totalPauseSeconds(), 1);
             // Spread the singing time evenly across every lyric line.
@@ -2379,7 +2432,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function setDockExpanded(open){
         dockExpanded = open;
         dockEl.classList.toggle('dock-collapsed', !open);
-        dockHintLabel.innerHTML = '\u2699';  // gear icon stays; chevron shows state
+        if(dockHintLabel) dockHintLabel.innerHTML = '';
         // Dock height changed -> the header bar above it must move too
         requestAnimationFrame(publishDockHeight);
         setTimeout(publishDockHeight, 300);   // after the CSS transition
@@ -2389,13 +2442,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    dockHandle.addEventListener('click', function(e){
-        // Don't toggle if user tapped one of the control buttons inside the
-        // handle — EXCEPT the dedicated Settings toggle button.
-        var btn=e.target.closest('button');
-        if(btn && btn.id!=='dockToggleBtn') return;
-        setDockExpanded(!dockExpanded);
-    });
+    // The dock body is empty now (all controls moved to the menu), so the
+    // handle no longer expands anything. Left intentionally inert.
+    
 
     // Show dock in collapsed state when entering perf mode
     // (override the plain display:flex set by mode switch)
@@ -2414,9 +2463,12 @@ document.addEventListener('DOMContentLoaded', function() {
        WPM-derived tempo so the scroll matches the count-in tempo.
     ════════════════════════════════════════════════════════ */
     var listenBtn        = document.getElementById('listenBtn');
-    var countInMode      = document.getElementById('countInMode');
-    var clickSensitivity = document.getElementById('clickSensitivity');
-    var listenStatusText = document.getElementById('listenStatusText');
+    // Count-in settings now live in Quick Actions; the old dock elements remain
+    // hidden as fallback. Prefer the QA controls when present.
+    var countInMode      = document.getElementById('qaCountInMode')  || document.getElementById('countInMode');
+    var clickSensitivity = document.getElementById('qaClickSens')    || document.getElementById('clickSensitivity');
+    var listenStatusText = document.getElementById('qaListenStatus') || document.getElementById('listenStatusText');
+    var listenStatusAlt  = document.getElementById('listenStatusText');
 
     var audioCtx=null, micStream=null, analyser=null, micSource=null;
     var listening=false, rafListenId=null;
@@ -2427,7 +2479,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var aboveThreshold=false;   // simple debounce so one hit = one click
     var lastPeakAt=0;
 
-    function setListenStatus(txt){ if(listenStatusText) listenStatusText.textContent=txt; }
+    function setListenStatus(txt){ if(listenStatusText) listenStatusText.textContent=txt; if(listenStatusAlt && listenStatusAlt!==listenStatusText) listenStatusAlt.textContent=txt; }
 
     function setListeningUI(on){
         listening=on;
@@ -3473,6 +3525,7 @@ document.addEventListener('DOMContentLoaded', function() {
             lyrics: s.lyrics || null,
             wpm: (s.wpm===undefined||s.wpm===null) ? null : s.wpm,
             speed_mode: s.speedMode || null, duration: s.duration || null,
+            total_bars: (s.totalBars===undefined||s.totalBars===null) ? null : s.totalBars,
             updated_by: deviceId
         };
     }
@@ -3481,7 +3534,7 @@ document.addEventListener('DOMContentLoaded', function() {
             title:r.title, artist:r.artist||'', key:r.key||'C',
             tempo:r.tempo||80, timeSig:r.time_sig||'4/4',
             notes:r.notes||'', structure:r.structure||'', lyrics:r.lyrics||'',
-            wpm:r.wpm, speedMode:r.speed_mode, duration:r.duration,
+            wpm:r.wpm, speedMode:r.speed_mode, duration:r.duration, totalBars:r.total_bars,
             updatedAt:r.updated_at
         };
     }
@@ -3590,9 +3643,39 @@ document.addEventListener('DOMContentLoaded', function() {
         try{
             sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
             setSyncStatus('Ready \u2014 cloud updates only when you press Upload','');
+            startKeepAlive();
         }catch(e){
             setSyncStatus('Could not start cloud: '+e.message,'err');
         }
+    }
+
+    // ── SUPABASE KEEP-ALIVE (item #5) ───────────────────────
+    // Free Supabase projects pause after ~7 days of NO activity. A tiny,
+    // cheap read every so often (only while the app is actually open) counts
+    // as activity and keeps the project awake. This is a read of a single
+    // row with head:true, so it transfers almost nothing.
+    //
+    // IMPORTANT LIMITATION: this only runs while someone has the app open in
+    // a browser. It cannot keep the project awake on its own if the app is
+    // closed for a week. For a hard guarantee, an external uptime pinger
+    // (e.g. a free cron service hitting the REST endpoint) is the real fix —
+    // but for a band that opens this app regularly, this is usually enough.
+    var keepAliveTimer=null;
+    async function keepAlivePing(){
+        if(!sb || !navigator.onLine) return;
+        try{
+            // Cheapest possible touch: count-only head request, no rows returned.
+            await sb.from('songs').select('title', {count:'exact', head:true});
+        }catch(e){ /* silent — a failed ping is harmless */ }
+    }
+    function startKeepAlive(){
+        if(keepAliveTimer) return;
+        keepAlivePing();                                  // once on load
+        keepAliveTimer=setInterval(keepAlivePing, 6*60*60*1000);  // every 6 hours
+        // Also ping when the tab regains focus after being backgrounded.
+        document.addEventListener('visibilitychange', function(){
+            if(document.visibilityState==='visible') keepAlivePing();
+        });
     }
 
     var syncPullBtn   = document.getElementById('syncPullBtn');
