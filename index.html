@@ -99,6 +99,8 @@
         .qa-step:active{transform:scale(0.94);}
         input.derived{background:var(--surface-2);border-style:dashed;opacity:0.9;}
         .bars-badge{display:inline-block;margin-left:0.6rem;padding:0.1rem 0.45rem;font-size:0.68rem;font-weight:700;font-style:normal;letter-spacing:0.02em;border-radius:50px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);vertical-align:middle;}
+        .attr-badge{display:inline-block;margin-left:0.4rem;padding:0.1rem 0.45rem;font-size:0.68rem;font-weight:700;font-style:normal;letter-spacing:0.02em;border-radius:50px;background:rgba(37,99,235,0.14);border:1px solid var(--primary);color:var(--primary);vertical-align:middle;}
+        [data-theme="dark"] .attr-badge{background:rgba(96,165,250,0.16);border-color:#3b82f6;color:#93c5fd;}
         .perf-section-heading.section-active{color:var(--accent);border-left-color:var(--accent);}
         .perf-section-heading.section-active .bars-badge{background:var(--accent);border-color:var(--accent);color:#fff;}
         /* Live button active glow (SongbookPro-style) */
@@ -162,34 +164,33 @@
         /* The controls that used to sit in the page header now live in a
            fixed bar at the bottom, so they stay reachable while scrolling
            a long lyric sheet — same idea as Performance Mode's dock. */
-        header.edit-bar{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:1400;
-            margin:0;border-bottom:none;border-top:1px solid var(--border);
-            padding:0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom));
-            background:var(--surface);box-shadow:0 -6px 24px rgba(0,0,0,0.28);
-            display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;justify-content:center;}
+        header.edit-bar{position:fixed;left:0;right:0;top:0;bottom:auto;z-index:1400;
+            margin:0;border-top:none;border-bottom:1px solid var(--border);
+            padding:calc(0.6rem + env(safe-area-inset-top)) 1rem 0.6rem;
+            background:var(--surface);box-shadow:0 6px 24px rgba(0,0,0,0.28);
+            display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;justify-content:space-between;}
         header.edit-bar #appTitle{font-size:1rem;margin:0;white-space:nowrap;}
         header.edit-bar .header-controls{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;justify-content:center;}
         header.edit-bar .lib-group{display:flex;align-items:center;gap:0.4rem;}
         header.edit-bar select{font-size:0.85rem;padding:0.4rem 0.6rem;}
         header.edit-bar .theme-toggle{padding:0.4rem 0.7rem;font-size:0.8rem;}
-        /* Leave room so the bar never covers the end of the form */
-        body.edit-bar-on .container{margin-bottom:8.5rem;}
+        /* Leave room so the top bar never covers the start of the form */
+        body.edit-bar-on .container{margin-top:5.5rem;}
 
-        /* In PERFORMANCE mode the header bar sits directly ABOVE the scroll
-           dock rather than on top of it. The dock reports its own height via
-           --dock-h so this stays correct whether the dock is collapsed or open. */
-        header.edit-bar.perf-bar{bottom:var(--dock-h,84px);padding-bottom:0.6rem;box-shadow:0 -4px 16px rgba(0,0,0,0.22);}
-        body.perf-bar-on .container{margin-bottom:0;}
+        /* In PERFORMANCE mode the header bar also lives at the top; the scroll
+           dock is independent at the bottom. */
+        header.edit-bar.perf-bar{top:0;bottom:auto;}
+        body.perf-bar-on .container{margin-top:5.5rem;}
 
         /* ── PHONE LAYOUT ───────────────────────────────────────
            Three stacked rows of controls ate most of a phone screen.
            Collapse to a single compact row, shrink the chrome, and let
            the Open dropdown take the leftover width. */
         @media(max-width:640px){
-            header.edit-bar{padding:0.4rem 0.5rem;gap:0.4rem;flex-wrap:nowrap !important;align-items:center;}
+            header.edit-bar{padding:calc(0.4rem + env(safe-area-inset-top)) 0.5rem 0.4rem;gap:0.4rem;flex-wrap:nowrap !important;align-items:center;}
             header.edit-bar #appTitle{display:none;}
-            header.edit-bar .header-left{flex-shrink:0;}
-            header.edit-bar .header-controls{flex:1;flex-wrap:nowrap !important;gap:0.35rem;min-width:0;}
+            header.edit-bar .header-left{flex:1;min-width:0;gap:0.35rem;}
+            header.edit-bar .header-controls{flex-shrink:0;flex-wrap:nowrap !important;gap:0.35rem;}
             /* The theme toggle is a luxury on a phone — icon only */
             header.edit-bar .theme-toggle{padding:0.35rem 0.5rem;font-size:0.75rem;flex-shrink:0;}
             header.edit-bar .theme-toggle #themeLabel{display:none;}
@@ -198,8 +199,8 @@
             header.edit-bar .lib-group select{width:100%;min-width:0;font-size:0.8rem;padding:0.4rem 0.5rem;}
             header.edit-bar .mode-toggle-container{flex-shrink:0;padding:0.15rem;}
             header.edit-bar .mode-btn{padding:0.4rem 0.6rem;font-size:0.75rem;}
-            body.edit-bar-on .container{margin-bottom:6.5rem;}
-            body.perf-bar-on .container{margin-bottom:0;}
+            body.edit-bar-on .container{margin-top:4.75rem;}
+            body.perf-bar-on .container{margin-top:4.75rem;}
             /* Editor breathing room: full-bleed padding was wasting space */
             .container.edit-mode{padding:1rem 0.85rem;}
             /* Stack form fields one-per-row so inputs aren't squeezed */
@@ -425,7 +426,7 @@
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
 <aside class="drawer" id="actionsDrawer" aria-label="Library and file actions">
     <div class="drawer-head">
-        <h3>Actions</h3>
+        <h3><span style="opacity:0.7;margin-right:0.4rem;">&#9776;</span>Menu</h3>
         <button type="button" class="drawer-close" id="drawerCloseBtn" aria-label="Close menu">&times;</button>
     </div>
     <div class="drawer-body">
@@ -489,6 +490,12 @@
         <div class="header-left">
             <button type="button" class="drawer-btn" id="openDrawerBtn" title="Library &amp; file actions" aria-label="Open actions menu">&#9776;</button>
             <span id="syncDotHeader" title="Cloud sync status" style="width:8px;height:8px;border-radius:50%;background:var(--text-faint);flex-shrink:0;"></span>
+            <div class="lib-group">
+                <label for="songLibrarySelect" style="margin-bottom:0;">Open:</label>
+                <select id="songLibrarySelect">
+                    <option value="">-- Songs &amp; Set Lists --</option>
+                </select>
+            </div>
         </div>
         <h1 id="appTitle">Song Editor</h1>
         <div class="header-controls">
@@ -496,12 +503,6 @@
                 <span id="themeIcon">&#9728;&#65039;</span>
                 <span id="themeLabel">Light Mode</span>
             </button>
-            <div class="lib-group">
-                <label for="songLibrarySelect" style="margin-bottom:0;">Open:</label>
-                <select id="songLibrarySelect">
-                    <option value="">-- Songs &amp; Set Lists --</option>
-                </select>
-            </div>
             <div class="mode-toggle-container" role="tablist">
                 <button class="mode-btn active" id="editModeBtn" role="tab" aria-selected="true">Edit View</button>
                 <button class="mode-btn" id="perfModeBtn" role="tab" aria-selected="false">Performance Mode</button>
@@ -595,12 +596,25 @@
                         <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Chorus">Chorus</button>
                         <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Bridge">Bridge</button>
                         <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Solo">Solo</button>
+                        <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Interlude">Interlude</button>
                         <button type="button" class="btn btn-outline insert-btn sect-btn" data-section="Outro">Outro</button>
+                        <button type="button" id="customSectionBtn" class="btn btn-outline insert-btn" title="Add a section with a name you choose">&#43; Custom</button>
+                        <button type="button" id="editSectionsBtn" class="btn btn-outline insert-btn" title="Edit the name, bars, tempo, time and key of each section">&#9998; Edit Sections</button>
                     </div>
                     <div class="insert-bar">
                         <span class="insert-bar-label">Insert break at cursor:</span>
                         <button type="button" id="insertBarsBtn" class="btn btn-outline insert-btn">&#127925; Add Measures Break</button>
                         <span class="hint" style="margin:0;">Click where you want it, then pick one.</span>
+                    </div>
+                    <div class="insert-bar">
+                        <span class="insert-bar-label">Snippets:</span>
+                        <select id="snippetSelect" style="font-size:0.8rem;padding:0.35rem 0.5rem;max-width:180px;">
+                            <option value="">Insert a saved snippet…</option>
+                        </select>
+                        <button type="button" id="insertSnippetBtn" class="btn btn-outline insert-btn">&#128229; Insert</button>
+                        <button type="button" id="saveSnippetBtn" class="btn btn-outline insert-btn" title="Save the selected text (or whole box) as a reusable snippet">&#128190; Save Selection</button>
+                        <button type="button" id="manageSnippetsBtn" class="btn btn-outline insert-btn" title="Rename or delete snippets">&#9881; Manage</button>
+                        <span class="hint" style="margin:0;">Reusable chunks of lyrics/chords you can drop into any song.</span>
                     </div>
                     <textarea id="songLyrics" placeholder="{c: Verse 1}&#10;[E] Amazing [A] grace how [E] sweet the sound..."></textarea>
                     <div class="hint">A measures break holds the auto-scroll for the given number of bars at this song's tempo, then resumes &mdash; best for intros, solos, and turnarounds.</div>
@@ -700,13 +714,20 @@
             <p style="margin:0 0 0.8rem;"><strong>Edit</strong> is where you build songs. <strong>Performance</strong> is the big-text, auto-scrolling view you use on stage. Switch with the buttons at the top.</p>
 
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Building a song</h3>
-            <p style="margin:0 0 0.8rem;">Fill in the title, tempo and time signature, then type or paste lyrics. Use the <strong>section buttons</strong> (Intro, Verse, Chorus&hellip;) to drop in headers &mdash; tick <em>&ldquo;with bars&rdquo;</em> first to also set how many measures each section runs. The <strong>Scroll Mode</strong> field picks how auto-scroll is paced, and saves with the song.</p>
+            <p style="margin:0 0 0.8rem;">Fill in the title, tempo and time signature, then type or paste lyrics. Use the <strong>section buttons</strong> (Intro, Verse, Chorus&hellip;) to drop in headers &mdash; or <strong>+ Custom</strong> to name your own (Vamp, Breakdown, etc.). Tick <em>&ldquo;with bars&rdquo;</em> first to also set how many measures each section runs. <strong>&#9998; Edit Sections</strong> lets you rename, retime, or add sections after the fact. The <strong>Scroll Mode</strong> field picks how auto-scroll is paced, and saves with the song.</p>
 
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Bar-timed scrolling (the good part)</h3>
             <p style="margin:0 0 0.8rem;">When sections have bar counts like <code>{c: Verse 1}{bars:16}</code>, the app knows exactly when each section plays and keeps it under the reading line at the right moment. The song&rsquo;s duration is then <em>calculated</em> from the bars and tempo &mdash; no guessing. Sections without bar counts fall back to even pacing, so you can add them gradually.</p>
 
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Measure breaks</h3>
             <p style="margin:0 0 0.8rem;">Use <strong>Add Measures Break</strong> to hold the scroll for a set number of bars &mdash; handy for intros, solos and turnarounds.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Mid-song tempo, time &amp; key changes</h3>
+            <p style="margin:0 0 0.8rem;">Add tags to any section header to change things partway through a song: <code>{c: Chorus}{bars:8}{tempo:120}{time:6/8}{key:G}</code>. Tempo and time signature adjust the bar-timed scroll from that section onward; key is shown for the performer. They carry forward until the next change. (Tempo/time only affect timing in bar-timed songs.)</p>
+            <p style="margin:0 0 0.8rem;">Don't want to type tags by hand? Press <strong>&#9998; Edit Sections</strong> above the lyrics to change every section's name, bars, tempo, time and key in one dialog.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Reusable snippets</h3>
+            <p style="margin:0 0 0.8rem;">Select a chunk of lyrics/chords and press <strong>Save Selection</strong> to store it under a name. Later, pick it from the <strong>Snippets</strong> list and press <strong>Insert</strong> to drop it into any song. Snippets are saved on this device and travel inside library backups.</p>
 
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Set lists</h3>
             <p style="margin:0 0 0.8rem;">In the Edit view, create a set list, add songs, and drag rows (or use the &#9650;/&#9660; buttons) to reorder. Order saves to your device instantly. Open a set list from the <strong>Open</strong> dropdown to perform it &mdash; use <strong>Prev / Next</strong> or the <strong>Set List</strong> button to move between songs. Open a single song instead and the set-list controls stay out of the way.</p>
@@ -744,6 +765,28 @@
         <div class="modal-actions">
             <button type="button" id="breakCancel" class="btn btn-secondary">Cancel</button>
             <button type="button" id="breakConfirm" class="btn btn-success">Insert Break</button>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT SECTIONS MODAL -->
+<div class="modal-overlay" id="editSectionsModal">
+    <div class="modal-box" style="max-width:640px;max-height:85vh;overflow-y:auto;text-align:left;">
+        <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>&#9998; Edit Sections</span>
+            <button type="button" class="drawer-close" id="editSectionsCloseX">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="hint" style="margin-bottom:0.75rem;">Change any section's name, bar count, and optional tempo / time / key changes. Leave a field blank to omit that tag. Changes are written back into the lyrics when you press Apply.</div>
+            <div id="editSectionsList"></div>
+            <div id="editSectionsEmpty" class="hint" style="display:none;">No section headers found. Add sections first with the buttons above.</div>
+        </div>
+        <div class="modal-actions" style="justify-content:space-between;">
+            <button type="button" id="editSectionsAdd" class="btn btn-purple">&#43; Add Section</button>
+            <div style="display:flex;gap:0.5rem;">
+                <button type="button" id="editSectionsCancel" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="editSectionsApply" class="btn btn-success">Apply Changes</button>
+            </div>
         </div>
     </div>
 </div>
@@ -912,6 +955,24 @@ document.addEventListener('DOMContentLoaded', function() {
     var SECTION_RE = /^\{\s*(?:c|comment)\s*:\s*(.+?)\s*\}$/i;
     // Section header WITH an inline bar count: {c: Verse 1}{bars:16}
     var SECTION_BARS_RE = /^\{\s*(?:c|comment)\s*:\s*(.+?)\s*\}\s*\{\s*bars\s*:\s*(\d+(?:\.\d+)?)\s*\}$/i;
+    // A section header optionally followed by any of {bars:N}{tempo:N}{time:X/Y}{key:Z}
+    // in any order, e.g. {c: Chorus}{bars:8}{tempo:120}{key:G}{time:6/8}
+    var SECTION_HEAD_RE = /^\{\s*(?:c|comment)\s*:\s*(.+?)\s*\}\s*(.*)$/i;
+    // Parse the trailing attribute tags off a header line's remainder.
+    function parseSectionAttrs(rest){
+        var out={bars:null, tempo:null, time:null, key:null};
+        if(!rest) return out;
+        var m;
+        var barsRe =/\{\s*bars\s*:\s*(\d+(?:\.\d+)?)\s*\}/i;
+        var tempoRe=/\{\s*tempo\s*:\s*(\d+(?:\.\d+)?)\s*\}/i;
+        var timeRe =/\{\s*time\s*:\s*(\d{1,2}\s*\/\s*\d{1,2})\s*\}/i;
+        var keyRe  =/\{\s*key\s*:\s*([^}]+?)\s*\}/i;
+        if((m=rest.match(barsRe)))  out.bars =parseFloat(m[1]);
+        if((m=rest.match(tempoRe))) out.tempo=parseFloat(m[1]);
+        if((m=rest.match(timeRe)))  out.time =m[1].replace(/\s+/g,'');
+        if((m=rest.match(keyRe)))   out.key  =m[1].trim();
+        return out;
+    }
     var CHORD_RE   = /^[A-G][#b]?(m|maj|min|dim|aug|sus|add|M)?[0-9]*(sus[0-9]*)?(add[0-9]*)?(\/[A-G][#b]?)?$/i;
     // Default shared library URL — your band's source-of-truth file on GitHub.
     // EDIT 'Setlist-App' below if your repository name ever changes.
@@ -1404,7 +1465,7 @@ document.addEventListener('DOMContentLoaded', function() {
     exportLibBtn.addEventListener('click', function(){
         var lib=getLib(); if(!Object.keys(lib).length){ alert('Your library is empty. Save some songs first.'); return; }
         var allSL=getAllSL();
-        var pkg={type:'SET_LIST_EXPORT',version:'2.2',exportedAt:new Date().toISOString(),songs:lib,setlists:allSL};
+        var pkg={type:'SET_LIST_EXPORT',version:'2.5',exportedAt:new Date().toISOString(),songs:lib,setlists:allSL,snippets:getSnippets()};
         var link=document.createElement('a');
         link.href=URL.createObjectURL(new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'}));
         // Always 'library.json' so it can be dropped straight into the repo
@@ -1426,7 +1487,7 @@ document.addEventListener('DOMContentLoaded', function() {
             throw new Error('Unrecognized file format.');
         }
         if(!Object.keys(incomingSongs).length) throw new Error('No song data found.');
-        return {songs:incomingSongs, setlists:incomingSL};
+        return {songs:incomingSongs, setlists:incomingSL, snippets:(p.snippets||null)};
     }
 
     // Merge a parsed payload into the local library, after confirmation.
@@ -1440,6 +1501,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if(!confirm(msg)) return false;
         saveLib(Object.assign({},getLib(),payload.songs));
         if(payload.setlists) saveAllSL(Object.assign({},getAllSL(),payload.setlists));
+        if(payload.snippets){
+            saveSnippets(Object.assign({},getSnippets(),payload.snippets));
+            if(typeof refreshSnippetDropdown==='function') refreshSnippetDropdown();
+        }
         refreshHeaderDropdown(); refreshSLBuilderUI();
         return true;
     }
@@ -1612,11 +1677,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Beats per bar from the song's time signature (e.g. "6/8" -> 6).
-    function beatsPerBar(){
-        var ts=effectiveTimeSig();
-        var n=parseInt(ts.split('/')[0],10);
+    // Beats per bar from a time-signature string (e.g. "6/8" -> 6).
+    function beatsPerBarOf(ts){
+        var n=parseInt(String(ts||'').split('/')[0],10);
         return (n>0)?n:4;
+    }
+    // Beats per bar from the song's (base) time signature.
+    function beatsPerBar(){ return beatsPerBarOf(effectiveTimeSig()); }
+    // Seconds per bar for a specific tempo + time signature.
+    function secondsPerBarOf(bpm, ts){
+        bpm = bpm || parseInt(flds.tempo.value,10) || 80;
+        return beatsPerBarOf(ts||effectiveTimeSig()) * (60/bpm);
     }
     // Seconds per bar at the song's tempo & time signature.
     function secondsPerBar(){
@@ -1728,10 +1799,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 })(pObj);
                 return;
             }
-            // Section header: {c: Verse 1}{bars:16} | {c: Verse 1} | legacy [Verse 1]
-            var headerText=null, headerBars=null;
-            var hb=t.match(SECTION_BARS_RE);
-            if(hb){ headerText=hb[1]; headerBars=parseFloat(hb[2]); }
+            // Section header: {c: Verse 1}{bars:16}{tempo:120}{time:6/8}{key:G}
+            //   | {c: Verse 1} | legacy [Verse 1]
+            var headerText=null, headerAttrs={bars:null,tempo:null,time:null,key:null};
+            var hh=t.match(SECTION_HEAD_RE);
+            if(hh){ headerText=hh[1]; headerAttrs=parseSectionAttrs(hh[2]); }
             else {
                 var hm=t.match(SECTION_RE);
                 if(hm){ headerText=hm[1]; }
@@ -1741,6 +1813,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             if(headerText!==null){
+                var headerBars=headerAttrs.bars;
                 section=document.createElement('div'); section.className='perf-section';
                 var h=document.createElement('div'); h.className='perf-section-heading';
                 h.textContent=headerText;
@@ -1748,14 +1821,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     var badge=document.createElement('span');
                     badge.className='bars-badge';
                     badge.textContent=headerBars+' bars';
-                    badge.title=headerBars+' bars \u2248 '+barsToSeconds(headerBars).toFixed(1)+'s at this tempo';
                     h.appendChild(badge);
                 }
+                // Show any mid-song tempo / time / key change on the heading.
+                function addChip(txt,title){
+                    var chip=document.createElement('span');
+                    chip.className='attr-badge';
+                    chip.textContent=txt; if(title) chip.title=title;
+                    h.appendChild(chip);
+                }
+                if(headerAttrs.tempo) addChip('\u2669='+headerAttrs.tempo, 'Tempo changes to '+headerAttrs.tempo+' BPM here');
+                if(headerAttrs.time)  addChip(headerAttrs.time, 'Time signature changes to '+headerAttrs.time+' here');
+                if(headerAttrs.key)   addChip('Key '+headerAttrs.key, 'Key changes to '+headerAttrs.key+' here');
                 section.appendChild(h); rnd.content.appendChild(section);
                 // Register this section on the timeline for the scroll engine
                 sectionTimeline.push({
                     el: section, heading: h, name: headerText,
-                    bars: headerBars, lineIdx: lineIdx,
+                    bars: headerBars, tempo: headerAttrs.tempo,
+                    time: headerAttrs.time, key: headerAttrs.key,
+                    lineIdx: lineIdx,
                     lines: 0, startSec: 0, endSec: 0
                 });
             } else {
@@ -1789,10 +1873,17 @@ document.addEventListener('DOMContentLoaded', function() {
         sectionTimeline.forEach(function(s){
             s.lines = s.el.querySelectorAll('.song-line').length;
         });
-        // Walk forward assigning start/end times from bar counts
-        var spb = secondsPerBar();
+        // Walk forward assigning start/end times from bar counts. Tempo and
+        // time signature carry forward until a section overrides them with an
+        // inline {tempo:} / {time:} tag (Part 3).
+        var curTempo = parseInt(flds.tempo.value,10) || 80;
+        var curTime  = effectiveTimeSig();
         var t = 0;
         sectionTimeline.forEach(function(s){
+            if(s.tempo) curTempo = s.tempo;   // sticky from here on
+            if(s.time)  curTime  = s.time;
+            s.effTempo = curTempo; s.effTime = curTime;
+            var spb = secondsPerBarOf(curTempo, curTime);
             s.startSec = t;
             if(s.bars !== null && s.bars > 0){
                 s.durSec = s.bars * spb;
@@ -1809,9 +1900,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Total song time implied by the bar counts (0 if none are set).
     function timelineDurationSec(){
-        var spb=secondsPerBar(), sum=0, any=false;
+        var curTempo=parseInt(flds.tempo.value,10)||80, curTime=effectiveTimeSig();
+        var sum=0, any=false;
         sectionTimeline.forEach(function(s){
-            if(s.bars!==null && s.bars>0){ sum += s.bars*spb; any=true; }
+            if(s.tempo) curTempo=s.tempo;
+            if(s.time)  curTime =s.time;
+            if(s.bars!==null && s.bars>0){ sum += s.bars*secondsPerBarOf(curTempo,curTime); any=true; }
         });
         pauseMarkers.forEach(function(p){ sum += p.secs; });
         return any ? sum : 0;
@@ -2767,6 +2861,101 @@ document.addEventListener('DOMContentLoaded', function() {
         return newPos;
     }
 
+    /* ════════════════════════════════════════════════════════
+       REUSABLE SNIPPETS (Part 2)
+       Named chunks of lyrics/chords saved on the device and
+       insertable into any song. Stored in localStorage; included
+       in library backups so they travel with an export.
+    ════════════════════════════════════════════════════════ */
+    var K_SNIPPETS = 'song_manager_snippets';
+    function getSnippets(){
+        try { return JSON.parse(localStorage.getItem(K_SNIPPETS)) || {}; }
+        catch(e){ return {}; }
+    }
+    function saveSnippets(o){ localStorage.setItem(K_SNIPPETS, JSON.stringify(o)); }
+
+    function refreshSnippetDropdown(){
+        var sel=document.getElementById('snippetSelect');
+        if(!sel) return;
+        var snips=getSnippets();
+        var names=Object.keys(snips).sort(function(a,b){ return a.toLowerCase().localeCompare(b.toLowerCase()); });
+        sel.innerHTML='<option value="">'+(names.length?'Insert a saved snippet\u2026':'No snippets saved yet')+'</option>';
+        names.forEach(function(n){
+            var o=document.createElement('option');
+            o.value=n; o.textContent=n;
+            sel.appendChild(o);
+        });
+    }
+
+    function saveSelectionAsSnippet(){
+        var ta=flds.lyrics;
+        var s=ta.selectionStart, e=ta.selectionEnd;
+        var text = (typeof s==='number' && e>s) ? ta.value.slice(s,e) : ta.value;
+        text = text.replace(/\s+$/,'');
+        if(!text.trim()){ alert('Nothing to save. Select some text first, or type in the lyrics box.'); return; }
+        var name=prompt('Name this snippet (e.g. "My Chorus"):');
+        if(name===null) return;
+        name=name.trim();
+        if(!name){ alert('A snippet needs a name.'); return; }
+        var snips=getSnippets();
+        if(snips[name] && !confirm('A snippet called "'+name+'" already exists. Replace it?')) return;
+        snips[name]=text;
+        saveSnippets(snips);
+        refreshSnippetDropdown();
+        var sel=document.getElementById('snippetSelect'); if(sel) sel.value=name;
+    }
+
+    function insertSelectedSnippet(){
+        var sel=document.getElementById('snippetSelect');
+        if(!sel || !sel.value) { alert('Pick a snippet from the list first.'); return; }
+        var snips=getSnippets();
+        var text=snips[sel.value];
+        if(text===undefined) { refreshSnippetDropdown(); return; }
+        var ta=flds.lyrics;
+        // Put a blank line before the snippet if we're not already on one.
+        var pos=(typeof ta.selectionStart==='number') ? ta.selectionStart : ta.value.length;
+        var before=ta.value.slice(0,pos);
+        var lead = (before.length>0 && !/\n\s*$/.test(before)) ? '\n' : '';
+        insertIntoTextarea(ta, lead + text + '\n', false);
+        syncStructureFromLyrics();
+    }
+
+    function manageSnippets(){
+        var snips=getSnippets();
+        var names=Object.keys(snips).sort();
+        if(!names.length){ alert('No snippets saved yet. Select some lyrics and press "Save Selection".'); return; }
+        var pick=prompt('Type the exact name of a snippet to RENAME or DELETE:\n\n'+names.join('\n'));
+        if(pick===null) return;
+        pick=pick.trim();
+        if(!snips[pick]){ alert('No snippet named "'+pick+'".'); return; }
+        var action=prompt('Type R to rename "'+pick+'", or D to delete it:');
+        if(action===null) return;
+        action=action.trim().toLowerCase();
+        if(action==='d'){
+            if(confirm('Delete snippet "'+pick+'"?')){ delete snips[pick]; saveSnippets(snips); refreshSnippetDropdown(); }
+        } else if(action==='r'){
+            var nn=prompt('New name for "'+pick+'":', pick);
+            if(nn===null) return;
+            nn=nn.trim();
+            if(!nn){ alert('Name cannot be empty.'); return; }
+            if(nn!==pick && snips[nn] && !confirm('"'+nn+'" exists. Replace it?')) return;
+            snips[nn]=snips[pick];
+            if(nn!==pick) delete snips[pick];
+            saveSnippets(snips);
+            refreshSnippetDropdown();
+        }
+    }
+
+    (function wireSnippets(){
+        var ins=document.getElementById('insertSnippetBtn');
+        var sav=document.getElementById('saveSnippetBtn');
+        var man=document.getElementById('manageSnippetsBtn');
+        if(ins) ins.addEventListener('click', insertSelectedSnippet);
+        if(sav) sav.addEventListener('click', saveSelectionAsSnippet);
+        if(man) man.addEventListener('click', manageSnippets);
+        refreshSnippetDropdown();
+    })();
+
     function insertSectionAtCursor(label, bars){
         var ta=flds.lyrics;
         var val=ta.value;
@@ -2782,16 +2971,157 @@ document.addEventListener('DOMContentLoaded', function() {
     // Section buttons: plain click inserts the header; the "with bars" toggle
     // opens the stepper modal so you can state how long the section runs.
     var sectionBarsToggle = document.getElementById('sectionBarsToggle');
+    function addSection(base){
+        var label=nextSectionLabel(base);
+        if(sectionBarsToggle && sectionBarsToggle.checked){
+            openBreakModal('section', label);
+        } else {
+            insertSectionAtCursor(label);
+        }
+    }
     Array.prototype.forEach.call(document.querySelectorAll('.sect-btn'), function(btn){
         btn.addEventListener('click', function(){
-            var base=btn.getAttribute('data-section');
-            var label=nextSectionLabel(base);
-            if(sectionBarsToggle && sectionBarsToggle.checked){
-                openBreakModal('section', label);
-            } else {
-                insertSectionAtCursor(label);
+            addSection(btn.getAttribute('data-section'));
+        });
+    });
+    // Custom-named section (e.g. Vamp, Breakdown, Refrain)
+    var customSectionBtn=document.getElementById('customSectionBtn');
+    if(customSectionBtn) customSectionBtn.addEventListener('click', function(){
+        var name=prompt('Name this section (e.g. Interlude, Vamp, Breakdown):');
+        if(name===null) return;
+        name=name.trim();
+        if(!name){ alert('A section needs a name.'); return; }
+        addSection(name);
+    });
+
+    /* ════════════════════════════════════════════════════════
+       EDIT SECTIONS (Part 1 of this round)
+       Lists every section header line in the lyrics and lets the
+       user edit name / bars / tempo / time / key, then rewrites
+       those exact header lines in place.
+    ════════════════════════════════════════════════════════ */
+    var editSectionsModal = document.getElementById('editSectionsModal');
+    var editSectionsList  = document.getElementById('editSectionsList');
+    var editSectionsEmpty = document.getElementById('editSectionsEmpty');
+
+    // Find header lines and their line indexes in the current lyrics.
+    function findSectionHeaderLines(){
+        var lines=flds.lyrics.value.split('\n');
+        var found=[];
+        lines.forEach(function(ln, idx){
+            var t=ln.trim();
+            var hh=t.match(SECTION_HEAD_RE);
+            if(hh){
+                var attrs=parseSectionAttrs(hh[2]);
+                found.push({idx:idx, name:hh[1], bars:attrs.bars, tempo:attrs.tempo, time:attrs.time, key:attrs.key});
             }
         });
+        return found;
+    }
+
+    function fieldRow(labelTxt, inputHtml){
+        return '<div style="display:flex;flex-direction:column;gap:0.2rem;min-width:0;">'+
+               '<label style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-muted);font-weight:700;">'+labelTxt+'</label>'+
+               inputHtml+'</div>';
+    }
+
+    // Build one editable section row. Pass a section object, or nothing for a
+    // brand-new section (which gets appended to the lyrics on Apply).
+    function buildSecRow(s){
+        s = s || {idx:null, name:'', bars:null, tempo:null, time:null, key:null, isNew:true};
+        var row=document.createElement('div');
+        row.className='edit-sec-row';
+        row.dataset.lineIdx = (s.idx===null||s.idx===undefined) ? '' : s.idx;
+        if(s.isNew) row.dataset.isNew='1';
+        row.style.cssText='border:1px solid '+(s.isNew?'var(--purple)':'var(--border)')+';border-radius:var(--radius);padding:0.6rem;margin-bottom:0.6rem;';
+        row.innerHTML=
+            '<div style="display:grid;grid-template-columns:2fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">'+
+                fieldRow('Section name','<input type="text" class="es-name" value="'+esc(s.name||'')+'" placeholder="e.g. Interlude" style="width:100%;">')+
+                fieldRow('Bars','<input type="number" class="es-bars" min="0" value="'+(s.bars!==null&&s.bars!==undefined?s.bars:'')+'" placeholder="\u2014" style="width:100%;">')+
+            '</div>'+
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;">'+
+                fieldRow('Tempo','<input type="number" class="es-tempo" min="0" value="'+(s.tempo!==null&&s.tempo!==undefined?s.tempo:'')+'" placeholder="\u2014" style="width:100%;">')+
+                fieldRow('Time','<input type="text" class="es-time" value="'+(s.time||'')+'" placeholder="e.g. 6/8" style="width:100%;">')+
+                fieldRow('Key','<input type="text" class="es-key" value="'+esc(s.key||'')+'" placeholder="e.g. G" style="width:100%;">')+
+            '</div>';
+        return row;
+    }
+
+    function openEditSections(){
+        var secs=findSectionHeaderLines();
+        editSectionsList.innerHTML='';
+        if(!secs.length){
+            editSectionsEmpty.style.display='block';
+        } else {
+            editSectionsEmpty.style.display='none';
+            secs.forEach(function(s){ editSectionsList.appendChild(buildSecRow(s)); });
+        }
+        editSectionsModal.classList.add('open');
+    }
+
+    function closeEditSections(){ editSectionsModal.classList.remove('open'); }
+
+    function rowToTag(row){
+        var name=(row.querySelector('.es-name').value||'').trim();
+        if(!name) return null;
+        var bars =(row.querySelector('.es-bars').value||'').trim();
+        var tempo=(row.querySelector('.es-tempo').value||'').trim();
+        var time =(row.querySelector('.es-time').value||'').trim();
+        var key  =(row.querySelector('.es-key').value||'').trim();
+        var tag='{c: '+name+'}';
+        if(bars!=='')  tag+='{bars:'+bars+'}';
+        if(tempo!=='') tag+='{tempo:'+tempo+'}';
+        if(time!=='')  tag+='{time:'+time+'}';
+        if(key!=='')   tag+='{key:'+key+'}';
+        return tag;
+    }
+    function applyEditSections(){
+        var lines=flds.lyrics.value.split('\n');
+        var newTags=[];
+        var rows=editSectionsList.querySelectorAll('.edit-sec-row');
+        Array.prototype.forEach.call(rows, function(row){
+            var tag=rowToTag(row);
+            if(tag===null) return;   // no name -> skip
+            if(row.dataset.isNew==='1'){
+                newTags.push(tag);   // appended after existing content
+            } else {
+                var idx=parseInt(row.dataset.lineIdx,10);
+                if(isNaN(idx) || idx>=lines.length) return;
+                var lead=(lines[idx].match(/^\s*/)||[''])[0];
+                lines[idx]=lead+tag;
+            }
+        });
+        var text=lines.join('\n');
+        if(newTags.length){
+            if(text && !/\n\s*$/.test(text)) text+='\n';
+            newTags.forEach(function(t){ text+='\n'+t+'\n'; });
+        }
+        flds.lyrics.value=text;
+        syncStructureFromLyrics();
+        closeEditSections();
+    }
+
+    var editSectionsAdd=document.getElementById('editSectionsAdd');
+    if(editSectionsAdd) editSectionsAdd.addEventListener('click', function(){
+        if(editSectionsEmpty) editSectionsEmpty.style.display='none';
+        var row=buildSecRow(null);
+        editSectionsList.appendChild(row);
+        var nameInput=row.querySelector('.es-name');
+        if(nameInput) nameInput.focus();
+        // Scroll the new row into view within the modal
+        row.scrollIntoView({block:'nearest'});
+    });
+
+    var editSectionsBtn=document.getElementById('editSectionsBtn');
+    if(editSectionsBtn) editSectionsBtn.addEventListener('click', openEditSections);
+    var esCancel=document.getElementById('editSectionsCancel');
+    var esCloseX=document.getElementById('editSectionsCloseX');
+    var esApply =document.getElementById('editSectionsApply');
+    if(esCancel) esCancel.addEventListener('click', closeEditSections);
+    if(esCloseX) esCloseX.addEventListener('click', closeEditSections);
+    if(esApply)  esApply.addEventListener('click', applyEditSections);
+    if(editSectionsModal) editSectionsModal.addEventListener('click', function(e){
+        if(e.target===editSectionsModal) closeEditSections();
     });
 
     rebuildStructureBtn.addEventListener('click', function(){
@@ -3570,7 +3900,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var pkg = {type:'SET_LIST_EXPORT', version:'2.5',
                        exportedAt:new Date().toISOString(),
                        reason: reason||'backup',
-                       songs:getLib(), setlists:getAllSL()};
+                       songs:getLib(), setlists:getAllSL(), snippets:getSnippets()};
             var blob = new Blob([JSON.stringify(pkg,null,2)], {type:'application/json'});
             var url  = URL.createObjectURL(blob);
             var a=document.createElement('a');
