@@ -1,0 +1,25 @@
+{
+  "version": 2.5,
+  "songs": {
+    "Sample Song": {
+      "artist": "Sample Artist",
+      "tempo": 120,
+      "time_sig": "4/4",
+      "key": "G",
+      "speed_mode": "bars",
+      "lyrics": "{c: Verse 1}\nFirst line of the verse\nSecond line of the verse\n\n{c: Chorus}\nChorus line one\nChorus line two\n"
+    },
+    "A Song With A Very Long Title That Should Wrap Or Truncate": {
+      "artist": "",
+      "tempo": 96,
+      "time_sig": "2/2",
+      "key": "",
+      "speed_mode": "bars",
+      "lyrics": "{c: Intro}\nOnly one line\n"
+    }
+  },
+  "setlists": {
+    "Set 1": ["Sample Song"],
+    "Set 2": ["A Song With A Very Long Title That Should Wrap Or Truncate", "Sample Song"]
+  }
+}

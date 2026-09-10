@@ -1,0 +1,13 @@
+{
+  "name": "setlist-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dev tooling for the Setlist App. Not shipped. index.html has no dependencies.",
+  "scripts": {
+    "check": "node scripts/syntax-check.js",
+    "test": "npm run check && node test/harness.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

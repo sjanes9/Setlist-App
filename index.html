@@ -1044,12 +1044,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // localStorage stays the source of truth for READS, so the app works with
     // no connection at all. Writes go to localStorage first (instant, offline
     // safe) and are then queued to Supabase in the background.
-    function getLib()  { try { return JSON.parse(localStorage.getItem(K_LIB))  || {}; } catch(e) { return {}; } }
-    function saveLib(o){ localStorage.setItem(K_LIB, JSON.stringify(o)); }
-    function getAllSL() { try { return JSON.parse(localStorage.getItem(K_SLS))  || {}; } catch(e) { return {}; } }
-    function saveAllSL(o){ localStorage.setItem(K_SLS, JSON.stringify(o)); }
-    function getActSLName() { return localStorage.getItem(K_ACTSL) || ''; }
-    function setActSLName(n){ localStorage.setItem(K_ACTSL, n); }
+    //
+    // Every localStorage access goes through lsGet/lsSet/lsDel so a blocked,
+    // full, or absent store (private mode, quota, sandboxed preview) degrades to
+    // a no-op instead of throwing. Required by CLAUDE.md: the app must boot with
+    // storage completely blocked.
+    function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+    function lsSet(k,v){ try { localStorage.setItem(k, v); return true; } catch(e){ return false; } }
+    function lsDel(k){ try { localStorage.removeItem(k); } catch(e){} }
+    function getLib()  { try { return JSON.parse(lsGet(K_LIB))  || {}; } catch(e) { return {}; } }
+    function saveLib(o){ lsSet(K_LIB, JSON.stringify(o)); }
+    function getAllSL() { try { return JSON.parse(lsGet(K_SLS))  || {}; } catch(e) { return {}; } }
+    function saveAllSL(o){ lsSet(K_SLS, JSON.stringify(o)); }
+    function getActSLName() { return lsGet(K_ACTSL) || ''; }
+    function setActSLName(n){ lsSet(K_ACTSL, n); }
     function getActSL() { var n=getActSLName(); return n ? (getAllSL()[n]||[]) : []; }
     function saveActSL(arr) {
         var n=getActSLName(); if(!n) return;
@@ -1156,9 +1164,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.setAttribute('data-theme', t);
         themeIcon.textContent  = t==='dark' ? '\uD83C\uDF19' : '\u2600\uFE0F';
         themeLabel.textContent = t==='dark' ? 'Dark Mode'   : 'Light Mode';
-        localStorage.setItem(K_THEME, t);
+        lsSet(K_THEME, t);
     }
-    applyTheme(localStorage.getItem(K_THEME) || (window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+    applyTheme(lsGet(K_THEME) || (window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
     themeBtn.addEventListener('click', function(){
         applyTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
     });
@@ -1524,10 +1532,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /* ---- EXPORT / IMPORT LIBRARY ---- */
+    // Build the full library export package. Shared by the Export button and the
+    // test hooks so an import/export round trip exercises the real shape.
+    function buildLibraryExport(){
+        return {type:'SET_LIST_EXPORT',version:'2.5',exportedAt:new Date().toISOString(),
+            songs:getLib(),setlists:getAllSL(),snippets:getSnippets(),tipQRs:getQRs()};
+    }
     exportLibBtn.addEventListener('click', function(){
         var lib=getLib(); if(!Object.keys(lib).length){ alert('Your library is empty. Save some songs first.'); return; }
-        var allSL=getAllSL();
-        var pkg={type:'SET_LIST_EXPORT',version:'2.5',exportedAt:new Date().toISOString(),songs:lib,setlists:allSL,snippets:getSnippets(),tipQRs:getQRs()};
+        var pkg=buildLibraryExport();
         var link=document.createElement('a');
         link.href=URL.createObjectURL(new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'}));
         // Always 'library.json' so it can be dropped straight into the repo
@@ -1622,7 +1635,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var text=await res.text();
             var payload=parseLibraryPayload(text);
             if(mergeLibraryPayload(payload, 'the shared library')){
-                localStorage.setItem(K_SHAREDURL, url);  // remember for next time
+                lsSet(K_SHAREDURL, url);  // remember for next time
                 var sc=Object.keys(payload.songs).length;
                 var lc=payload.setlists?Object.keys(payload.setlists).length:0;
                 setSharedStatus('\u2713 Loaded '+sc+' song(s)'+(lc?' & '+lc+' set list(s)':'')+'. URL saved.', 'var(--accent)');
@@ -1637,7 +1650,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     if(forgetSharedBtn) forgetSharedBtn.addEventListener('click', function(){
-        localStorage.removeItem(K_SHAREDURL);
+        lsDel(K_SHAREDURL);
         if(sharedUrlInput) sharedUrlInput.value=DEFAULT_SHARED_URL;
         setSharedStatus('Saved URL cleared.', 'var(--text-muted)');
     });
@@ -2938,10 +2951,10 @@ document.addEventListener('DOMContentLoaded', function() {
     ════════════════════════════════════════════════════════ */
     var K_SNIPPETS = 'song_manager_snippets';
     function getSnippets(){
-        try { return JSON.parse(localStorage.getItem(K_SNIPPETS)) || {}; }
+        try { return JSON.parse(lsGet(K_SNIPPETS)) || {}; }
         catch(e){ return {}; }
     }
-    function saveSnippets(o){ localStorage.setItem(K_SNIPPETS, JSON.stringify(o)); }
+    function saveSnippets(o){ lsSet(K_SNIPPETS, JSON.stringify(o)); }
 
     function refreshSnippetDropdown(){
         var sel=document.getElementById('snippetSelect');
@@ -3452,12 +3465,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var qaMetroFlash   = document.getElementById('qaMetroFlash');
     var qaMetroAuto    = document.getElementById('qaMetroAuto');
     var K_METRO_AUTO   = 'song_manager_metro_auto';
-    var metroAutoStart = localStorage.getItem(K_METRO_AUTO)==='true';
+    var metroAutoStart = lsGet(K_METRO_AUTO)==='true';
     if(qaMetroAuto){
         qaMetroAuto.checked = metroAutoStart;
         qaMetroAuto.addEventListener('change', function(){
             metroAutoStart = qaMetroAuto.checked;
-            localStorage.setItem(K_METRO_AUTO, metroAutoStart ? 'true' : 'false');
+            lsSet(K_METRO_AUTO, metroAutoStart ? 'true' : 'false');
         });
     }
     var qaSaveBtn      = document.getElementById('qaSaveBtn');
@@ -3922,10 +3935,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var K_DEVICE = 'song_manager_device_id';
     var sb = null;
 
-    var deviceId = localStorage.getItem(K_DEVICE);
+    var deviceId = lsGet(K_DEVICE);
     if(!deviceId){
         deviceId = 'dev_' + Math.random().toString(36).slice(2,10);
-        localStorage.setItem(K_DEVICE, deviceId);
+        lsSet(K_DEVICE, deviceId);
     }
 
     function setSyncStatus(msg, tone){
@@ -4165,10 +4178,10 @@ document.addEventListener('DOMContentLoaded', function() {
     ════════════════════════════════════════════════════════ */
     var K_QRCODES = 'song_manager_tip_qrs';
     function getQRs(){
-        try { return JSON.parse(localStorage.getItem(K_QRCODES)) || []; }
+        try { return JSON.parse(lsGet(K_QRCODES)) || []; }
         catch(e){ return []; }
     }
-    function saveQRs(arr){ localStorage.setItem(K_QRCODES, JSON.stringify(arr)); }
+    function saveQRs(arr){ lsSet(K_QRCODES, JSON.stringify(arr)); }
 
     function refreshQRList(){
         var box=document.getElementById('qrList');
@@ -4350,6 +4363,51 @@ document.addEventListener('DOMContentLoaded', function() {
 
     refreshHeaderDropdown();
     refreshSLBuilderUI();
+
+    /* ---- TEST HOOKS ----
+       CLAUDE.md: expose internals on one namespaced global so the jsdom harness
+       can reach them without them being trapped in this closure. The app itself
+       never reads window.__setlist. Keep this list current when helpers are
+       renamed. */
+    window.__setlist = {
+        // Real localStorage key constants, so the harness asserts against these
+        // rather than hard-coding strings that can silently drift.
+        keys: {
+            lib:       K_LIB,
+            setlists:  K_SLS,
+            activeSL:  K_ACTSL,
+            theme:     K_THEME,
+            snippets:  K_SNIPPETS,
+            metroAuto: K_METRO_AUTO,
+            deviceId:  K_DEVICE,
+            qrCodes:   K_QRCODES,
+            sharedUrl: K_SHAREDURL
+        },
+        // Library / setlist / snippet / QR storage helpers
+        getLib: getLib,               saveLib: saveLib,
+        getAllSL: getAllSL,           saveAllSL: saveAllSL,
+        getActSLName: getActSLName,   setActSLName: setActSLName,
+        getActSL: getActSL,           saveActSL: saveActSL,
+        getSnippets: getSnippets,     saveSnippets: saveSnippets,
+        getQRs: getQRs,               saveQRs: saveQRs,
+        // Import / export round trip
+        buildLibraryExport: buildLibraryExport,
+        parseLibraryPayload: parseLibraryPayload,
+        mergeLibraryPayload: mergeLibraryPayload,
+        loadSong: loadSong,
+        // ChordPro section + chord parsing
+        SECTION_RE: SECTION_RE,
+        SECTION_BARS_RE: SECTION_BARS_RE,
+        SECTION_HEAD_RE: SECTION_HEAD_RE,
+        CHORD_RE: CHORD_RE,
+        parseSectionAttrs: parseSectionAttrs,
+        parseChordLine: parseChordLine,
+        getSectionHeaders: getSectionHeaders,
+        parseDuration: parseDuration,
+        // View refreshers
+        refreshHeaderDropdown: refreshHeaderDropdown,
+        refreshSLBuilderUI: refreshSLBuilderUI
+    };
 
 }); // DOMContentLoaded
 </script>
