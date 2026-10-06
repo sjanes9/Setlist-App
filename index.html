@@ -110,17 +110,15 @@
         .aud-title{font-size:clamp(1.4rem,3.5vw,2.4rem);margin:0;color:var(--text);line-height:1.05;}
         .aud-exit{flex-shrink:0;opacity:0.5;padding:0.35rem 0.7rem;font-size:0.85rem;}
         .aud-exit:hover{opacity:1;}
-        /* Body: songs take the room they need, QR sits at the bottom. */
-        .aud-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:0.5rem;}
-        .aud-setlist{flex:1;min-height:0;display:flex;flex-direction:column;flex-wrap:wrap;
-            align-content:flex-start;gap:0 2.5rem;overflow:hidden;
-            /* --aud-fs is set per-render from the song count so everything fits */
-            font-size:var(--aud-fs,1.4rem);}
-        .aud-song{display:flex;align-items:baseline;gap:0.6rem;padding:0.15em 0.1em;
-            font-size:1em;color:var(--text);width:var(--aud-col,100%);box-sizing:border-box;
-            border-bottom:1px solid var(--border-subtle);}
-        .aud-song .aud-num{font-weight:700;opacity:0.45;min-width:1.6em;text-align:right;font-variant-numeric:tabular-nums;}
-        .aud-song .aud-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        /* Body: the editable text fills the room, QR sits at the bottom. */
+        .aud-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:0.75rem;}
+        .aud-text{flex:1;min-height:0;width:100%;box-sizing:border-box;resize:none;
+            background:transparent;border:none;outline:none;color:var(--text);
+            font-family:inherit;line-height:1.5;padding:0.25rem;
+            font-size:var(--aud-fs,1.6rem);overflow:auto;-webkit-overflow-scrolling:touch;}
+        .aud-text::placeholder{color:var(--text-faint);opacity:0.7;}
+        .aud-title[contenteditable]{outline:none;border-bottom:1px dashed transparent;}
+        .aud-title[contenteditable]:hover,.aud-title[contenteditable]:focus{border-bottom-color:var(--border);}
         /* Tip QR strip along the bottom */
         .aud-tips{flex-shrink:0;text-align:center;margin-top:0.25rem;}
         .aud-tips-label{font-size:clamp(0.9rem,2vw,1.2rem);font-weight:700;color:var(--text);margin-bottom:0.4rem;}
@@ -711,11 +709,11 @@
         <div id="audienceView" style="display:none;">
             <div class="aud-wrap">
                 <div class="aud-header">
-                    <h2 class="aud-title" id="audBandName">Tonight's Set</h2>
+                    <h2 class="aud-title" id="audBandName" contenteditable="true" spellcheck="false" title="Tap to edit">Tonight's Set</h2>
                     <button type="button" id="audExitBtn" class="btn btn-secondary aud-exit">&#10005; Exit</button>
                 </div>
                 <div class="aud-body">
-                    <div class="aud-setlist" id="audSetlist"></div>
+                    <textarea id="audText" class="aud-text" placeholder="Type anything to show the crowd &mdash; tonight's set list, your band name, social handles, a thank-you&hellip;"></textarea>
                     <div class="aud-tips" id="audTips">
                         <div class="aud-tips-label" id="audTipsLabel">Enjoying the show? Tips welcome!</div>
                         <div class="aud-qr-row" id="audQrRow"></div>
@@ -1044,20 +1042,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // localStorage stays the source of truth for READS, so the app works with
     // no connection at all. Writes go to localStorage first (instant, offline
     // safe) and are then queued to Supabase in the background.
-    //
-    // Every localStorage access goes through lsGet/lsSet/lsDel so a blocked,
-    // full, or absent store (private mode, quota, sandboxed preview) degrades to
-    // a no-op instead of throwing. Required by CLAUDE.md: the app must boot with
-    // storage completely blocked.
-    function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
-    function lsSet(k,v){ try { localStorage.setItem(k, v); return true; } catch(e){ return false; } }
-    function lsDel(k){ try { localStorage.removeItem(k); } catch(e){} }
-    function getLib()  { try { return JSON.parse(lsGet(K_LIB))  || {}; } catch(e) { return {}; } }
-    function saveLib(o){ lsSet(K_LIB, JSON.stringify(o)); }
-    function getAllSL() { try { return JSON.parse(lsGet(K_SLS))  || {}; } catch(e) { return {}; } }
-    function saveAllSL(o){ lsSet(K_SLS, JSON.stringify(o)); }
-    function getActSLName() { return lsGet(K_ACTSL) || ''; }
-    function setActSLName(n){ lsSet(K_ACTSL, n); }
+    function getLib()  { try { return JSON.parse(localStorage.getItem(K_LIB))  || {}; } catch(e) { return {}; } }
+    function saveLib(o){ localStorage.setItem(K_LIB, JSON.stringify(o)); }
+    function getAllSL() { try { return JSON.parse(localStorage.getItem(K_SLS))  || {}; } catch(e) { return {}; } }
+    function saveAllSL(o){ localStorage.setItem(K_SLS, JSON.stringify(o)); }
+    function getActSLName() { return localStorage.getItem(K_ACTSL) || ''; }
+    function setActSLName(n){ localStorage.setItem(K_ACTSL, n); }
     function getActSL() { var n=getActSLName(); return n ? (getAllSL()[n]||[]) : []; }
     function saveActSL(arr) {
         var n=getActSLName(); if(!n) return;
@@ -1164,9 +1154,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.setAttribute('data-theme', t);
         themeIcon.textContent  = t==='dark' ? '\uD83C\uDF19' : '\u2600\uFE0F';
         themeLabel.textContent = t==='dark' ? 'Dark Mode'   : 'Light Mode';
-        lsSet(K_THEME, t);
+        localStorage.setItem(K_THEME, t);
     }
-    applyTheme(lsGet(K_THEME) || (window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+    applyTheme(localStorage.getItem(K_THEME) || (window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
     themeBtn.addEventListener('click', function(){
         applyTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
     });
@@ -1532,15 +1522,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /* ---- EXPORT / IMPORT LIBRARY ---- */
-    // Build the full library export package. Shared by the Export button and the
-    // test hooks so an import/export round trip exercises the real shape.
-    function buildLibraryExport(){
-        return {type:'SET_LIST_EXPORT',version:'2.5',exportedAt:new Date().toISOString(),
-            songs:getLib(),setlists:getAllSL(),snippets:getSnippets(),tipQRs:getQRs()};
-    }
     exportLibBtn.addEventListener('click', function(){
         var lib=getLib(); if(!Object.keys(lib).length){ alert('Your library is empty. Save some songs first.'); return; }
-        var pkg=buildLibraryExport();
+        var allSL=getAllSL();
+        var pkg={type:'SET_LIST_EXPORT',version:'2.5',exportedAt:new Date().toISOString(),songs:lib,setlists:allSL,snippets:getSnippets(),tipQRs:getQRs(),audienceText:(localStorage.getItem('song_manager_audience_text')||''),audienceTitle:(localStorage.getItem('song_manager_audience_title')||'')};
         var link=document.createElement('a');
         link.href=URL.createObjectURL(new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'}));
         // Always 'library.json' so it can be dropped straight into the repo
@@ -1562,7 +1547,7 @@ document.addEventListener('DOMContentLoaded', function() {
             throw new Error('Unrecognized file format.');
         }
         if(!Object.keys(incomingSongs).length) throw new Error('No song data found.');
-        return {songs:incomingSongs, setlists:incomingSL, snippets:(p.snippets||null), tipQRs:(p.tipQRs||null)};
+        return {songs:incomingSongs, setlists:incomingSL, snippets:(p.snippets||null), tipQRs:(p.tipQRs||null), audienceText:(p.audienceText||null), audienceTitle:(p.audienceTitle||null)};
     }
 
     // Merge a parsed payload into the local library, after confirmation.
@@ -1586,6 +1571,12 @@ document.addEventListener('DOMContentLoaded', function() {
             payload.tipQRs.forEach(function(q){ if(names.indexOf(q.name)===-1) existing.push(q); });
             saveQRs(existing);
             if(typeof refreshQRList==='function') refreshQRList();
+        }
+        if(payload.audienceText && !localStorage.getItem('song_manager_audience_text')){
+            localStorage.setItem('song_manager_audience_text', payload.audienceText);
+        }
+        if(payload.audienceTitle && !localStorage.getItem('song_manager_audience_title')){
+            localStorage.setItem('song_manager_audience_title', payload.audienceTitle);
         }
         refreshHeaderDropdown(); refreshSLBuilderUI();
         return true;
@@ -1635,7 +1626,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var text=await res.text();
             var payload=parseLibraryPayload(text);
             if(mergeLibraryPayload(payload, 'the shared library')){
-                lsSet(K_SHAREDURL, url);  // remember for next time
+                localStorage.setItem(K_SHAREDURL, url);  // remember for next time
                 var sc=Object.keys(payload.songs).length;
                 var lc=payload.setlists?Object.keys(payload.setlists).length:0;
                 setSharedStatus('\u2713 Loaded '+sc+' song(s)'+(lc?' & '+lc+' set list(s)':'')+'. URL saved.', 'var(--accent)');
@@ -1650,7 +1641,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     if(forgetSharedBtn) forgetSharedBtn.addEventListener('click', function(){
-        lsDel(K_SHAREDURL);
+        localStorage.removeItem(K_SHAREDURL);
         if(sharedUrlInput) sharedUrlInput.value=DEFAULT_SHARED_URL;
         setSharedStatus('Saved URL cleared.', 'var(--text-muted)');
     });
@@ -2951,10 +2942,10 @@ document.addEventListener('DOMContentLoaded', function() {
     ════════════════════════════════════════════════════════ */
     var K_SNIPPETS = 'song_manager_snippets';
     function getSnippets(){
-        try { return JSON.parse(lsGet(K_SNIPPETS)) || {}; }
+        try { return JSON.parse(localStorage.getItem(K_SNIPPETS)) || {}; }
         catch(e){ return {}; }
     }
-    function saveSnippets(o){ lsSet(K_SNIPPETS, JSON.stringify(o)); }
+    function saveSnippets(o){ localStorage.setItem(K_SNIPPETS, JSON.stringify(o)); }
 
     function refreshSnippetDropdown(){
         var sel=document.getElementById('snippetSelect');
@@ -3465,12 +3456,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var qaMetroFlash   = document.getElementById('qaMetroFlash');
     var qaMetroAuto    = document.getElementById('qaMetroAuto');
     var K_METRO_AUTO   = 'song_manager_metro_auto';
-    var metroAutoStart = lsGet(K_METRO_AUTO)==='true';
+    var metroAutoStart = localStorage.getItem(K_METRO_AUTO)==='true';
     if(qaMetroAuto){
         qaMetroAuto.checked = metroAutoStart;
         qaMetroAuto.addEventListener('change', function(){
             metroAutoStart = qaMetroAuto.checked;
-            lsSet(K_METRO_AUTO, metroAutoStart ? 'true' : 'false');
+            localStorage.setItem(K_METRO_AUTO, metroAutoStart ? 'true' : 'false');
         });
     }
     var qaSaveBtn      = document.getElementById('qaSaveBtn');
@@ -3935,10 +3926,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var K_DEVICE = 'song_manager_device_id';
     var sb = null;
 
-    var deviceId = lsGet(K_DEVICE);
+    var deviceId = localStorage.getItem(K_DEVICE);
     if(!deviceId){
         deviceId = 'dev_' + Math.random().toString(36).slice(2,10);
-        lsSet(K_DEVICE, deviceId);
+        localStorage.setItem(K_DEVICE, deviceId);
     }
 
     function setSyncStatus(msg, tone){
@@ -3982,7 +3973,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var pkg = {type:'SET_LIST_EXPORT', version:'2.5',
                        exportedAt:new Date().toISOString(),
                        reason: reason||'backup',
-                       songs:getLib(), setlists:getAllSL(), snippets:getSnippets(), tipQRs:getQRs()};
+                       songs:getLib(), setlists:getAllSL(), snippets:getSnippets(), tipQRs:getQRs(), audienceText:(localStorage.getItem('song_manager_audience_text')||''), audienceTitle:(localStorage.getItem('song_manager_audience_title')||'')};
             var blob = new Blob([JSON.stringify(pkg,null,2)], {type:'application/json'});
             var url  = URL.createObjectURL(blob);
             var a=document.createElement('a');
@@ -4178,10 +4169,10 @@ document.addEventListener('DOMContentLoaded', function() {
     ════════════════════════════════════════════════════════ */
     var K_QRCODES = 'song_manager_tip_qrs';
     function getQRs(){
-        try { return JSON.parse(lsGet(K_QRCODES)) || []; }
+        try { return JSON.parse(localStorage.getItem(K_QRCODES)) || []; }
         catch(e){ return []; }
     }
-    function saveQRs(arr){ lsSet(K_QRCODES, JSON.stringify(arr)); }
+    function saveQRs(arr){ localStorage.setItem(K_QRCODES, JSON.stringify(arr)); }
 
     function refreshQRList(){
         var box=document.getElementById('qrList');
@@ -4231,37 +4222,23 @@ document.addEventListener('DOMContentLoaded', function() {
     var openAudienceBtn= document.getElementById('openAudienceBtn');
     var audExitBtn     = document.getElementById('audExitBtn');
 
+    var K_AUDTEXT  = 'song_manager_audience_text';
+    var K_AUDTITLE = 'song_manager_audience_title';
+
     function renderAudienceScreen(){
-        // Just the set list + QR codes, sized so it all fits on one screen.
-        var box=document.getElementById('audSetlist');
+        var ta=document.getElementById('audText');
         var titleEl=document.getElementById('audBandName');
-        if(!box) return;
-        box.innerHTML='';
-        var queue=getActSL();
-        var activeName=getActSLName();
-        var songs=[];
-        if(queue.length){
-            if(titleEl) titleEl.textContent = activeName || "Tonight's Set";
-            songs=queue.slice();
-        } else {
-            if(titleEl) titleEl.textContent = "Set List";
-            var cur=flds.title.value.trim();
-            if(cur) songs=[cur];
+        // Restore the text and title the user typed last time.
+        if(ta){
+            var saved=localStorage.getItem(K_AUDTEXT);
+            if(saved!==null) ta.value=saved;
         }
-        if(!songs.length){
-            box.innerHTML='<div class="aud-tips-empty">Open a set list or a song to show it here.</div>';
-        } else {
-            songs.forEach(function(songTitle, idx){
-                var row=document.createElement('div');
-                row.className='aud-song';
-                var num=document.createElement('span'); num.className='aud-num'; num.textContent=(idx+1)+'.';
-                var nm=document.createElement('span'); nm.className='aud-name'; nm.textContent=songTitle;
-                row.appendChild(num); row.appendChild(nm);
-                box.appendChild(row);
-            });
+        if(titleEl){
+            var savedT=localStorage.getItem(K_AUDTITLE);
+            if(savedT) titleEl.textContent=savedT;
         }
 
-        // Tip QRs along the bottom
+        // Tip QRs along the bottom (unchanged)
         var qrRow=document.getElementById('audQrRow');
         var qrs=getQRs();
         qrRow.innerHTML='';
@@ -4279,41 +4256,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 qrRow.appendChild(cell);
             });
         }
-
-        // Size everything to fit the viewport without scrolling.
-        fitAudienceScreen(songs.length, qrs.length);
+        fitAudienceScreen(qrs.length);
     }
 
-    // Choose a font size, column layout and QR size so the whole set list plus
-    // QR codes fit on one screen. Runs after the DOM is in place; re-runs on
-    // resize/rotation while the audience screen is open.
-    function fitAudienceScreen(songCount, qrCount){
+    // Pick a readable text size and QR size for the current screen. The text
+    // box scrolls if the content is longer than fits, so this just sets a
+    // comfortable default based on viewport width.
+    function fitAudienceScreen(qrCount){
         var view=document.getElementById('audienceView');
-        var setlist=document.getElementById('audSetlist');
-        if(!view || !setlist || !songCount) return;
-        var vh=window.innerHeight;
-        // Vertical budget for the song list = screen minus header minus QR area,
-        // with a safety margin so nothing clips at the bottom.
-        var qrPx = qrCount ? 210 : 24;   // QR strip height incl. label/caption
-        var headerPx = 84;
-        var avail = Math.max(vh - headerPx - qrPx - 24, 160);
-        // Each row's total height is ~1.7x the font size (line + padding + border).
-        var ROW = 1.7;
-        // Try 1, 2, or 3 columns; pick the largest font that fits.
-        var best={fs:12, cols:1, colW:'100%'};
-        [1,2,3].forEach(function(cols){
-            var rows=Math.ceil(songCount/cols);
-            var fs=Math.floor(avail / (rows*ROW));
-            fs=Math.min(fs, 34);          // cap so 1-2 songs aren't giant
-            fs=Math.max(fs, 11);
-            if(fs > best.fs){
-                best={fs:fs, cols:cols, colW:(cols===1?'100%':(cols===2?'calc(50% - 1.25rem)':'calc(33.333% - 1.7rem)'))};
-            }
-        });
-        setlist.style.setProperty('--aud-fs', best.fs+'px');
-        setlist.style.setProperty('--aud-col', best.colW);
-        // QR size scales a little with how much room is left.
-        var qrSize = qrCount>=3 ? 130 : (qrCount===2 ? 150 : 170);
+        var box=document.getElementById('audText');
+        if(!view) return;
+        var vw=window.innerWidth;
+        var fs = vw<480 ? 20 : (vw<900 ? 26 : 32);
+        if(box) box.style.setProperty('--aud-fs', fs+'px');
+        var qrSize = qrCount>=3 ? 140 : (qrCount===2 ? 160 : 180);
         view.style.setProperty('--aud-qr', qrSize+'px');
     }
 
@@ -4331,11 +4287,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if(openAudienceBtn) openAudienceBtn.addEventListener('click', openAudience);
     if(audExitBtn)      audExitBtn.addEventListener('click', closeAudience);
-    // Keep the one-screen fit correct when the device rotates or resizes.
+    // Save what the user types so it persists between shows.
+    var audText=document.getElementById('audText');
+    if(audText) audText.addEventListener('input', function(){
+        localStorage.setItem(K_AUDTEXT, audText.value);
+    });
+    var audTitle=document.getElementById('audBandName');
+    if(audTitle) audTitle.addEventListener('input', function(){
+        localStorage.setItem(K_AUDTITLE, audTitle.textContent.trim());
+    });
+    // Keep text/QR sizing sensible when the device rotates or resizes.
     function refitAudienceIfOpen(){
         if(audienceView && audienceView.style.display==='block'){
-            var q=getActSL(); var n=q.length || (flds.title.value.trim()?1:0);
-            fitAudienceScreen(n, getQRs().length);
+            fitAudienceScreen(getQRs().length);
         }
     }
     window.addEventListener('resize', refitAudienceIfOpen);
@@ -4363,51 +4327,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     refreshHeaderDropdown();
     refreshSLBuilderUI();
-
-    /* ---- TEST HOOKS ----
-       CLAUDE.md: expose internals on one namespaced global so the jsdom harness
-       can reach them without them being trapped in this closure. The app itself
-       never reads window.__setlist. Keep this list current when helpers are
-       renamed. */
-    window.__setlist = {
-        // Real localStorage key constants, so the harness asserts against these
-        // rather than hard-coding strings that can silently drift.
-        keys: {
-            lib:       K_LIB,
-            setlists:  K_SLS,
-            activeSL:  K_ACTSL,
-            theme:     K_THEME,
-            snippets:  K_SNIPPETS,
-            metroAuto: K_METRO_AUTO,
-            deviceId:  K_DEVICE,
-            qrCodes:   K_QRCODES,
-            sharedUrl: K_SHAREDURL
-        },
-        // Library / setlist / snippet / QR storage helpers
-        getLib: getLib,               saveLib: saveLib,
-        getAllSL: getAllSL,           saveAllSL: saveAllSL,
-        getActSLName: getActSLName,   setActSLName: setActSLName,
-        getActSL: getActSL,           saveActSL: saveActSL,
-        getSnippets: getSnippets,     saveSnippets: saveSnippets,
-        getQRs: getQRs,               saveQRs: saveQRs,
-        // Import / export round trip
-        buildLibraryExport: buildLibraryExport,
-        parseLibraryPayload: parseLibraryPayload,
-        mergeLibraryPayload: mergeLibraryPayload,
-        loadSong: loadSong,
-        // ChordPro section + chord parsing
-        SECTION_RE: SECTION_RE,
-        SECTION_BARS_RE: SECTION_BARS_RE,
-        SECTION_HEAD_RE: SECTION_HEAD_RE,
-        CHORD_RE: CHORD_RE,
-        parseSectionAttrs: parseSectionAttrs,
-        parseChordLine: parseChordLine,
-        getSectionHeaders: getSectionHeaders,
-        parseDuration: parseDuration,
-        // View refreshers
-        refreshHeaderDropdown: refreshHeaderDropdown,
-        refreshSLBuilderUI: refreshSLBuilderUI
-    };
 
 }); // DOMContentLoaded
 </script>
