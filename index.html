@@ -101,32 +101,21 @@
         .bars-badge{display:inline-block;margin-left:0.6rem;padding:0.1rem 0.45rem;font-size:0.68rem;font-weight:700;font-style:normal;letter-spacing:0.02em;border-radius:50px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);vertical-align:middle;}
         .attr-badge{display:inline-block;margin-left:0.4rem;padding:0.1rem 0.45rem;font-size:0.68rem;font-weight:700;font-style:normal;letter-spacing:0.02em;border-radius:50px;background:rgba(37,99,235,0.14);border:1px solid var(--primary);color:var(--primary);vertical-align:middle;}
         /* ── AUDIENCE SCREEN ─────────────────────────────────── */
-        /* Audience screen: the WHOLE set list + QR codes fit on one screen,
-           no scrolling. The list flows into as many columns as needed and the
-           text auto-sizes to the number of songs so it always fits vertically. */
+        /* Audience screen: QR codes fill the whole screen, centered. */
         #audienceView{position:fixed;inset:0;z-index:3000;background:var(--surface);overflow:hidden;}
-        .aud-wrap{height:100%;display:flex;flex-direction:column;padding:calc(0.75rem + env(safe-area-inset-top)) 1.25rem calc(0.75rem + env(safe-area-inset-bottom));box-sizing:border-box;}
-        .aud-header{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:0.5rem;flex-shrink:0;}
-        .aud-title{font-size:clamp(1.4rem,3.5vw,2.4rem);margin:0;color:var(--text);line-height:1.05;}
-        .aud-exit{flex-shrink:0;opacity:0.5;padding:0.35rem 0.7rem;font-size:0.85rem;}
+        .aud-wrap{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;
+            padding:calc(1rem + env(safe-area-inset-top)) 1.25rem calc(1rem + env(safe-area-inset-bottom));box-sizing:border-box;}
+        /* Exit button floats in the top-right corner, out of the way. */
+        .aud-exit{position:absolute;top:calc(0.75rem + env(safe-area-inset-top));right:1rem;z-index:2;
+            opacity:0.45;padding:0.35rem 0.7rem;font-size:0.85rem;}
         .aud-exit:hover{opacity:1;}
-        /* Body: the editable text fills the room, QR sits at the bottom. */
-        .aud-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:0.75rem;}
-        .aud-text{flex:1;min-height:0;width:100%;box-sizing:border-box;resize:none;
-            background:transparent;border:none;outline:none;color:var(--text);
-            font-family:inherit;line-height:1.5;padding:0.25rem;
-            font-size:var(--aud-fs,1.6rem);overflow:auto;-webkit-overflow-scrolling:touch;}
-        .aud-text::placeholder{color:var(--text-faint);opacity:0.7;}
-        .aud-title[contenteditable]{outline:none;border-bottom:1px dashed transparent;}
-        .aud-title[contenteditable]:hover,.aud-title[contenteditable]:focus{border-bottom-color:var(--border);}
-        /* Tip QR strip along the bottom */
-        .aud-tips{flex-shrink:0;text-align:center;margin-top:0.25rem;}
-        .aud-tips-label{font-size:clamp(0.9rem,2vw,1.2rem);font-weight:700;color:var(--text);margin-bottom:0.4rem;}
-        .aud-qr-row{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:flex-end;}
-        .aud-qr{display:flex;flex-direction:column;align-items:center;gap:0.3rem;}
-        .aud-qr img{width:var(--aud-qr,150px);height:auto;border-radius:10px;background:#fff;padding:6px;box-shadow:var(--shadow-card);}
-        .aud-qr-caption{font-size:0.9rem;font-weight:700;color:var(--text-muted);}
-        .aud-tips-empty{font-size:0.85rem;color:var(--text-faint);}
+        .aud-tips{width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.5rem;}
+        .aud-tips-label{font-size:clamp(1.6rem,4.5vw,3rem);font-weight:800;color:var(--text);line-height:1.1;margin:0;}
+        .aud-qr-row{display:flex;gap:clamp(1.5rem,4vw,3.5rem);justify-content:center;flex-wrap:wrap;align-items:flex-start;width:100%;}
+        .aud-qr{display:flex;flex-direction:column;align-items:center;gap:0.75rem;}
+        .aud-qr img{width:var(--aud-qr,300px);max-width:88vw;height:auto;border-radius:16px;background:#fff;padding:12px;box-shadow:var(--shadow-card);}
+        .aud-qr-caption{font-size:clamp(1.1rem,2.6vw,1.6rem);font-weight:700;color:var(--text);}
+        .aud-tips-empty{font-size:1rem;color:var(--text-faint);max-width:28ch;line-height:1.5;}
         /* QR management rows in the drawer */
         .qr-item{display:flex;align-items:center;gap:0.5rem;padding:0.4rem;border:1px solid var(--border);border-radius:var(--radius);}
         .qr-item img{width:40px;height:40px;object-fit:contain;background:#fff;border-radius:4px;flex-shrink:0;}
@@ -470,8 +459,8 @@
         </div>
 
         <div class="drawer-group">
-            <div class="drawer-group-title">&#128176; Tip QR Codes</div>
-            <div class="drawer-hint" style="opacity:0.8;margin-bottom:0.5rem;">Upload QR images (Venmo, PayPal, etc.) to show on the Audience Screen.</div>
+            <div class="drawer-group-title">&#128241; Audience QR Codes</div>
+            <div class="drawer-hint" style="opacity:0.8;margin-bottom:0.5rem;">Upload QR images (tips like Venmo/PayPal, or your website) to show on the Audience Screen.</div>
             <div id="qrList" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.5rem;"></div>
             <label class="btn btn-outline" style="cursor:pointer;text-align:center;">
                 &#128247; Upload QR Image
@@ -708,16 +697,10 @@
         <!-- AUDIENCE SCREEN (crowd-facing: setlist + tip QR codes) -->
         <div id="audienceView" style="display:none;">
             <div class="aud-wrap">
-                <div class="aud-header">
-                    <h2 class="aud-title" id="audBandName" contenteditable="true" spellcheck="false" title="Tap to edit">Tonight's Set</h2>
-                    <button type="button" id="audExitBtn" class="btn btn-secondary aud-exit">&#10005; Exit</button>
-                </div>
-                <div class="aud-body">
-                    <textarea id="audText" class="aud-text" placeholder="Type anything to show the crowd &mdash; tonight's set list, your band name, social handles, a thank-you&hellip;"></textarea>
-                    <div class="aud-tips" id="audTips">
-                        <div class="aud-tips-label" id="audTipsLabel">Enjoying the show? Tips welcome!</div>
-                        <div class="aud-qr-row" id="audQrRow"></div>
-                    </div>
+                <button type="button" id="audExitBtn" class="btn btn-secondary aud-exit">&#10005; Exit</button>
+                <div class="aud-tips" id="audTips">
+                    <div class="aud-tips-label" id="audTipsLabel">Enjoying the show? Tips welcome!</div>
+                    <div class="aud-qr-row" id="audQrRow"></div>
                 </div>
             </div>
         </div>
@@ -4206,7 +4189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(file.size > 1200000){ alert('That image is large ('+Math.round(file.size/1024)+'KB). A QR under ~1MB is plenty; a big photo may slow backups.'); }
         var reader=new FileReader();
         reader.onload=function(ev){
-            var label=prompt('Label for this QR (e.g. Venmo, PayPal, Cash App):', '');
+            var label=prompt('Label for this QR (e.g. Venmo, PayPal, Cash App, Website):', '');
             var qrs=getQRs();
             qrs.push({ name:(label||'').trim() || ('QR '+(qrs.length+1)), data:ev.target.result });
             saveQRs(qrs);
@@ -4222,35 +4205,22 @@ document.addEventListener('DOMContentLoaded', function() {
     var openAudienceBtn= document.getElementById('openAudienceBtn');
     var audExitBtn     = document.getElementById('audExitBtn');
 
-    var K_AUDTEXT  = 'song_manager_audience_text';
-    var K_AUDTITLE = 'song_manager_audience_title';
-
     function renderAudienceScreen(){
-        var ta=document.getElementById('audText');
-        var titleEl=document.getElementById('audBandName');
-        // Restore the text and title the user typed last time.
-        if(ta){
-            var saved=localStorage.getItem(K_AUDTEXT);
-            if(saved!==null) ta.value=saved;
-        }
-        if(titleEl){
-            var savedT=localStorage.getItem(K_AUDTITLE);
-            if(savedT) titleEl.textContent=savedT;
-        }
-
-        // Tip QRs along the bottom (unchanged)
+        // The audience screen is now just the tip QR codes, shown large.
         var qrRow=document.getElementById('audQrRow');
         var qrs=getQRs();
         qrRow.innerHTML='';
         if(!qrs.length){
             document.getElementById('audTipsLabel').style.display='none';
-            document.getElementById('audTips').style.display='none';
+            var empty=document.createElement('div');
+            empty.className='aud-tips-empty';
+            empty.textContent='Add tip or website QR codes from the menu to show them here.';
+            qrRow.appendChild(empty);
         } else {
-            document.getElementById('audTips').style.display='';
             document.getElementById('audTipsLabel').style.display='';
             qrs.forEach(function(q){
                 var cell=document.createElement('div'); cell.className='aud-qr';
-                var img=document.createElement('img'); img.src=q.data; img.alt=q.name||'Tip QR';
+                var img=document.createElement('img'); img.src=q.data; img.alt=q.name||'QR';
                 var cap=document.createElement('div'); cap.className='aud-qr-caption'; cap.textContent=q.name||'';
                 cell.appendChild(img); if(q.name) cell.appendChild(cap);
                 qrRow.appendChild(cell);
@@ -4259,18 +4229,18 @@ document.addEventListener('DOMContentLoaded', function() {
         fitAudienceScreen(qrs.length);
     }
 
-    // Pick a readable text size and QR size for the current screen. The text
-    // box scrolls if the content is longer than fits, so this just sets a
-    // comfortable default based on viewport width.
+    // Size the QR images to fill the screen: bigger when there are fewer codes,
+    // smaller when there are several, so they always fit side by side.
     function fitAudienceScreen(qrCount){
         var view=document.getElementById('audienceView');
-        var box=document.getElementById('audText');
         if(!view) return;
         var vw=window.innerWidth;
-        var fs = vw<480 ? 20 : (vw<900 ? 26 : 32);
-        if(box) box.style.setProperty('--aud-fs', fs+'px');
-        var qrSize = qrCount>=3 ? 140 : (qrCount===2 ? 160 : 180);
-        view.style.setProperty('--aud-qr', qrSize+'px');
+        var base;
+        if(qrCount<=1)       base = Math.min(vw*0.7, 460);
+        else if(qrCount===2) base = Math.min(vw*0.42, 380);
+        else if(qrCount===3) base = Math.min(vw*0.28, 320);
+        else                 base = Math.min(vw*0.21, 260);
+        view.style.setProperty('--aud-qr', Math.round(base)+'px');
     }
 
     function openAudience(){
@@ -4287,16 +4257,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if(openAudienceBtn) openAudienceBtn.addEventListener('click', openAudience);
     if(audExitBtn)      audExitBtn.addEventListener('click', closeAudience);
-    // Save what the user types so it persists between shows.
-    var audText=document.getElementById('audText');
-    if(audText) audText.addEventListener('input', function(){
-        localStorage.setItem(K_AUDTEXT, audText.value);
-    });
-    var audTitle=document.getElementById('audBandName');
-    if(audTitle) audTitle.addEventListener('input', function(){
-        localStorage.setItem(K_AUDTITLE, audTitle.textContent.trim());
-    });
-    // Keep text/QR sizing sensible when the device rotates or resizes.
+    // Keep QR sizing sensible when the device rotates or resizes.
     function refitAudienceIfOpen(){
         if(audienceView && audienceView.style.display==='block'){
             fitAudienceScreen(getQRs().length);
