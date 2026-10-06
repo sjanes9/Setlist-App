@@ -105,10 +105,19 @@
         #audienceView{position:fixed;inset:0;z-index:3000;background:var(--surface);overflow:hidden;}
         .aud-wrap{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;
             padding:calc(1rem + env(safe-area-inset-top)) 1.25rem calc(1rem + env(safe-area-inset-bottom));box-sizing:border-box;}
-        /* Exit button floats in the top-right corner, out of the way. */
-        .aud-exit{position:absolute;top:calc(0.75rem + env(safe-area-inset-top));right:1rem;z-index:2;
-            opacity:0.45;padding:0.35rem 0.7rem;font-size:0.85rem;}
+        /* Controls cluster (QR size + Exit) floats top-right, out of the way. */
+        .aud-controls{position:absolute;top:calc(0.75rem + env(safe-area-inset-top));right:1rem;z-index:2;
+            display:flex;align-items:center;gap:0.75rem;}
+        .aud-size{display:flex;align-items:center;gap:0.4rem;opacity:0.5;font-size:0.8rem;
+            font-weight:600;color:var(--text-muted);white-space:nowrap;transition:opacity 0.2s;}
+        .aud-size:hover{opacity:1;}
+        .aud-size input[type="range"]{width:110px;}
+        .aud-exit{opacity:0.45;padding:0.35rem 0.7rem;font-size:0.85rem;}
         .aud-exit:hover{opacity:1;}
+        @media(max-width:640px){
+            .aud-size span{display:none;}           /* just the slider on a phone */
+            .aud-size input[type="range"]{width:80px;}
+        }
         .aud-tips{width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.5rem;}
         .aud-tips-label{font-size:clamp(1.6rem,4.5vw,3rem);font-weight:800;color:var(--text);line-height:1.1;margin:0;}
         .aud-qr-row{display:flex;gap:clamp(1.5rem,4vw,3.5rem);justify-content:center;flex-wrap:wrap;align-items:flex-start;width:100%;}
@@ -697,7 +706,13 @@
         <!-- AUDIENCE SCREEN (crowd-facing: setlist + tip QR codes) -->
         <div id="audienceView" style="display:none;">
             <div class="aud-wrap">
-                <button type="button" id="audExitBtn" class="btn btn-secondary aud-exit">&#10005; Exit</button>
+                <div class="aud-controls">
+                    <label class="aud-size" title="Resize the QR codes">
+                        <span>QR size</span>
+                        <input type="range" id="audQrSize" min="140" max="640" step="10" value="300">
+                    </label>
+                    <button type="button" id="audExitBtn" class="btn btn-secondary aud-exit">&#10005; Exit</button>
+                </div>
                 <div class="aud-tips" id="audTips">
                     <div class="aud-tips-label" id="audTipsLabel">Enjoying the show? Tips welcome!</div>
                     <div class="aud-qr-row" id="audQrRow"></div>
@@ -4237,18 +4252,25 @@ document.addEventListener('DOMContentLoaded', function() {
         fitAudienceScreen(qrs.length);
     }
 
-    // Size the QR images to fill the screen: bigger when there are fewer codes,
-    // smaller when there are several, so they always fit side by side.
+    // Size the QR images. If the user has set a size with the slider, use that
+    // (saved so it sticks). Otherwise auto-fit by how many codes there are.
+    var K_QRSIZE = 'song_manager_audience_qr_size';
+    function autoQrSize(qrCount){
+        var vw=window.innerWidth;
+        if(qrCount<=1)       return Math.min(vw*0.7, 460);
+        else if(qrCount===2) return Math.min(vw*0.42, 380);
+        else if(qrCount===3) return Math.min(vw*0.28, 320);
+        else                 return Math.min(vw*0.21, 260);
+    }
     function fitAudienceScreen(qrCount){
         var view=document.getElementById('audienceView');
         if(!view) return;
-        var vw=window.innerWidth;
-        var base;
-        if(qrCount<=1)       base = Math.min(vw*0.7, 460);
-        else if(qrCount===2) base = Math.min(vw*0.42, 380);
-        else if(qrCount===3) base = Math.min(vw*0.28, 320);
-        else                 base = Math.min(vw*0.21, 260);
-        view.style.setProperty('--aud-qr', Math.round(base)+'px');
+        var saved=parseInt(localStorage.getItem(K_QRSIZE),10);
+        var px = (saved && saved>0) ? saved : Math.round(autoQrSize(qrCount));
+        view.style.setProperty('--aud-qr', px+'px');
+        // Keep the slider in sync with whatever size is showing.
+        var slider=document.getElementById('audQrSize');
+        if(slider) slider.value = px;
     }
 
     function openAudience(){
@@ -4265,6 +4287,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if(openAudienceBtn) openAudienceBtn.addEventListener('click', openAudience);
     if(audExitBtn)      audExitBtn.addEventListener('click', closeAudience);
+    // QR size slider — live resize + remembered for next time.
+    var audQrSize=document.getElementById('audQrSize');
+    if(audQrSize) audQrSize.addEventListener('input', function(){
+        var px=parseInt(audQrSize.value,10)||300;
+        var view=document.getElementById('audienceView');
+        if(view) view.style.setProperty('--aud-qr', px+'px');
+        localStorage.setItem(K_QRSIZE, px);
+    });
     // Keep QR sizing sensible when the device rotates or resizes.
     function refitAudienceIfOpen(){
         if(audienceView && audienceView.style.display==='block'){
