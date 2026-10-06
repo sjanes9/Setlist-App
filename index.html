@@ -648,6 +648,12 @@
                         <span class="hint" style="margin:0;">Click where you want it, then pick one.</span>
                     </div>
                     <div class="insert-bar">
+                        <span class="insert-bar-label">Change at section:</span>
+                        <button type="button" id="tempoChangeBtn" class="btn btn-outline insert-btn" title="Set a tempo change on the section at the cursor">&#9834; Tempo Change</button>
+                        <button type="button" id="timeChangeBtn" class="btn btn-outline insert-btn" title="Set a time-signature change on the section at the cursor">&#8734; Time Change</button>
+                        <span class="hint" style="margin:0;">Click in a section first, then set its tempo or time signature.</span>
+                    </div>
+                    <div class="insert-bar">
                         <span class="insert-bar-label">Snippets:</span>
                         <select id="snippetSelect" style="font-size:0.8rem;padding:0.35rem 0.5rem;max-width:180px;">
                             <option value="">Insert a saved snippet…</option>
@@ -782,7 +788,7 @@
 
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Mid-song tempo, time &amp; key changes</h3>
             <p style="margin:0 0 0.8rem;">Add tags to any section header to change things partway through a song: <code>{c: Chorus}{bars:8}{tempo:120}{time:6/8}{key:G}</code>. Tempo and time signature adjust the bar-timed scroll from that section onward; key is shown for the performer. They carry forward until the next change. (Tempo/time only affect timing in bar-timed songs.)</p>
-            <p style="margin:0 0 0.8rem;">Don't want to type tags by hand? Press <strong>&#9998; Edit Sections</strong> above the lyrics to change every section's name, bars, tempo, time and key in one dialog.</p>
+            <p style="margin:0 0 0.8rem;">Don't want to type tags by hand? Click inside a section and press <strong>&#9834; Tempo Change</strong> or <strong>&#8734; Time Change</strong> to set that section's tempo or time signature (leave the box blank to remove it). Or press <strong>&#9998; Edit Sections</strong> to change every section's name, bars, tempo, time and key in one dialog.</p>
 
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Reusable snippets</h3>
             <p style="margin:0 0 0.8rem;">Select a chunk of lyrics/chords and press <strong>Save Selection</strong> to store it under a name. Later, pick it from the <strong>Snippets</strong> list and press <strong>Insert</strong> to drop it into any song. Snippets are saved on this device and travel inside library backups.</p>
@@ -3072,6 +3078,91 @@ document.addEventListener('DOMContentLoaded', function() {
         if(!name){ alert('A section needs a name.'); return; }
         addSection(name);
     });
+
+    /* ── TEMPO / TIME CHANGE BUTTONS ─────────────────────────
+       Apply a tempo or time-signature change to the section the
+       cursor is in. The change is written as an inline tag on that
+       section's header ({tempo:120} / {time:6/8}), which is what the
+       bar-timed scroll engine reads. Set an empty value to remove it.
+    ──────────────────────────────────────────────────────── */
+    // Find the section header line at or above the cursor; returns its line index or -1.
+    function sectionHeaderLineAtCursor(){
+        var ta=flds.lyrics;
+        var val=ta.value;
+        var pos=(typeof ta.selectionStart==='number') ? ta.selectionStart : val.length;
+        var lines=val.slice(0,pos).split('\n');
+        // Walk backward from the cursor's line to find the nearest header.
+        var upto=lines.length-1;
+        var all=val.split('\n');
+        for(var i=upto;i>=0;i--){
+            if(SECTION_HEAD_RE.test(all[i].trim())) return i;
+        }
+        return -1;
+    }
+
+    // Set (or clear) one attribute tag on a given header line, preserving the rest.
+    function setAttrOnHeaderLine(idx, attr, value){
+        var all=flds.lyrics.value.split('\n');
+        if(idx<0 || idx>=all.length) return false;
+        var hh=all[idx].trim().match(SECTION_HEAD_RE);
+        if(!hh) return false;
+        var name=hh[1];
+        var a=parseSectionAttrs(hh[2]);
+        a[attr] = (value===''||value===null) ? null : value;
+        var tag='{c: '+name+'}';
+        if(a.bars!==null && a.bars!==undefined && a.bars!=='') tag+='{bars:'+a.bars+'}';
+        if(a.tempo!==null && a.tempo!==undefined && a.tempo!=='') tag+='{tempo:'+a.tempo+'}';
+        if(a.time)  tag+='{time:'+a.time+'}';
+        if(a.key)   tag+='{key:'+a.key+'}';
+        var lead=(all[idx].match(/^\s*/)||[''])[0];
+        all[idx]=lead+tag;
+        // Preserve caret + scroll while we rewrite the box.
+        var ta=flds.lyrics, pageY=window.scrollY, taTop=ta.scrollTop, caret=ta.selectionStart;
+        ta.value=all.join('\n');
+        try{ ta.focus({preventScroll:true}); }catch(e){ ta.focus(); }
+        ta.selectionStart=ta.selectionEnd=Math.min(caret, ta.value.length);
+        ta.scrollTop=taTop; window.scrollTo(0,pageY);
+        syncStructureFromLyrics();
+        // Persist if saved
+        var title=flds.title.value.trim(), lib=getLib();
+        if(title && lib[title]){ lib[title].lyrics=ta.value; lib[title].updatedAt=new Date().toISOString(); saveLib(lib); }
+        return true;
+    }
+
+    function changeSectionAttr(attr){
+        var idx=sectionHeaderLineAtCursor();
+        if(idx<0){
+            alert('Put your cursor inside a section first (click on a line under a {section} header), then try again.');
+            return;
+        }
+        var all=flds.lyrics.value.split('\n');
+        var hh=all[idx].trim().match(SECTION_HEAD_RE);
+        var cur=parseSectionAttrs(hh[2]);
+        var secName=hh[1];
+        if(attr==='tempo'){
+            var def=(cur.tempo!=null?cur.tempo:(parseInt(flds.tempo.value,10)||120));
+            var v=prompt('Tempo (BPM) for "'+secName+'" from here on.\nLeave blank to remove a tempo change:', def);
+            if(v===null) return;
+            v=v.trim();
+            if(v===''){ setAttrOnHeaderLine(idx,'tempo',''); return; }
+            var n=parseInt(v,10);
+            if(!n || n<30 || n>300){ alert('Enter a tempo between 30 and 300 BPM.'); return; }
+            setAttrOnHeaderLine(idx,'tempo',n);
+        } else {
+            var defT=(cur.time!=null?cur.time:effectiveTimeSig());
+            var t=prompt('Time signature for "'+secName+'" from here on (e.g. 6/8, 3/4).\nLeave blank to remove a time change:', defT);
+            if(t===null) return;
+            t=t.trim();
+            if(t===''){ setAttrOnHeaderLine(idx,'time',''); return; }
+            if(!/^\d{1,2}\/\d{1,2}$/.test(t)){ alert('Enter a time signature like 6/8 or 3/4.'); return; }
+            setAttrOnHeaderLine(idx,'time',t);
+        }
+    }
+
+    var tempoChangeBtn=document.getElementById('tempoChangeBtn');
+    var timeChangeBtn =document.getElementById('timeChangeBtn');
+    if(tempoChangeBtn) tempoChangeBtn.addEventListener('click', function(){ changeSectionAttr('tempo'); });
+    if(timeChangeBtn)  timeChangeBtn.addEventListener('click', function(){ changeSectionAttr('time'); });
 
     /* ════════════════════════════════════════════════════════
        EDIT SECTIONS (Part 1 of this round)
