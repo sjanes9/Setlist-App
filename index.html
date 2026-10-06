@@ -2882,10 +2882,10 @@ document.addEventListener('DOMContentLoaded', function() {
         var out=[];
         flds.lyrics.value.split('\n').forEach(function(line){
             var t=line.trim();
-            var mb=t.match(SECTION_BARS_RE);
-            if(mb){ out.push(mb[1]); return; }
-            var m=t.match(SECTION_RE);
-            if(m){ out.push(m[1]); return; }
+            // {c: Name} followed by any attribute tags ({bars}{tempo}{time}{key}).
+            // Take ONLY the name so the Structure field stays clean.
+            var hh=t.match(SECTION_HEAD_RE);
+            if(hh){ out.push(hh[1].trim()); return; }
             // Legacy [Section] support (ignores chord brackets)
             if(t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']'){
                 var inner=t.slice(1,-1).trim();
