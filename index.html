@@ -2348,14 +2348,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if(scrolling) rafId=requestAnimationFrame(scrollLoop);
     }
 
-    // Manual-scroll detection: difference > 4px means user moved it — absorb & continue.
+    // Manual-scroll detection: if the page moved to a spot the engine didn't
+    // put it, the user dragged it — adopt that new spot and keep scrolling from
+    // there (works in BOTH rate mode and bar-timed/timeline mode).
     window.addEventListener('scroll', function(){
         if(!scrolling || paused) return;
         var userDelta = Math.abs(window.scrollY - lastEngineY);
         if(userDelta > 4){
             curScrollY  = window.scrollY;
             lastEngineY = window.scrollY;
-            lastTs      = null;
+            lastTs      = null;   // reset so there's no velocity jump next frame
+            // In timeline mode the position is derived from the song clock, so a
+            // manual move must also move the clock — otherwise the next frame
+            // snaps the page right back. Convert the new Y back into song time.
+            if(useTimeline && timelineAnchors && timelineAnchors.length){
+                songElapsedMs = timeAtScrollY(window.scrollY, timelineAnchors) * 1000;
+            }
         }
     }, {passive:true});
 
