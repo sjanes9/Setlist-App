@@ -130,6 +130,8 @@
         .qr-item img{width:40px;height:40px;object-fit:contain;background:#fff;border-radius:4px;flex-shrink:0;}
         .qr-item .qr-name{flex:1;min-width:0;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
         .qr-item button{background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:0.2rem 0.4rem;flex-shrink:0;}
+        .qr-item .qr-edit{color:var(--text-muted);}
+        .qr-item .qr-edit:hover{color:var(--primary);}
         [data-theme="dark"] .attr-badge{background:rgba(96,165,250,0.16);border-color:#3b82f6;color:#93c5fd;}
         .perf-section-heading.section-active{color:var(--accent);border-left-color:var(--accent);}
         .perf-section-heading.section-active .bars-badge{background:var(--accent);border-color:var(--accent);color:#fff;}
@@ -4284,13 +4286,26 @@ document.addEventListener('DOMContentLoaded', function() {
             var row=document.createElement('div');
             row.className='qr-item';
             var img=document.createElement('img'); img.src=q.data; img.alt=q.name||'QR';
-            var name=document.createElement('span'); name.className='qr-name'; name.textContent=q.name||('QR '+(i+1));
+            var name=document.createElement('span'); name.className='qr-name';
+            name.textContent = q.name || '(no label)';
+            if(!q.name) name.style.opacity='0.5';
+            // #2 Edit label (pencil)
+            var edit=document.createElement('button'); edit.type='button'; edit.innerHTML='&#9998;';
+            edit.title='Edit label'; edit.className='qr-edit';
+            edit.addEventListener('click', function(){
+                var cur=getQRs();
+                var current=cur[i] ? (cur[i].name||'') : '';
+                var nn=prompt('Label for this QR (leave blank for none):', current);
+                if(nn===null) return;            // cancelled
+                cur[i].name = nn.trim();
+                saveQRs(cur); refreshQRList();
+            });
             var del=document.createElement('button'); del.type='button'; del.innerHTML='&times;'; del.title='Remove';
             del.addEventListener('click', function(){
                 if(!confirm('Remove this QR code?')) return;
                 var cur=getQRs(); cur.splice(i,1); saveQRs(cur); refreshQRList();
             });
-            row.appendChild(img); row.appendChild(name); row.appendChild(del);
+            row.appendChild(img); row.appendChild(name); row.appendChild(edit); row.appendChild(del);
             box.appendChild(row);
         });
     }
@@ -4305,7 +4320,7 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.onload=function(ev){
             var label=prompt('Label for this QR (e.g. Venmo, PayPal, Cash App, Website):', '');
             var qrs=getQRs();
-            qrs.push({ name:(label||'').trim() || ('QR '+(qrs.length+1)), data:ev.target.result });
+            qrs.push({ name:(label||'').trim(), data:ev.target.result });
             saveQRs(qrs);
             refreshQRList();
         };
