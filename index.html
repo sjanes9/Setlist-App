@@ -332,6 +332,19 @@
         .chord-row{display:block;height:1.5rem;position:relative;white-space:pre;font-family:'Courier New',Courier,monospace;font-size:calc(var(--perf-font-size)*0.8);font-weight:700;overflow-x:visible;}
         .chord-wrapper{position:absolute;background-color:var(--chord-bg);color:var(--chord-text);padding:0 5px;border-radius:4px;line-height:1.3;transition:background-color var(--transition),color var(--transition);}
         .lyric-row{display:block;font-size:var(--perf-font-size);white-space:pre-wrap;word-break:break-word;color:var(--text);min-height:1.4rem;transition:color var(--transition);}
+        /* #2 Chord preview in the editor — reuses the performance chord markup
+           but at a fixed, compact size so it reads well under the textarea. */
+        .chord-preview{--perf-font-size:1.05rem;margin-top:0.6rem;padding:0.75rem 0.85rem;
+            background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
+            max-height:320px;overflow:auto;-webkit-overflow-scrolling:touch;}
+        .chord-preview .perf-section-heading{font-size:0.95rem;font-weight:800;color:var(--accent);
+            margin:0.6rem 0 0.3rem;letter-spacing:0.02em;}
+        .chord-preview .perf-section-heading:first-child{margin-top:0;}
+        .chord-preview .song-line{margin-bottom:0.5rem;}
+        .chord-preview .chord-wrapper{background-color:var(--chord-bg,rgba(37,99,235,0.15));
+            color:var(--chord-text,var(--primary));}
+        .chord-preview .bars-badge,.chord-preview .attr-badge{font-size:0.6rem;}
+        .chord-preview-empty{font-size:0.85rem;color:var(--text-faint);}
         .sl-panel{width:0;overflow:hidden;flex-shrink:0;transition:width 0.3s ease;}
         .sl-panel.open{width:var(--sl-panel-w);}
         .sl-panel-inner{width:var(--sl-panel-w);background:var(--sl-bg);border:1px solid var(--sl-border);border-radius:var(--radius-lg);padding:1rem;position:sticky;top:1.5rem;max-height:calc(100vh - 10rem);overflow-y:auto;transition:background-color var(--transition),border-color var(--transition);}
@@ -666,7 +679,14 @@
                         <span class="hint" style="margin:0;">Reusable chunks of lyrics/chords you can drop into any song.</span>
                     </div>
                     <textarea id="songLyrics" placeholder="{c: Verse 1}&#10;[E] Amazing [A] grace how [E] sweet the sound..."></textarea>
-                    <div class="hint">A measures break holds the auto-scroll for the given number of bars at this song's tempo, then resumes &mdash; best for intros, solos, and turnarounds.</div>
+                    <div class="hint">Put chords in [square brackets] right before the word they land on, e.g. <code>[Em]Can we for[G]get</code>. A measures break holds the auto-scroll for the given number of bars.</div>
+                    <div class="insert-bar" style="margin-top:0.5rem;">
+                        <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin:0;white-space:nowrap;">
+                            <input type="checkbox" id="chordPreviewToggle" checked style="width:auto;"> Chord preview
+                        </label>
+                        <span class="hint" style="margin:0;">See chords positioned over the lyrics, like in performance mode.</span>
+                    </div>
+                    <div id="chordPreview" class="chord-preview"></div>
                 </div>
 
                 <div class="action-row">
@@ -703,6 +723,16 @@
                 <div class="sl-add-row">
                     <select id="setlistAddSelect"></select>
                     <button type="button" id="setlistAddBtn" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">+ Add</button>
+                </div>
+                <div id="slTotalBar" style="display:none;align-items:center;gap:1rem;flex-wrap:wrap;margin:0.5rem 0 0.75rem;padding:0.6rem 0.85rem;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);">
+                    <div style="font-size:1rem;font-weight:800;color:var(--text);">
+                        Total set time: <span id="slTotalTime">0:00</span>
+                    </div>
+                    <div style="font-size:0.78rem;color:var(--text-muted);" id="slTotalDetail"></div>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--text-muted);margin:0;margin-left:auto;white-space:nowrap;">
+                        Gap between songs
+                        <input type="number" id="slGapSecs" min="0" max="600" step="5" value="30" style="width:66px;text-align:center;font-size:0.85rem;padding:0.3rem 0.4rem;"> sec
+                    </label>
                 </div>
                 <ul class="sl-queue" id="setlistQueue">
                     <li class="sl-empty" id="setlistEmptyHint">No songs in this set list yet.</li>
@@ -791,6 +821,12 @@
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Mid-song tempo, time &amp; key changes</h3>
             <p style="margin:0 0 0.8rem;">Add tags to any section header to change things partway through a song: <code>{c: Chorus}{bars:8}{tempo:120}{time:6/8}{key:G}</code>. Tempo and time signature adjust the bar-timed scroll from that section onward; key is shown for the performer. They carry forward until the next change. (Tempo/time only affect timing in bar-timed songs.)</p>
             <p style="margin:0 0 0.8rem;">Don't want to type tags by hand? Click inside a section and press <strong>&#9834; Tempo Change</strong> or <strong>&#8734; Time Change</strong> to set that section's tempo or time signature (leave the box blank to remove it). Or press <strong>&#9998; Edit Sections</strong> to change every section's name, bars, tempo, time and key in one dialog.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Chords over lyrics</h3>
+            <p style="margin:0 0 0.8rem;">Put a chord in [square brackets] right before the word it lands on &mdash; <code>[Em]Can we for[G]get</code>. The <strong>Chord preview</strong> under the lyrics shows the chords positioned over the words, exactly as they'll appear in performance mode.</p>
+
+            <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Set list total time</h3>
+            <p style="margin:0 0 0.8rem;">The Set List Builder shows the total running time of the active set &mdash; the sum of each song's duration plus an adjustable gap between songs &mdash; so you can judge set length. It updates as you reorder.</p>
 
             <h3 style="color:var(--accent);margin:0.8rem 0 0.3rem;font-size:1rem;">Reusable snippets</h3>
             <p style="margin:0 0 0.8rem;">Select a chunk of lyrics/chords and press <strong>Save Selection</strong> to store it under a name. Later, pick it from the <strong>Snippets</strong> list and press <strong>Insert</strong> to drop it into any song. Snippets are saved on this device and travel inside library backups.</p>
@@ -1079,6 +1115,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var tbEl=document.getElementById('songTotalBars');
         if(tbEl) tbEl.value = song.totalBars || '';
         if(typeof syncTotalBarsUI==='function') syncTotalBarsUI();
+        if(typeof renderChordPreview==='function') renderChordPreview();
     }
 
     /* ---- DOM REFS ---- */
@@ -1258,6 +1295,17 @@ document.addEventListener('DOMContentLoaded', function() {
         renderQueue();
     }
 
+    (function initSetGap(){
+        var gapEl=document.getElementById('slGapSecs');
+        if(!gapEl) return;
+        var saved=localStorage.getItem(K_SETGAP);
+        if(saved!==null) gapEl.value=saved;
+        gapEl.addEventListener('input', function(){
+            localStorage.setItem(K_SETGAP, gapEl.value);
+            updateSetTotalTime();
+        });
+    })();
+
     function refreshActSLDropdown() {
         var all    = getAllSL();
         var active = getActSLName();
@@ -1325,7 +1373,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 '<div class="q-info">'+
                   '<div class="q-title">'+esc(title)+'</div>'+
                   '<div class="q-meta">'+(song.key?'Key: '+esc(song.key):'')+
-                    (song.tempo?' &middot; '+song.tempo+' BPM':'')+'</div>'+
+                    (song.tempo?' &middot; '+song.tempo+' BPM':'')+
+                    (songDurationSec(song)?' &middot; '+fmtMMSS(songDurationSec(song)):'')+'</div>'+
                 '</div>'+
                 '<div class="q-move">'+
                   '<button class="q-up" title="Move up">&#9650;</button>'+
@@ -1356,6 +1405,50 @@ document.addEventListener('DOMContentLoaded', function() {
             li.addEventListener('dragend',   onDragEnd);
             slQueue.appendChild(li);
         });
+        updateSetTotalTime();
+    }
+
+    /* ── #1 SET LIST TOTAL TIME ───────────────────────────────
+       Sums each song's duration plus an adjustable gap between
+       songs, so you can gauge real stage time. */
+    var K_SETGAP = 'song_manager_set_gap_secs';
+    function fmtMMSS(sec){
+        sec=Math.max(0,Math.round(sec));
+        var m=Math.floor(sec/60), s=sec%60;
+        return m+':'+(s<10?'0':'')+s;
+    }
+    function fmtHMS(sec){
+        sec=Math.max(0,Math.round(sec));
+        var h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+        if(h>0) return h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+        return m+':'+(s<10?'0':'')+s;
+    }
+    // A single song's length in seconds. Uses the stored duration field
+    // (which bar-timed songs compute automatically); 0 if unknown.
+    function songDurationSec(song){
+        if(!song) return 0;
+        return parseDuration(song.duration||'') || 0;
+    }
+    function updateSetTotalTime(){
+        var bar=document.getElementById('slTotalBar');
+        if(!bar) return;
+        var queue=getActSL(), lib=getLib();
+        if(!queue.length){ bar.style.display='none'; return; }
+        var gapEl=document.getElementById('slGapSecs');
+        var gap=gapEl ? (parseInt(gapEl.value,10)||0) : 0;
+        var songSec=0, known=0, unknown=0;
+        queue.forEach(function(t){
+            var d=songDurationSec(lib[t]);
+            if(d>0){ songSec+=d; known++; } else { unknown++; }
+        });
+        var gapSec = gap * Math.max(queue.length-1, 0);
+        var total  = songSec + gapSec;
+        document.getElementById('slTotalTime').textContent = fmtHMS(total);
+        var detail = fmtMMSS(songSec)+' of music';
+        if(gapSec>0) detail += ' + '+fmtMMSS(gapSec)+' gaps';
+        if(unknown>0) detail += ' \u2022 '+unknown+' song'+(unknown>1?'s':'')+' with no set duration';
+        document.getElementById('slTotalDetail').textContent = detail;
+        bar.style.display='flex';
     }
 
     /* ---- DRAG & DROP ---- */
@@ -3042,6 +3135,64 @@ document.addEventListener('DOMContentLoaded', function() {
         if(man) man.addEventListener('click', manageSnippets);
         refreshSnippetDropdown();
     })();
+
+    /* ── #2 CHORD PREVIEW (editor) ─────────────────────────────
+       Renders the lyrics box into chords-over-lyrics, the same way
+       performance mode does, so you can see chord placement while
+       editing. Section headers show as labels; break/pause tags are
+       hidden. Reuses parseChordLine for identical positioning. */
+    var chordPreviewBox=document.getElementById('chordPreview');
+    var chordPreviewToggle=document.getElementById('chordPreviewToggle');
+    var BREAK_LINE_RE=/^\{\s*(?:bars|pause)\s*:\s*\d+(?:\.\d+)?\s*\}$/i;
+
+    function renderChordPreview(){
+        if(!chordPreviewBox) return;
+        var on = !chordPreviewToggle || chordPreviewToggle.checked;
+        chordPreviewBox.style.display = on ? 'block' : 'none';
+        if(!on) return;
+        chordPreviewBox.innerHTML='';
+        var text=flds.lyrics.value || '';
+        if(!text.trim()){
+            chordPreviewBox.innerHTML='<div class="chord-preview-empty">Chords you add in [brackets] will show here, positioned over the lyrics.</div>';
+            return;
+        }
+        text.split('\n').forEach(function(line){
+            var t=line.trim();
+            if(!t){ // blank line -> small spacer
+                var sp=document.createElement('div'); sp.style.height='0.4rem'; chordPreviewBox.appendChild(sp); return;
+            }
+            if(BREAK_LINE_RE.test(t)) return;   // hide bare break tags
+            var hh=t.match(SECTION_HEAD_RE);
+            if(hh){
+                var h=document.createElement('div'); h.className='perf-section-heading';
+                h.textContent=hh[1].trim();
+                var a=parseSectionAttrs(hh[2]);
+                if(a.bars){ var b=document.createElement('span'); b.className='bars-badge'; b.textContent=a.bars+' bars'; h.appendChild(b); }
+                if(a.tempo){ var tp=document.createElement('span'); tp.className='attr-badge'; tp.textContent='\u2669='+a.tempo; h.appendChild(tp); }
+                if(a.time){ var tm=document.createElement('span'); tm.className='attr-badge'; tm.textContent=a.time; h.appendChild(tm); }
+                if(a.key){ var ky=document.createElement('span'); ky.className='attr-badge'; ky.textContent='Key '+a.key; h.appendChild(ky); }
+                chordPreviewBox.appendChild(h);
+                return;
+            }
+            // Legacy [Section] header (not a chord-only line)
+            if(t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']'){
+                var inr=t.slice(1,-1).trim();
+                if(inr && !CHORD_RE.test(inr)){
+                    var h2=document.createElement('div'); h2.className='perf-section-heading'; h2.textContent=inr;
+                    chordPreviewBox.appendChild(h2); return;
+                }
+            }
+            chordPreviewBox.appendChild(parseChordLine(line));
+        });
+    }
+
+    var _chordPrevTimer=null;
+    function scheduleChordPreview(){
+        if(_chordPrevTimer) clearTimeout(_chordPrevTimer);
+        _chordPrevTimer=setTimeout(renderChordPreview, 120);
+    }
+    if(flds.lyrics) flds.lyrics.addEventListener('input', scheduleChordPreview);
+    if(chordPreviewToggle) chordPreviewToggle.addEventListener('change', renderChordPreview);
 
     function insertSectionAtCursor(label, bars){
         var ta=flds.lyrics;
