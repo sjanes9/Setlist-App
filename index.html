@@ -213,6 +213,24 @@
            dock is independent at the bottom. */
         header.edit-bar.perf-bar{top:0;bottom:auto;}
         body.perf-bar-on .container{margin-top:5.5rem;}
+        /* Reading-line marker (left edge, 35% down = the scroll anchor line). */
+        #readLineMarker{display:none;}
+        body.perf-bar-on #readLineMarker{
+            display:flex;align-items:center;
+            position:fixed;left:0;top:35vh;z-index:900;pointer-events:none;
+        }
+        #readLineMarker::before{
+            content:"";display:block;height:0;width:44px;
+            border-top:2px solid var(--accent);opacity:0.55;
+        }
+        #readLineMarker .read-line-arrow{
+            color:var(--accent);font-size:0.9rem;line-height:1;margin-left:-4px;opacity:0.75;
+            filter:drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+        }
+        @media(max-width:640px){
+            body.perf-bar-on #readLineMarker::before{width:28px;}
+            #readLineMarker .read-line-arrow{font-size:0.8rem;}
+        }
 
         /* ── PHONE LAYOUT ───────────────────────────────────────
            Three stacked rows of controls ate most of a phone screen.
@@ -760,6 +778,12 @@
 
         <!-- PERFORMANCE VIEW -->
         <div id="performanceView">
+            <!-- Reading-line marker: a fixed guide on the left edge showing the
+                 line the scroll engine anchors each section to (35% down). It
+                 gives a reference point when manually scrolling. -->
+            <div id="readLineMarker" aria-hidden="true">
+                <span class="read-line-arrow">&#9654;</span>
+            </div>
             <div class="perf-layout" id="perfLayout">
                 <div class="sl-panel" id="setlistPanel">
                     <div class="sl-panel-inner">
