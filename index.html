@@ -44,6 +44,8 @@
             --sl-active-bg:#3b82f6; --sl-active-text:#ffffff;
         }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        /* Block Chrome/Android pull-down-to-refresh (it reloads the app mid-set). */
+        html,body{overscroll-behavior-y:none;}
         body{font-family:'Georgia','Times New Roman',serif;background-color:var(--bg);color:var(--text);line-height:1.6;padding:2rem;transition:background-color var(--transition),color var(--transition);}
         .container{max-width:900px;margin:0 auto 7rem;background:var(--surface);padding:2rem;border-radius:var(--radius-lg);box-shadow:var(--shadow-card);transition:background-color var(--transition),max-width var(--transition),padding var(--transition);}.container.perf-mode{max-width:100%;border-radius:0;box-shadow:none;padding:1.5rem 2rem;}
         header{margin-bottom:2rem;border-bottom:2px solid var(--border-subtle);padding-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
@@ -1609,7 +1611,12 @@ document.addEventListener('DOMContentLoaded', function() {
             wpm:spd.wpm, speedMode:spd.speedMode, duration:spd.duration, totalBars:spd.totalBars,
             updatedAt:new Date().toISOString()};
         saveLib(lib); refreshHeaderDropdown(); refreshSLBuilderUI();
-        libSelect.value='song::'+title; alert('"'+title+'" saved successfully.');
+        // Keep the set list selected if we're working inside one; otherwise a
+        // save would flip the dropdown to a single song and Performance mode
+        // would then open WITHOUT the set list.
+        if(libSelect.value.indexOf('setlist::')!==0) libSelect.value='song::'+title;
+        saveSession();
+        alert('"'+title+'" saved successfully.');
     });
     delBtn.addEventListener('click', function(){
         var val=libSelect.value;
@@ -2208,6 +2215,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var queue=getActSL(); if(idx<0||idx>=queue.length) return;
         curIdx=idx; var song=getLib()[queue[idx]]; if(!song) return;
         loadSong(song); stopScroll(); renderPerfView(); renderSLPanel(); loadWpmForCurrentSong();
+        if(typeof saveSession==='function') saveSession();
         // iOS Safari is unreliable with behavior:'smooth' here, and the reset must
         // happen AFTER the new content lays out. Use an instant jump on the next frame.
         curScrollY=0;
@@ -2258,6 +2266,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var paused      = false;  // true while holding at a pause
     var pauseUntil  = 0;      // timestamp when current pause ends
     var activePause = null;
+    // User-input tracking so the auto-scroll never fights a finger/wheel.
+    var touching=false, touchMoved=false, lastUserMoveTs=-1e9;
+    window.addEventListener('touchstart', function(){ touching=true; touchMoved=false; }, {passive:true});
+    window.addEventListener('touchmove',  function(){ touchMoved=true; }, {passive:true});
+    window.addEventListener('touchend',    function(){ touching=false; }, {passive:true});
+    window.addEventListener('touchcancel', function(){ touching=false; }, {passive:true});
+    window.addEventListener('wheel', function(){ lastUserMoveTs=performance.now(); }, {passive:true});
 
     function countWords(str){
         return (str||'').replace(/\[[^\]]*\]/g,'').replace(/\{pause:[^}]*\}/gi,'').trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
@@ -2450,6 +2465,23 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // The user is dragging / flinging the page: let go of the wheel, adopt
+        // wherever they put it, and carry on from there once they let go.
+        if((touching && touchMoved) || (ts - lastUserMoveTs) < 160){
+            curScrollY = window.scrollY; lastEngineY = curScrollY;
+            if(useTimeline && timelineAnchors && timelineAnchors.length){
+                songElapsedMs = timeAtScrollY(curScrollY, timelineAnchors) * 1000;
+            }
+            // Pauses below the new position can fire again; ones above are done.
+            var trigY = window.scrollY + window.innerHeight*READ_FRACTION;
+            pauseMarkers.forEach(function(pm){
+                pm.fired = (pm.el.getBoundingClientRect().top + window.scrollY) <= trigY;
+            });
+            lastTs = ts;
+            if(scrolling) rafId=requestAnimationFrame(scrollLoop);
+            return;
+        }
+
         if(useTimeline){
             // ── TIMELINE MODE ── position derived from elapsed song time
             songElapsedMs += delta;
@@ -2492,9 +2524,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // put it, the user dragged it — adopt that new spot and keep scrolling from
     // there (works in BOTH rate mode and bar-timed/timeline mode).
     window.addEventListener('scroll', function(){
-        if(!scrolling || paused) return;
+        if(!scrolling) return;
         var userDelta = Math.abs(window.scrollY - lastEngineY);
-        if(userDelta > 4){
+        // Any scroll while a finger is dragging is the user's; otherwise treat a
+        // jump bigger than rounding noise as the user's (momentum / wheel).
+        if((touching && touchMoved) || userDelta > 1.5){
+            lastUserMoveTs = performance.now();
             curScrollY  = window.scrollY;
             lastEngineY = window.scrollY;
             lastTs      = null;   // reset so there's no velocity jump next frame
@@ -2704,7 +2739,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // On resize, reapply so the column stays correct
+    // Phones fire 'resize' every time the browser URL bar slides in/out while
+    // you drag the page (height changes only). Re-laying-out and recomputing the
+    // scroll rate on each of those is what made manual scrolling jitter, so only
+    // react when the WIDTH changes (rotation / real resize).
+    var _lastInnerW = window.innerWidth;
+    function widthActuallyChanged(){
+        if(window.innerWidth === _lastInnerW) return false;
+        _lastInnerW = window.innerWidth; return true;
+    }
     window.addEventListener('resize', function(){
+        if(!widthActuallyChanged()) return;
         if(document.getElementById('performanceView').style.display !== 'none'){
             applyColWidth(parseInt(colWidthSlider.value, 10));
             // Screen geometry changed -> re-derive the scroll rate for this device
@@ -2740,8 +2785,11 @@ document.addEventListener('DOMContentLoaded', function() {
         var _dockEl=document.getElementById('scrollDock');
         if(_dockEl) _dockRO.observe(_dockEl);
     }
+    var _lastDockW = window.innerWidth;
     window.addEventListener('resize', function(){
         publishDockHeight();
+        if(window.innerWidth === _lastDockW) return;   // height-only (URL bar) change
+        _lastDockW = window.innerWidth;
         if(typeof recalcColWidthSoon==='function') recalcColWidthSoon();
     });
     window.addEventListener('orientationchange', function(){
@@ -4607,6 +4655,84 @@ document.addEventListener('DOMContentLoaded', function() {
 
     refreshHeaderDropdown();
     refreshSLBuilderUI();
+
+    /* ════════════════════════════════════════════════════════
+       SESSION RESTORE
+       Remembers where you were (mode, set list, song number, scroll) so an
+       accidental refresh, a phone reclaiming the tab, or a pull-down gesture
+       drops you straight back where you were instead of the start screen.
+    ════════════════════════════════════════════════════════ */
+    var K_SESSION = 'song_manager_session';
+    var restoringSession = false;
+    function saveSession(){
+        if(restoringSession) return;
+        try{
+            var mode = perfBtn.classList.contains('active') ? 'perf'
+                     : (slBuilderView && slBuilderView.style.display==='block') ? 'builder' : 'edit';
+            localStorage.setItem(K_SESSION, JSON.stringify({
+                mode:mode, single:!!perfIsSingleSong, sl:getActSLName(), idx:curIdx,
+                title:flds.title.value.trim(), y:Math.round(window.scrollY), t:Date.now()
+            }));
+        }catch(e){}
+    }
+    function restoreSession(){
+        var s; try{ s=JSON.parse(localStorage.getItem(K_SESSION)||'null'); }catch(e){ s=null; }
+        if(!s || !s.mode || (Date.now()-(s.t||0)) > 12*3600*1000) return;
+        var lib=getLib(), sls=getAllSL();
+        restoringSession=true;
+        try{
+            if(s.mode==='perf'){
+                if(!s.single && s.sl && sls[s.sl] && sls[s.sl].length && lib[sls[s.sl][0]]){
+                    libSelect.value='setlist::'+s.sl;
+                    libSelect.dispatchEvent(new Event('change'));      // enters performance mode
+                    var idx=Math.min(Math.max(parseInt(s.idx,10)||0,0), sls[s.sl].length-1);
+                    if(idx>0) jumpTo(idx);
+                } else if(s.title && lib[s.title]){
+                    libSelect.value='song::'+s.title;
+                    libSelect.dispatchEvent(new Event('change'));
+                    perfBtn.click();
+                } else return;
+                setTimeout(function(){ window.scrollTo(0, s.y||0); }, 350);
+            } else if(s.mode==='builder'){
+                openSLBuilder();
+            } else if(s.title && lib[s.title]){
+                libSelect.value='song::'+s.title;
+                loadSong(lib[s.title]);
+            }
+        }catch(e){ /* a failed restore must never break startup */ }
+        restoringSession=false;
+        saveSession();
+    }
+    // Keep the screen awake while performing (a drummer isn't touching the
+    // phone, so it would otherwise dim and lock mid-song). Wake locks are
+    // dropped whenever the page is hidden, so re-request on return.
+    var _perfWL=null;
+    async function perfWakeOn(){
+        try{
+            if('wakeLock' in navigator && !_perfWL){
+                _perfWL=await navigator.wakeLock.request('screen');
+                if(_perfWL && _perfWL.addEventListener) _perfWL.addEventListener('release', function(){ _perfWL=null; });
+            }
+        }catch(e){ _perfWL=null; }
+    }
+    function perfWakeOff(){ try{ if(_perfWL){ _perfWL.release(); } }catch(e){} _perfWL=null; }
+    perfBtn.addEventListener('click', perfWakeOn);
+    editBtn.addEventListener('click', perfWakeOff);
+    document.addEventListener('visibilitychange', function(){
+        if(document.visibilityState==='visible' && perfBtn.classList.contains('active')) perfWakeOn();
+    });
+    editBtn.addEventListener('click', saveSession);
+    perfBtn.addEventListener('click', saveSession);
+    libSelect.addEventListener('change', saveSession);
+    if(openSLBuilderBtn) openSLBuilderBtn.addEventListener('click', saveSession);
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') saveSession(); });
+    window.addEventListener('pagehide', saveSession);
+    var _sessScrollT=null;
+    window.addEventListener('scroll', function(){
+        if(!perfBtn.classList.contains('active')) return;
+        clearTimeout(_sessScrollT); _sessScrollT=setTimeout(saveSession, 500);
+    }, {passive:true});
+    restoreSession();
 
 }); // DOMContentLoaded
 </script>
