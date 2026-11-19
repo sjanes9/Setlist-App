@@ -387,9 +387,16 @@
         .sl-queue{list-style:none;display:flex;flex-direction:column;gap:0.4rem;min-height:3rem;}
         .sl-queue-item{display:flex;align-items:center;gap:0.5rem;background:var(--sl-item-bg);border:1px solid var(--border);border-radius:var(--radius);padding:0.5rem 0.75rem;cursor:grab;user-select:none;transition:background-color var(--transition),border-color var(--transition),box-shadow 0.15s ease;}
         .sl-queue-item:active{cursor:grabbing;}
-        .sl-queue-item.drag-over{border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,0.2);}
-        .sl-queue-item.dragging{opacity:0.4;}
-        .drag-handle{color:var(--text-faint);font-size:1rem;flex-shrink:0;cursor:grab;}
+        .drag-handle{display:flex;align-items:center;justify-content:center;width:38px;height:38px;flex-shrink:0;font-size:1.5rem;line-height:1;color:var(--text-muted);background:var(--surface-2);border:1px solid var(--border);border-radius:8px;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;}
+        .drag-handle:active{cursor:grabbing;background:var(--primary);color:#fff;border-color:var(--primary);}
+        #setlistBuilderView{overflow-anchor:none;}
+        .sl-queue-item.sel{border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,0.35);}
+        .sl-queue-item.dragging{position:relative;z-index:50;opacity:0.92;box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+        .sl-queue-item.drop-before{box-shadow:0 -4px 0 0 var(--primary);}
+        .sl-queue-item.drop-after{box-shadow:0 4px 0 0 var(--primary);}
+        .sl-insert-hint{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;font-size:0.78rem;color:var(--text-muted);margin:0 0 0.6rem;}
+        .sl-insert-hint strong{color:var(--primary);}
+        .sl-insert-hint button{font-size:0.72rem;padding:0.15rem 0.55rem;border-radius:999px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;}
         .q-num{font-size:0.75rem;font-weight:700;color:var(--text-faint);min-width:1.25rem;text-align:right;flex-shrink:0;}
         .q-info{flex:1;min-width:0;}
         .q-title{font-weight:600;font-size:0.9rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -399,6 +406,7 @@
         /* Set list formatting: headers, highlight colours, notes */
         .sl-queue-item{flex-wrap:wrap;}
         .sl-queue-head{background:var(--surface-2);border-style:dashed;}
+        .sl-queue-head.sel{background:rgba(37,99,235,0.08);}
         .q-head-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:1px solid var(--border);}
         .q-head-text{flex:1;min-width:0;font-weight:800;font-size:0.95rem;padding:0.3rem 0.5rem;background:transparent;border:1px solid transparent;color:var(--text);}
         .q-head-text:focus{border-color:var(--primary);background:var(--bg);}
@@ -772,7 +780,7 @@
                     <button type="button" id="renameSetListBtn" class="btn btn-secondary" style="padding:0.45rem 0.85rem;font-size:0.8rem;">Rename</button>
                 </div>
                 <div class="hint" style="margin-bottom:0.5rem;">Drag a row by its grip or use the &#9650;/&#9660; buttons to reorder. Tap the colour dot to highlight a song, type a note under any song, and use headers (or <strong>H+</strong>) to label tunings and breaks. Changes save to this device instantly &mdash; press <strong>Upload to Cloud</strong> in the menu to share them.</div>
-                <div id="slSavedBanner" style="display:none;margin-bottom:0.75rem;padding:0.5rem 0.75rem;border-radius:var(--radius);background:rgba(22,163,74,0.15);border:1px solid var(--accent);color:var(--accent);font-size:0.8rem;font-weight:600;">&#10003; Set list order saved to this device</div>
+                <div id="slSavedBanner" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:5.5rem;z-index:2500;padding:0.5rem 0.9rem;border-radius:999px;background:var(--surface);border:1px solid var(--accent);box-shadow:0 4px 18px rgba(0,0,0,0.25);color:var(--accent);font-size:0.8rem;font-weight:700;pointer-events:none;white-space:nowrap;">&#10003; Set list order saved to this device</div>
                 <div class="sl-add-row">
                     <select id="setlistAddSelect"></select>
                     <button type="button" id="setlistAddBtn" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">+ Add</button>
@@ -788,6 +796,7 @@
                     <button type="button" class="sl-chip" data-h="Drop D">Drop D</button>
                     <button type="button" class="sl-chip" data-h="Break">Break</button>
                 </div>
+                <div class="sl-insert-hint" id="slInsertHint"></div>
                 <div id="slTotalBar" style="display:none;align-items:center;gap:1rem;flex-wrap:wrap;margin:0.5rem 0 0.75rem;padding:0.6rem 0.85rem;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);">
                     <div style="font-size:1rem;font-weight:800;color:var(--text);">
                         Total set time: <span id="slTotalTime">0:00</span>
@@ -1458,9 +1467,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function slMutate(fn){
+    // Which row new songs / headers are inserted above (-1 = none, add at the end).
+    var slSelIdx=-1, slSelName='';
+    function slRow(i){ return slQueue.querySelector('.sl-queue-item[data-index="'+i+'"]'); }
+    function updateInsertHint(){
+        var h=document.getElementById('slInsertHint'); if(!h) return;
+        var items=getActItems();
+        if(slSelIdx>=0 && slSelIdx<items.length){
+            var it=slAnnotate(items)[slSelIdx];
+            var label = it.type==='header' ? 'header “'+esc(it.text)+'”' : '#'+it.no+' '+esc(it.title);
+            h.innerHTML='<span>New songs and headers go <strong>above '+label+'</strong></span> <button type="button" id="slSelClear">Clear selection</button>';
+            document.getElementById('slSelClear').addEventListener('click', function(){ setSel(-1); });
+        } else {
+            h.innerHTML='<span>Tap a row to select it: new songs and headers are then added just above it. With nothing selected they go at the end.</span>';
+        }
+    }
+    function setSel(i){
+        slSelIdx=i;
+        slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){
+            el.classList.toggle('sel', parseInt(el.dataset.index,10)===i);
+        });
+        updateInsertHint();
+    }
+    // Re-render after a change WITHOUT the page jumping: the row at aOld is kept at the
+    // same spot on screen as it moves to aNew (so you can tap the same arrow again).
+    function slMutate(fn, aOld, aNew){
+        var before=null;
+        if(aOld!==undefined && aOld!==null && aOld>=0){
+            var el=slRow(aOld); if(el) before=el.getBoundingClientRect().top;
+        }
+        slQueue.style.minHeight=slQueue.offsetHeight+'px';      // stop the page height collapsing mid-render
         var its=getActItems(); fn(its); saveActItems(its);
         refreshSLBuilderUI(); refreshHeaderDropdown(); flashSLSaved();
+        if(before!==null){
+            var el2=slRow(aNew===undefined?aOld:aNew);
+            if(el2){ var d=el2.getBoundingClientRect().top-before; if(d) window.scrollBy(0,d); }
+        }
+        slQueue.style.minHeight='';
+    }
+    // Where an add (song or header) lands: above the selected row, else the end.
+    function slInsertAt(its){ return (slSelIdx>=0 && slSelIdx<=its.length-1) ? slSelIdx : its.length; }
+    // Insert an item at the right place and keep the selection on the same row.
+    function slInsertItem(item){
+        var anchor=null, n=getActItems().length, at=(slSelIdx>=0 && slSelIdx<n) ? slSelIdx : n;
+        if(at<n){ anchor=at; slSelIdx=at+1; }          // selection stays on the same row
+        slMutate(function(its){ its.splice(at,0,item); }, anchor, anchor===null?undefined:anchor+1);
     }
     function slSaveQuiet(fn){ var its=getActItems(); fn(its); saveActItems(its); }   // no re-render (keeps typing focus)
     function nextHeaderColor(items){
@@ -1470,10 +1521,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function addSLHeader(text, atIdx){
         text=(text||'').trim(); if(!text) return;
         if(!getActSLName()){ alert('Create a set list first.'); return; }
-        slMutate(function(its){
-            var h={type:'header', text:text, color:nextHeaderColor(its)};
-            if(atIdx===undefined || atIdx===null || atIdx>its.length) its.push(h); else its.splice(atIdx,0,h);
-        });
+        var h={type:'header', text:text, color:nextHeaderColor(getActItems())};
+        if(atIdx===undefined || atIdx===null){ slInsertItem(h); return; }
+        // explicit position (the per-row "H+ header" button)
+        if(slSelIdx>=atIdx) slSelIdx++;
+        slMutate(function(its){ its.splice(atIdx,0,h); }, atIdx, atIdx+1);
     }
     function openSLPalette(li, it){
         var ex=li.querySelector('.q-palette');
@@ -1496,25 +1548,27 @@ document.addEventListener('DOMContentLoaded', function() {
         var items  = getActItems();
         var library= getLib();
         var name   = getActSLName();
+        if(slSelName!==name){ slSelName=name; slSelIdx=-1; }
+        if(slSelIdx>=items.length) slSelIdx=-1;
         slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){ el.remove(); });
         if (!name) {
             slEmptyHint.textContent='Create a set list above to get started.';
-            slEmptyHint.style.display='block'; updateSetTotalTime(); return;
+            slEmptyHint.style.display='block'; updateSetTotalTime(); updateInsertHint(); return;
         }
         if (!items.length) {
             slEmptyHint.textContent='No songs in this set list yet. Add songs above.';
-            slEmptyHint.style.display='block'; updateSetTotalTime(); return;
+            slEmptyHint.style.display='block'; updateSetTotalTime(); updateInsertHint(); return;
         }
         slEmptyHint.style.display='none';
         slAnnotate(items).forEach(function(it){
             var idx=it.idx;
             var li=document.createElement('li');
             li.className='sl-queue-item'+(it.type==='header'?' sl-queue-head':'');
-            li.draggable=false; li.dataset.index=idx;
+            li.dataset.index=idx; if(idx===slSelIdx) li.classList.add('sel');
             var move='<div class="q-move"><button type="button" class="q-up" title="Move up">&#9650;</button>'+
                      '<button type="button" class="q-down" title="Move down">&#9660;</button></div>';
             if(it.type==='header'){
-                li.innerHTML='<span class="drag-handle">&#10783;</span>'+
+                li.innerHTML='<span class="drag-handle" title="Drag to reorder">&#8801;</span>'+
                     '<span class="q-head-dot" style="background:'+(it.eff||'transparent')+'"></span>'+
                     '<input type="text" class="q-head-text" value="'+esc(it.text)+'" placeholder="Header (tuning, break, etc.)" aria-label="Header text">'+
                     '<button type="button" class="q-remove" title="Remove header">&#10005;</button>'+
@@ -1525,7 +1579,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 var song=library[it.title]||{};
                 var dur=songDurationSec(song);
-                li.innerHTML='<span class="drag-handle">&#10783;</span>'+
+                li.innerHTML='<span class="drag-handle" title="Drag to reorder">&#8801;</span>'+
                     '<span class="q-num">'+it.no+'</span>'+
                     '<div class="q-info">'+
                       '<div class="q-title"><span class="q-hl" style="'+(it.eff?'background:'+it.eff+';color:#111;':'')+'">'+esc(it.title)+'</span></div>'+
@@ -1551,24 +1605,30 @@ document.addEventListener('DOMContentLoaded', function() {
             li.querySelector('.q-swatch').addEventListener('click', function(e){ e.stopPropagation(); openSLPalette(li, it); });
             li.querySelector('.q-remove').addEventListener('click', function(e){
                 e.stopPropagation();
-                slMutate(function(its){ its.splice(idx,1); });
+                if(slSelIdx===idx) slSelIdx=-1; else if(slSelIdx>idx) slSelIdx--;
+                slMutate(function(its){ its.splice(idx,1); }, idx+1, idx);
             });
             li.querySelector('.q-up').addEventListener('click', function(e){
                 e.stopPropagation(); if(idx===0) return;
-                slMutate(function(its){ var m=its.splice(idx,1)[0]; its.splice(idx-1,0,m); });
+                if(slSelIdx===idx) slSelIdx=idx-1; else if(slSelIdx===idx-1) slSelIdx=idx;
+                slMutate(function(its){ var m=its.splice(idx,1)[0]; its.splice(idx-1,0,m); }, idx, idx-1);
             });
             li.querySelector('.q-down').addEventListener('click', function(e){
                 e.stopPropagation();
-                slMutate(function(its){ if(idx>=its.length-1) return; var m=its.splice(idx,1)[0]; its.splice(idx+1,0,m); });
+                if(idx>=items.length-1) return;
+                if(slSelIdx===idx) slSelIdx=idx+1; else if(slSelIdx===idx+1) slSelIdx=idx;
+                slMutate(function(its){ var m=its.splice(idx,1)[0]; its.splice(idx+1,0,m); }, idx, idx+1);
             });
-            // Rows are only draggable from the grip, so text fields stay editable.
-            var grip=li.querySelector('.drag-handle');
-            grip.addEventListener('mousedown', function(){ li.draggable=true; });
-            li.addEventListener('dragstart', onDragStart);
-            li.addEventListener('dragover',  onDragOver);
-            li.addEventListener('dragleave', onDragLeave);
-            li.addEventListener('drop',      onDrop);
-            li.addEventListener('dragend',   onDragEnd);
+            // Select a row (new songs/headers go above it). Tap again to deselect.
+            li.addEventListener('click', function(e){
+                if(e.target.closest('button,input,.drag-handle')) return;
+                setSel(slSelIdx===idx ? -1 : idx);
+            });
+            li.addEventListener('focusin', function(e){
+                if(e.target.tagName==='INPUT' && slSelIdx!==idx) setSel(idx);
+            });
+            // Drag by the big grip. Pointer events, so it works with a finger as well as a mouse.
+            li.querySelector('.drag-handle').addEventListener('pointerdown', function(e){ startRowDrag(e, li, idx); });
             slQueue.appendChild(li);
         });
         updateSetTotalTime();
@@ -1617,18 +1677,67 @@ document.addEventListener('DOMContentLoaded', function() {
         bar.style.display='flex';
     }
 
-    /* ---- DRAG & DROP ---- */
-    var dragSrc=null;
-    function onDragStart(e){ dragSrc=parseInt(this.dataset.index,10); this.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; }
-    function onDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; this.classList.add('drag-over'); }
-    function onDragLeave(){ this.classList.remove('drag-over'); }
-    function onDrop(e){
-        e.preventDefault(); this.classList.remove('drag-over');
-        var dest=parseInt(this.dataset.index,10);
-        if(dragSrc===null||dragSrc===dest) return;
-        slMutate(function(its){ var moved=its.splice(dragSrc,1)[0]; its.splice(dest,0,moved); });
+    /* ---- DRAG & DROP (pointer events: finger or mouse) ---- */
+    function startRowDrag(e, li, idx){
+        if(e.pointerType==='mouse' && e.button!==0) return;
+        e.preventDefault();
+        var grip=e.currentTarget;
+        try{ grip.setPointerCapture(e.pointerId); }catch(_){}
+        var rows=[].slice.call(slQueue.querySelectorAll('.sl-queue-item'));
+        var others=rows.filter(function(r){ return r!==li; });
+        var startY=e.clientY, startScroll=window.scrollY, curY=e.clientY, slot=idx, raf=null, done=false;
+        li.classList.add('dragging');
+        function marks(){
+            rows.forEach(function(r){ r.classList.remove('drop-before','drop-after'); });
+            if(slot<idx && others[slot]) others[slot].classList.add('drop-before');
+            else if(slot>idx && others[slot-1]) others[slot-1].classList.add('drop-after');
+        }
+        function update(){
+            li.style.transform='translateY('+(curY-startY+(window.scrollY-startScroll))+'px)';
+            var s=0;
+            others.forEach(function(r){ var b=r.getBoundingClientRect(); if(curY>b.top+b.height/2) s++; });
+            if(s!==slot){ slot=s; marks(); }
+        }
+        function tick(){
+            if(done) return;
+            var edge=90, bottomEdge=window.innerHeight-130;
+            if(curY<edge) window.scrollBy(0,-Math.ceil((edge-curY)/6));
+            else if(curY>bottomEdge) window.scrollBy(0,Math.ceil((curY-bottomEdge)/6));
+            update(); raf=requestAnimationFrame(tick);
+        }
+        function onMove(ev){ curY=ev.clientY; update(); }
+        function finish(ev){
+            if(done) return; done=true;
+            cancelAnimationFrame(raf);
+            grip.removeEventListener('pointermove',onMove);
+            grip.removeEventListener('pointerup',finish);
+            grip.removeEventListener('pointercancel',cancel);
+            try{ grip.releasePointerCapture(e.pointerId); }catch(_){}
+            rows.forEach(function(r){ r.classList.remove('drop-before','drop-after'); });
+            if(slot!==idx){
+                // keep the selection on the same item
+                if(slSelIdx===idx) slSelIdx=slot;
+                else if(slSelIdx>idx && slSelIdx<=slot) slSelIdx--;
+                else if(slSelIdx<idx && slSelIdx>=slot) slSelIdx++;
+                // li is still transformed here, so its rect is where the finger dropped it
+                slMutate(function(its){ var m=its.splice(idx,1)[0]; its.splice(slot,0,m); }, idx, slot);
+            } else {
+                li.style.transform=''; li.classList.remove('dragging');
+            }
+        }
+        function cancel(){
+            if(done) return; done=true; cancelAnimationFrame(raf);
+            grip.removeEventListener('pointermove',onMove);
+            grip.removeEventListener('pointerup',finish);
+            grip.removeEventListener('pointercancel',cancel);
+            rows.forEach(function(r){ r.classList.remove('drop-before','drop-after'); });
+            li.style.transform=''; li.classList.remove('dragging');
+        }
+        grip.addEventListener('pointermove',onMove);
+        grip.addEventListener('pointerup',finish);
+        grip.addEventListener('pointercancel',cancel);
+        raf=requestAnimationFrame(tick);
     }
-    function onDragEnd(){ dragSrc=null; slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){ el.draggable=false; el.classList.remove('dragging','drag-over'); }); }
 
     /* ---- SET LIST CONTROLS ---- */
     actSLSel.addEventListener('change', function(){
@@ -1665,7 +1774,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var title=addSLSel.value; if(!title) return;
         if(!getActSLName()){ alert('Create a set list first.'); return; }
         var q=getActSL();
-        if(!q.includes(title)){ slMutate(function(its){ its.push({type:'song', title:title, color:'', note:''}); }); }
+        if(!q.includes(title)){ slInsertItem({type:'song', title:title, color:'', note:''}); }
     });
     // Header / tuning labels (like "½ Step Down", "Standard", "Break")
     (function initHeaderControls(){
