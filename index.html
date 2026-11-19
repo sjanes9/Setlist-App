@@ -396,6 +396,39 @@
         .q-meta{font-size:0.75rem;color:var(--text-muted);}
         .q-remove{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:1rem;line-height:1;padding:0.1rem 0.3rem;border-radius:4px;transition:color var(--transition),background-color var(--transition);flex-shrink:0;}
         .q-remove:hover{color:var(--danger);background:rgba(239,68,68,0.1);}
+        /* Set list formatting: headers, highlight colours, notes */
+        .sl-queue-item{flex-wrap:wrap;}
+        .sl-queue-head{background:var(--surface-2);border-style:dashed;}
+        .q-head-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:1px solid var(--border);}
+        .q-head-text{flex:1;min-width:0;font-weight:800;font-size:0.95rem;padding:0.3rem 0.5rem;background:transparent;border:1px solid transparent;color:var(--text);}
+        .q-head-text:focus{border-color:var(--primary);background:var(--bg);}
+        .q-noterow{flex-basis:100%;padding-left:2rem;}
+        .q-noterow .q-note{margin-top:0;}
+        @media (max-width:600px){
+            .sl-builder{padding:0.75rem 0.55rem;}
+            .sl-queue-item{padding:0.5rem 0.4rem;gap:0.35rem;}
+            .q-noterow,.q-actions{padding-left:0.2rem;}
+        }
+        .q-actions{flex-basis:100%;display:flex;align-items:center;gap:0.5rem;padding-left:2rem;}
+        .q-actions .q-move{flex-direction:row;margin:0;gap:4px;}
+        .q-title{white-space:normal;overflow:visible;}
+        .q-hl{padding:0.05rem 0.35rem;border-radius:3px;}
+        .q-note{width:100%;margin-top:0.3rem;font-size:0.8rem;padding:0.3rem 0.5rem;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;}
+        .q-swatch{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);cursor:pointer;flex-shrink:0;padding:0;touch-action:manipulation;}
+        .q-hadd{font-size:0.7rem;font-weight:800;padding:0.35rem 0.4rem;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:6px;cursor:pointer;flex-shrink:0;touch-action:manipulation;}
+        .q-hadd:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .q-palette{flex-basis:100%;display:flex;gap:0.4rem;flex-wrap:wrap;padding:0.4rem 0 0.1rem 2rem;}
+        .q-sw{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);cursor:pointer;padding:0;font-size:0.75rem;color:var(--text-muted);background:transparent;touch-action:manipulation;}
+        .q-sw.on{border-color:var(--text);box-shadow:0 0 0 2px var(--primary);}
+        .sl-head-row{display:flex;gap:0.5rem;align-items:center;margin:-0.4rem 0 0.5rem;}
+        .sl-head-row input{flex:1;min-width:0;font-size:0.875rem;padding:0.5rem 0.75rem;}
+        .sl-chips{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;}
+        .sl-chip{font-size:0.75rem;font-weight:700;padding:0.3rem 0.7rem;border-radius:999px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;touch-action:manipulation;}
+        .sl-chip:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .sl-head{list-style:none;display:flex;align-items:center;gap:0.45rem;padding:0.7rem 0.65rem 0.25rem;font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;opacity:0.85;}
+        .sl-head-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(128,128,128,0.4);}
+        .sl-hl{padding:0.05rem 0.3rem;border-radius:3px;}
+        .sl-note{font-size:0.7rem;opacity:0.85;white-space:normal;margin-top:0.1rem;font-style:italic;}
         .sl-empty{text-align:center;color:var(--text-faint);font-size:0.85rem;padding:1rem 0;font-style:italic;}
         
         /* ── COLLAPSIBLE DOCK ── */
@@ -738,11 +771,22 @@
                     <button type="button" id="newSetListBtn" class="btn btn-success" style="padding:0.45rem 0.85rem;font-size:0.8rem;">+ Create</button>
                     <button type="button" id="renameSetListBtn" class="btn btn-secondary" style="padding:0.45rem 0.85rem;font-size:0.8rem;">Rename</button>
                 </div>
-                <div class="hint" style="margin-bottom:0.5rem;">Drag rows or use the &#9650;/&#9660; buttons to reorder. Changes save to this device instantly &mdash; press <strong>Upload to Cloud</strong> in the menu to share them.</div>
+                <div class="hint" style="margin-bottom:0.5rem;">Drag a row by its grip or use the &#9650;/&#9660; buttons to reorder. Tap the colour dot to highlight a song, type a note under any song, and use headers (or <strong>H+</strong>) to label tunings and breaks. Changes save to this device instantly &mdash; press <strong>Upload to Cloud</strong> in the menu to share them.</div>
                 <div id="slSavedBanner" style="display:none;margin-bottom:0.75rem;padding:0.5rem 0.75rem;border-radius:var(--radius);background:rgba(22,163,74,0.15);border:1px solid var(--accent);color:var(--accent);font-size:0.8rem;font-weight:600;">&#10003; Set list order saved to this device</div>
                 <div class="sl-add-row">
                     <select id="setlistAddSelect"></select>
                     <button type="button" id="setlistAddBtn" class="btn" style="padding:0.5rem 1rem;font-size:0.875rem;">+ Add</button>
+                </div>
+                <div class="sl-head-row">
+                    <input type="text" id="slHeaderInput" list="slHeaderPresets" placeholder="Add a header, e.g. &#189; Step Down, Standard, Break&#8230;" autocomplete="off">
+                    <datalist id="slHeaderPresets"><option value="&#189; Step Down"><option value="Standard"><option value="Drop D"><option value="Break"></datalist>
+                    <button type="button" id="slHeaderAddBtn" class="btn btn-secondary" style="padding:0.5rem 0.9rem;font-size:0.8rem;">+ Header</button>
+                </div>
+                <div class="sl-chips" id="slHeaderChips">
+                    <button type="button" class="sl-chip" data-h="&#189; Step Down">&#189; Step Down</button>
+                    <button type="button" class="sl-chip" data-h="Standard">Standard</button>
+                    <button type="button" class="sl-chip" data-h="Drop D">Drop D</button>
+                    <button type="button" class="sl-chip" data-h="Break">Break</button>
                 </div>
                 <div id="slTotalBar" style="display:none;align-items:center;gap:1rem;flex-wrap:wrap;margin:0.5rem 0 0.75rem;padding:0.6rem 0.85rem;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);">
                     <div style="font-size:1rem;font-weight:800;color:var(--text);">
@@ -1116,10 +1160,49 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveAllSL(o){ localStorage.setItem(K_SLS, JSON.stringify(o)); }
     function getActSLName() { return localStorage.getItem(K_ACTSL) || ''; }
     function setActSLName(n){ localStorage.setItem(K_ACTSL, n); }
-    function getActSL() { var n=getActSLName(); return n ? (getAllSL()[n]||[]) : []; }
-    function saveActSL(arr) {
+    /* A set list is stored as an array. A plain song is just its title string
+       (the original format, so old data and old exports keep working). Extras are
+       only stored when used:
+         {type:'header', text:'\u00BD Step Down', color:'#dd7e6b'}   section / tuning label
+         {type:'song', title:'Jolene', color:'#f6b26b', note:'> straight into...'} */
+    var SL_COLORS = ['#dd7e6b','#b6d7a8','#6d9eeb','#b4a7d6','#f6b26b','#76a5af','#f1c232','#a4c2f4','#ea9999','#d5a6bd'];
+    function slNorm(e){
+        if(typeof e==='string') return {type:'song', title:e, color:'', note:''};
+        if(e && e.type==='header') return {type:'header', text:String(e.text||''), color:e.color||''};
+        if(e && e.title!==undefined) return {type:'song', title:String(e.title), color:e.color||'', note:e.note||''};
+        return null;
+    }
+    function slItemsOf(arr){ return (arr||[]).map(slNorm).filter(Boolean); }
+    function slPack(items){
+        return items.map(function(it){
+            if(it.type==='header') return {type:'header', text:it.text, color:it.color||''};
+            if(!it.color && !it.note) return it.title;           // plain song stays a plain string
+            var o={type:'song', title:it.title};
+            if(it.color) o.color=it.color;
+            if(it.note)  o.note=it.note;
+            return o;
+        });
+    }
+    function slSongCount(arr){ return slItemsOf(arr).filter(function(i){ return i.type==='song'; }).length; }
+    // Adds running song number, the colour inherited from the header above (a song's
+    // own colour wins), and the tuning/header text it sits under.
+    function slAnnotate(items){
+        var col='', tun='', n=0;
+        return items.map(function(it,i){
+            var o=Object.assign({}, it, {idx:i});
+            if(it.type==='header'){ col=it.color||''; tun=it.text; o.eff=col; }
+            else { n++; o.no=n; o.eff=it.color||col; o.tuning=tun; }
+            return o;
+        });
+    }
+    function getActItems(){ var n=getActSLName(); return n ? slItemsOf(getAllSL()[n]) : []; }
+    function saveActItems(items){
         var n=getActSLName(); if(!n) return;
-        var all=getAllSL(); all[n]=arr; saveAllSL(all);
+        var all=getAllSL(); all[n]=slPack(items); saveAllSL(all);
+    }
+    // Songs only, in order — what Performance mode and the add-dropdown work from.
+    function getActSL() {
+        return getActItems().filter(function(i){ return i.type==='song'; }).map(function(i){ return i.title; });
     }
 
     /* ---- UTILITY ---- */
@@ -1254,7 +1337,7 @@ document.addEventListener('DOMContentLoaded', function() {
             slNames.forEach(function(n){
                 var o = document.createElement('option');
                 o.value = 'setlist::'+n;
-                o.textContent = n + '  (' + allSL[n].length + ' songs)';
+                o.textContent = n + '  (' + slSongCount(allSL[n]) + ' songs)';
                 grp2.appendChild(o);
             });
             libSelect.appendChild(grp2);
@@ -1345,7 +1428,7 @@ document.addEventListener('DOMContentLoaded', function() {
             names.forEach(function(n){
                 var o = document.createElement('option');
                 o.value = n;
-                o.textContent = n + '  (' + all[n].length + ' song' + (all[n].length!==1?'s':'') + ')';
+                o.textContent = n + '  (' + slSongCount(all[n]) + ' song' + (slSongCount(all[n])!==1?'s':'') + ')';
                 if (n===active) o.selected=true;
                 actSLSel.appendChild(o);
             });
@@ -1375,55 +1458,112 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function slMutate(fn){
+        var its=getActItems(); fn(its); saveActItems(its);
+        refreshSLBuilderUI(); refreshHeaderDropdown(); flashSLSaved();
+    }
+    function slSaveQuiet(fn){ var its=getActItems(); fn(its); saveActItems(its); }   // no re-render (keeps typing focus)
+    function nextHeaderColor(items){
+        var heads=items.filter(function(i){ return i.type==='header'; });
+        return SL_COLORS[heads.length % SL_COLORS.length];
+    }
+    function addSLHeader(text, atIdx){
+        text=(text||'').trim(); if(!text) return;
+        if(!getActSLName()){ alert('Create a set list first.'); return; }
+        slMutate(function(its){
+            var h={type:'header', text:text, color:nextHeaderColor(its)};
+            if(atIdx===undefined || atIdx===null || atIdx>its.length) its.push(h); else its.splice(atIdx,0,h);
+        });
+    }
+    function openSLPalette(li, it){
+        var ex=li.querySelector('.q-palette');
+        if(ex){ ex.remove(); return; }
+        var pal=document.createElement('div'); pal.className='q-palette';
+        SL_COLORS.concat(['']).forEach(function(col){
+            var b=document.createElement('button'); b.type='button'; b.className='q-sw'+((it.color||'')===col?' on':'');
+            if(col){ b.style.background=col; b.title='Highlight colour'; }
+            else { b.textContent='✕'; b.title = it.type==='header' ? 'No colour' : 'Use the header’s colour'; }
+            b.addEventListener('click', function(e){
+                e.stopPropagation();
+                slMutate(function(its){ its[it.idx].color=col; });
+            });
+            pal.appendChild(b);
+        });
+        li.appendChild(pal);
+    }
+
     function renderQueue() {
-        var queue  = getActSL();
+        var items  = getActItems();
         var library= getLib();
         var name   = getActSLName();
         slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){ el.remove(); });
         if (!name) {
             slEmptyHint.textContent='Create a set list above to get started.';
-            slEmptyHint.style.display='block'; return;
+            slEmptyHint.style.display='block'; updateSetTotalTime(); return;
         }
-        if (!queue.length) {
+        if (!items.length) {
             slEmptyHint.textContent='No songs in this set list yet. Add songs above.';
-            slEmptyHint.style.display='block'; return;
+            slEmptyHint.style.display='block'; updateSetTotalTime(); return;
         }
         slEmptyHint.style.display='none';
-        queue.forEach(function(title, idx){
-            var song=library[title]||{};
+        slAnnotate(items).forEach(function(it){
+            var idx=it.idx;
             var li=document.createElement('li');
-            li.className='sl-queue-item'; li.draggable=true;
-            li.dataset.index=idx; li.dataset.title=title;
-            li.innerHTML='<span class="drag-handle">&#10783;</span>'+
-                '<span class="q-num">'+(idx+1)+'</span>'+
-                '<div class="q-info">'+
-                  '<div class="q-title">'+esc(title)+'</div>'+
-                  '<div class="q-meta">'+(song.key?'Key: '+esc(song.key):'')+
-                    (song.tempo?' &middot; '+song.tempo+' BPM':'')+
-                    (songDurationSec(song)?' &middot; '+fmtMMSS(songDurationSec(song)):'')+'</div>'+
-                '</div>'+
-                '<div class="q-move">'+
-                  '<button class="q-up" title="Move up">&#9650;</button>'+
-                  '<button class="q-down" title="Move down">&#9660;</button>'+
-                '</div>'+
-                '<button class="q-remove" title="Remove">&#10005;</button>';
+            li.className='sl-queue-item'+(it.type==='header'?' sl-queue-head':'');
+            li.draggable=false; li.dataset.index=idx;
+            var move='<div class="q-move"><button type="button" class="q-up" title="Move up">&#9650;</button>'+
+                     '<button type="button" class="q-down" title="Move down">&#9660;</button></div>';
+            if(it.type==='header'){
+                li.innerHTML='<span class="drag-handle">&#10783;</span>'+
+                    '<span class="q-head-dot" style="background:'+(it.eff||'transparent')+'"></span>'+
+                    '<input type="text" class="q-head-text" value="'+esc(it.text)+'" placeholder="Header (tuning, break, etc.)" aria-label="Header text">'+
+                    '<button type="button" class="q-remove" title="Remove header">&#10005;</button>'+
+                    '<div class="q-actions"><button type="button" class="q-swatch" title="Header colour" style="background:'+(it.color||'transparent')+'"></button>'+move+'</div>';
+                li.querySelector('.q-head-text').addEventListener('input', function(e){
+                    var v=e.target.value; slSaveQuiet(function(its){ its[idx].text=v; });
+                });
+            } else {
+                var song=library[it.title]||{};
+                var dur=songDurationSec(song);
+                li.innerHTML='<span class="drag-handle">&#10783;</span>'+
+                    '<span class="q-num">'+it.no+'</span>'+
+                    '<div class="q-info">'+
+                      '<div class="q-title"><span class="q-hl" style="'+(it.eff?'background:'+it.eff+';color:#111;':'')+'">'+esc(it.title)+'</span></div>'+
+                      '<div class="q-meta">'+(song.key?'Key: '+esc(song.key):'')+
+                        (song.tempo?' &middot; '+song.tempo+' BPM':'')+
+                        (dur?' &middot; '+fmtMMSS(dur):'')+
+                        (it.tuning?' &middot; '+esc(it.tuning):'')+'</div>'+
+                    '</div>'+
+                    '<button type="button" class="q-remove" title="Remove">&#10005;</button>'+
+                    '<div class="q-noterow"><input type="text" class="q-note" value="'+esc(it.note||'')+'" placeholder="Add a note, e.g. > guitar straight into the next song" aria-label="Note"></div>'+
+                    '<div class="q-actions"><button type="button" class="q-swatch" title="Highlight colour" style="background:'+(it.eff||'transparent')+'"></button>'+
+                    move+'<button type="button" class="q-hadd" title="Insert a header above this song">H+ header</button></div>';
+                li.querySelector('.q-note').addEventListener('input', function(e){
+                    var v=e.target.value; slSaveQuiet(function(its){ its[idx].note=v; });
+                });
+                li.querySelector('.q-hadd').addEventListener('click', function(e){
+                    e.stopPropagation();
+                    var inp=document.getElementById('slHeaderInput');
+                    var t=prompt('Header text (e.g. ½ Step Down, Standard, Break):', inp?inp.value:'');
+                    if(t && t.trim()) addSLHeader(t, idx);
+                });
+            }
+            li.querySelector('.q-swatch').addEventListener('click', function(e){ e.stopPropagation(); openSLPalette(li, it); });
             li.querySelector('.q-remove').addEventListener('click', function(e){
                 e.stopPropagation();
-                var q=getActSL(); q.splice(idx,1); saveActSL(q);
-                refreshSLBuilderUI(); refreshHeaderDropdown();
+                slMutate(function(its){ its.splice(idx,1); });
             });
             li.querySelector('.q-up').addEventListener('click', function(e){
-                e.stopPropagation();
-                if(idx===0) return;
-                var q=getActSL(); var m=q.splice(idx,1)[0]; q.splice(idx-1,0,m);
-                saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown(); flashSLSaved();
+                e.stopPropagation(); if(idx===0) return;
+                slMutate(function(its){ var m=its.splice(idx,1)[0]; its.splice(idx-1,0,m); });
             });
             li.querySelector('.q-down').addEventListener('click', function(e){
                 e.stopPropagation();
-                var q=getActSL(); if(idx>=q.length-1) return;
-                var m=q.splice(idx,1)[0]; q.splice(idx+1,0,m);
-                saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown(); flashSLSaved();
+                slMutate(function(its){ if(idx>=its.length-1) return; var m=its.splice(idx,1)[0]; its.splice(idx+1,0,m); });
             });
+            // Rows are only draggable from the grip, so text fields stay editable.
+            var grip=li.querySelector('.drag-handle');
+            grip.addEventListener('mousedown', function(){ li.draggable=true; });
             li.addEventListener('dragstart', onDragStart);
             li.addEventListener('dragover',  onDragOver);
             li.addEventListener('dragleave', onDragLeave);
@@ -1486,10 +1626,9 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault(); this.classList.remove('drag-over');
         var dest=parseInt(this.dataset.index,10);
         if(dragSrc===null||dragSrc===dest) return;
-        var q=getActSL(); var moved=q.splice(dragSrc,1)[0]; q.splice(dest,0,moved);
-        saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown(); flashSLSaved();
+        slMutate(function(its){ var moved=its.splice(dragSrc,1)[0]; its.splice(dest,0,moved); });
     }
-    function onDragEnd(){ dragSrc=null; slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){ el.classList.remove('dragging','drag-over'); }); }
+    function onDragEnd(){ dragSrc=null; slQueue.querySelectorAll('.sl-queue-item').forEach(function(el){ el.draggable=false; el.classList.remove('dragging','drag-over'); }); }
 
     /* ---- SET LIST CONTROLS ---- */
     actSLSel.addEventListener('change', function(){
@@ -1526,8 +1665,22 @@ document.addEventListener('DOMContentLoaded', function() {
         var title=addSLSel.value; if(!title) return;
         if(!getActSLName()){ alert('Create a set list first.'); return; }
         var q=getActSL();
-        if(!q.includes(title)){ q.push(title); saveActSL(q); refreshSLBuilderUI(); refreshHeaderDropdown(); }
+        if(!q.includes(title)){ slMutate(function(its){ its.push({type:'song', title:title, color:'', note:''}); }); }
     });
+    // Header / tuning labels (like "½ Step Down", "Standard", "Break")
+    (function initHeaderControls(){
+        var inp=document.getElementById('slHeaderInput');
+        var btn=document.getElementById('slHeaderAddBtn');
+        if(btn) btn.addEventListener('click', function(){
+            if(!inp) return; addSLHeader(inp.value); inp.value='';
+        });
+        if(inp) inp.addEventListener('keydown', function(e){
+            if(e.key==='Enter'){ e.preventDefault(); addSLHeader(inp.value); inp.value=''; }
+        });
+        document.querySelectorAll('#slHeaderChips .sl-chip').forEach(function(ch){
+            ch.addEventListener('click', function(){ addSLHeader(ch.getAttribute('data-h')); });
+        });
+    })();
 
     /* ---- LIBRARY SAVE / DELETE ---- */
     // Read the current scroll-speed control values (used by both save paths).
@@ -2182,22 +2335,34 @@ document.addEventListener('DOMContentLoaded', function() {
         slPanelName.textContent=name?'\uD83C\uDFB5 '+name:'\uD83C\uDFB5 Set List';
         slProgress.textContent=queue.length?(curIdx+1)+' / '+queue.length:'0 / 0';
         slPanelList.innerHTML='';
-        queue.forEach(function(title,idx){
+        var annotated=slAnnotate(getActItems());
+        var songIdx=-1, curInfo=null;
+        annotated.forEach(function(it){
+            if(it.type==='header'){
+                var hl=document.createElement('li'); hl.className='sl-head';
+                hl.innerHTML='<span class="sl-head-dot" style="background:'+(it.eff||'transparent')+'"></span>'+esc(it.text);
+                slPanelList.appendChild(hl); return;
+            }
+            songIdx++; var idx=songIdx, title=it.title;
+            if(idx===curIdx) curInfo=it;
             var song=lib[title]||{};
             var li=document.createElement('li'); li.className='sl-item';
             if(idx===curIdx) li.classList.add('active');
             if(idx<curIdx)   li.classList.add('done');
             li.innerHTML='<span class="sl-num">'+(idx+1)+'</span>'+
                 '<div class="sl-info">'+
-                  '<div class="sl-title">'+esc(title)+'</div>'+
+                  '<div class="sl-title"><span class="sl-hl" style="'+(it.eff?'background:'+it.eff+';color:#111;':'')+'">'+esc(title)+'</span></div>'+
                   '<div class="sl-meta">'+(song.key?'Key '+esc(song.key):'')+
                     (song.tempo?' &middot; '+song.tempo+' BPM':'')+'</div>'+
-                '</div>'+(idx<curIdx?'<span class="sl-tick">\u2713</span>':'');
+                  (it.note?'<div class="sl-note">'+esc(it.note)+'</div>':'')+
+                '</div>'+(idx<curIdx?'<span class="sl-tick">✓</span>':'');
             li.addEventListener('click',function(){ jumpTo(idx); });
             slPanelList.appendChild(li);
         });
         if(queue.length && !perfIsSingleSong){
-            slNavLabel.textContent=(curIdx+1)+' / '+queue.length+'  \u2022  '+(queue[curIdx]||'');
+            slNavLabel.textContent=(curIdx+1)+' / '+queue.length+'  \u2022  '+(queue[curIdx]||'')+
+                (curInfo&&curInfo.tuning?'  \u2022  '+curInfo.tuning:'');
+            slNavLabel.title=(curInfo&&curInfo.note)?curInfo.note:'';
             slNavCluster.style.display='flex';
         } else { slNavCluster.style.display='none'; }
         prevBtn.disabled=curIdx===0;
