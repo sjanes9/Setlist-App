@@ -1157,6 +1157,15 @@ document.addEventListener('DOMContentLoaded', function() {
        headers; square brackets are reserved for CHORDS. We write the standard
        form and still READ the legacy [Verse 1] form so old songs keep working. */
     var SECTION_RE = /^\{\s*(?:c|comment)\s*:\s*(.+?)\s*\}$/i;
+    // Old-style header: the WHOLE line is exactly one bracket pair, e.g. [Verse 1].
+    // A lyric line that merely starts with a chord and ENDS with one, like
+    // "[E]Far [C]away from [G]the [C]toadies[G]", is NOT a header.
+    var LEGACY_HEAD_RE = /^\[([^\[\]]+)\]$/;
+    function legacyHeaderName(t){
+        var m=(t||'').match(LEGACY_HEAD_RE); if(!m) return null;
+        var inner=m[1].trim();
+        return (inner && !CHORD_RE.test(inner)) ? inner : null;
+    }
     // Section header WITH an inline bar count: {c: Verse 1}{bars:16}
     var SECTION_BARS_RE = /^\{\s*(?:c|comment)\s*:\s*(.+?)\s*\}\s*\{\s*bars\s*:\s*(\d+(?:\.\d+)?)\s*\}$/i;
     // A section header optionally followed by any of {bars:N}{tempo:N}{time:X/Y}{key:Z}
@@ -2295,9 +2304,9 @@ document.addEventListener('DOMContentLoaded', function() {
             else {
                 var hm=t.match(SECTION_RE);
                 if(hm){ headerText=hm[1]; }
-                else if(t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']'){
-                    var inr=t.slice(1,-1).trim();
-                    if(inr && !CHORD_RE.test(inr)) headerText=inr;
+                else {
+                    var inr=legacyHeaderName(t);
+                    if(inr) headerText=inr;
                 }
             }
             if(headerText!==null){
@@ -3389,10 +3398,8 @@ document.addEventListener('DOMContentLoaded', function() {
             var hh=t.match(SECTION_HEAD_RE);
             if(hh){ out.push(hh[1].trim()); return; }
             // Legacy [Section] support (ignores chord brackets)
-            if(t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']'){
-                var inner=t.slice(1,-1).trim();
-                if(inner && !CHORD_RE.test(inner)) out.push(inner);
-            }
+            var inner=legacyHeaderName(t);
+            if(inner) out.push(inner);
         });
         return out;
     }
@@ -3584,12 +3591,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             // Legacy [Section] header (not a chord-only line)
-            if(t.length>2 && t.charAt(0)==='[' && t.charAt(t.length-1)===']'){
-                var inr=t.slice(1,-1).trim();
-                if(inr && !CHORD_RE.test(inr)){
-                    var h2=document.createElement('div'); h2.className='perf-section-heading'; h2.textContent=inr;
-                    chordPreviewBox.appendChild(h2); return;
-                }
+            var inr=legacyHeaderName(t);
+            if(inr){
+                var h2=document.createElement('div'); h2.className='perf-section-heading'; h2.textContent=inr;
+                chordPreviewBox.appendChild(h2); return;
             }
             chordPreviewBox.appendChild(parseChordLine(line, thisOff));
         });
