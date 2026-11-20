@@ -351,6 +351,23 @@
         .song-line{display:flex;flex-direction:column;margin-bottom:1.25rem;position:relative;max-width:var(--perf-col-width);}
         .chord-row{display:block;height:1.5rem;position:relative;white-space:pre;font-family:'Courier New',Courier,monospace;font-size:calc(var(--perf-font-size)*0.8);font-weight:700;overflow-x:visible;}
         .chord-wrapper{position:absolute;background-color:var(--chord-bg);color:var(--chord-text);padding:0 5px;border-radius:4px;line-height:1.3;transition:background-color var(--transition),color var(--transition);}
+        /* Hide chord changes (per-device setting, e.g. for the drummer) */
+        body.hide-chords #performanceView .chord-row{display:none;}
+        body.hide-chords #performanceView .song-line.chords-only{display:none;}
+        .chord-toggle-btn{padding:0.4rem 0.65rem;font-size:0.8rem;font-weight:700;flex-shrink:0;white-space:nowrap;}
+        .chord-toggle-btn.off{opacity:0.6;text-decoration:line-through;}
+        .chord-preview .chord-wrapper{cursor:pointer;}
+        .chord-preview .chord-wrapper:hover{outline:2px solid var(--primary);}
+        .chord-pop-backdrop{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.35);display:flex;align-items:flex-end;justify-content:center;}
+        .chord-pop{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) 0 0;box-shadow:0 -8px 40px rgba(0,0,0,0.35);width:100%;max-width:480px;padding:0.9rem 1rem 1.1rem;max-height:85vh;overflow-y:auto;}
+        .chord-pop h4{margin:0 0 0.6rem;font-size:1rem;color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:0.5rem;}
+        .chord-pop .cp-cur{font-family:'Courier New',monospace;font-size:1.3rem;font-weight:800;color:var(--primary);}
+        .chord-pop .cp-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin:0.6rem 0 0.3rem;}
+        .chord-pop .cp-grid{display:flex;flex-wrap:wrap;gap:0.4rem;}
+        .chord-pop .cp-grid button{min-width:46px;height:42px;padding:0 0.5rem;font-size:0.95rem;font-weight:700;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:8px;cursor:pointer;touch-action:manipulation;}
+        .chord-pop .cp-grid button.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .chord-pop .cp-row{display:flex;gap:0.5rem;align-items:center;margin-top:0.6rem;flex-wrap:wrap;}
+        .chord-pop .cp-row input{flex:1;min-width:110px;font-size:1rem;padding:0.45rem 0.6rem;}
         .lyric-row{display:block;font-size:var(--perf-font-size);white-space:pre-wrap;word-break:break-word;color:var(--text);min-height:1.4rem;transition:color var(--transition);}
         /* #2 Chord preview in the editor — reuses the performance chord markup
            but at a fixed, compact size so it reads well under the textarea. */
@@ -724,6 +741,11 @@
                         <span class="hint" style="margin:0;">Click where you want it, then pick one.</span>
                     </div>
                     <div class="insert-bar">
+                        <span class="insert-bar-label">Chords:</span>
+                        <button type="button" id="quickChordBtn" class="btn btn-outline insert-btn" title="Insert a chord at the cursor (starts as E, then type or tap it in the preview to change)">&#9835; + Chord (E)</button>
+                        <span class="hint" style="margin:0;">Click in the lyrics where the chord lands. To change one later, tap it in the Chord preview below.</span>
+                    </div>
+                    <div class="insert-bar">
                         <span class="insert-bar-label">Change at section:</span>
                         <button type="button" id="tempoChangeBtn" class="btn btn-outline insert-btn" title="Set a tempo change on the section at the cursor">&#9834; Tempo Change</button>
                         <button type="button" id="timeChangeBtn" class="btn btn-outline insert-btn" title="Set a time-signature change on the section at the cursor">&#8734; Time Change</button>
@@ -1058,6 +1080,7 @@
                 <span id="scrollStatusText">Paused</span>
             </div>
         </div>
+        <button type="button" id="chordToggleBtn" class="btn btn-outline chord-toggle-btn" title="Show or hide the chord changes on this device" aria-pressed="true">Chords &#10003;</button>
         <button type="button" id="quickActionsBtn" class="btn btn-outline live-btn dock-menu-btn" title="Menu — tempo, duration, count-in, metronome" aria-label="Open menu">&#9776;</button>
         <!-- Hidden legacy toggle: the dock body no longer expands, but some code
              still references this. Kept inert so nothing throws. -->
@@ -2418,15 +2441,22 @@ document.addEventListener('DOMContentLoaded', function() {
         applyColWidth(parseInt(colWidthSlider.value,10));
     }
 
-    function parseChordLine(line){
+    // baseOffset (editor preview only): where this line starts in the lyrics text, so a
+    // tapped chord can be found and changed in the textarea.
+    function parseChordLine(line, baseOffset){
         var wrap=document.createElement('div'); wrap.className='song-line';
         var cr=document.createElement('div'); cr.className='chord-row';
         var lr=document.createElement('div'); lr.className='lyric-row';
         var re=/\[([^\]]+)\]/g; var m,last=0,lyrics='',chords=[];
-        while((m=re.exec(line))!==null){ lyrics+=line.substring(last,m.index); chords.push({text:m[1],pos:lyrics.length}); last=re.lastIndex; }
+        while((m=re.exec(line))!==null){ lyrics+=line.substring(last,m.index); chords.push({text:m[1],pos:lyrics.length,at:m.index,len:m[0].length}); last=re.lastIndex; }
         lyrics+=line.substring(last); lr.textContent=lyrics||'\u00A0';
         if(chords.length){
-            chords.forEach(function(c){ var s=document.createElement('span'); s.className='chord-wrapper'; s.textContent=c.text; s.style.left=(c.pos*0.58)+'em'; cr.appendChild(s); });
+            if(!lyrics.trim()) wrap.classList.add('chords-only');     // instrumental chord line: hidden with the chords
+            chords.forEach(function(c){
+                var s=document.createElement('span'); s.className='chord-wrapper'; s.textContent=c.text; s.style.left=(c.pos*0.58)+'em';
+                if(baseOffset!==undefined){ s.dataset.off=baseOffset+c.at; s.dataset.len=c.len; s.title='Tap to change this chord'; }
+                cr.appendChild(s);
+            });
             wrap.appendChild(cr);
         }
         wrap.appendChild(lr); return wrap;
@@ -2826,6 +2856,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, {passive:true});
 
+    // (Re)measure the page and build the time->position anchors, scaled to the entered duration.
+    function prepareTimeline(){
+        timelineAnchors = buildAnchors();
+        var entered = parseDuration(durationInput.value);
+        var natural = timelineDurationSec();
+        if(entered>0 && natural>0 && Math.abs(entered-natural)>1){
+            var f = entered/natural;
+            timelineAnchors.forEach(function(a){ a.t *= f; });
+            timelineTotalSec = natural * f;
+        } else {
+            timelineTotalSec = natural;
+        }
+    }
+    // The layout changed under a running auto-scroll (e.g. chords hidden): re-measure but
+    // keep the song clock, so the scroll stays locked to the music.
+    function relayoutWhileScrolling(){
+        if(!scrolling) return;
+        if(useTimeline){
+            var keep=songElapsedMs;
+            prepareTimeline();
+            songElapsedMs=keep;
+            curScrollY=scrollYAtTime(keep/1000, timelineAnchors);
+            lastEngineY=curScrollY;
+            window.scrollTo(0, curScrollY);
+        } else {
+            calcRate();
+            curScrollY=window.scrollY; lastEngineY=curScrollY;
+        }
+        lastTs=null;
+    }
+
     function startScroll(){
         scrolling=true; lastTs=null; paused=false; activePause=null; curScrollY=window.scrollY;
         // Reset which pauses have fired, but only those still below us
@@ -2838,17 +2899,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Decide between timeline mode and classic rate mode
         useTimeline = hasTimeline() && speedMode.value==='duration';
         if(useTimeline){
-            timelineAnchors = buildAnchors();
-            // If the user overrode the duration, scale the timeline to match
-            var entered = parseDuration(durationInput.value);
-            var natural = timelineDurationSec();
-            if(entered>0 && natural>0 && Math.abs(entered-natural)>1){
-                var f = entered/natural;
-                timelineAnchors.forEach(function(a){ a.t *= f; });
-                timelineTotalSec = natural * f;
-            } else {
-                timelineTotalSec = natural;
-            }
+            prepareTimeline();
             // Resume from wherever the page currently sits
             songElapsedMs = timeAtScrollY(window.scrollY, timelineAnchors)*1000;
             statusTxt.textContent='Scrolling';
@@ -3512,7 +3563,9 @@ document.addEventListener('DOMContentLoaded', function() {
             chordPreviewBox.innerHTML='<div class="chord-preview-empty">Chords you add in [brackets] will show here, positioned over the lyrics.</div>';
             return;
         }
+        var lineOffset=0;
         text.split('\n').forEach(function(line){
+            var thisOff=lineOffset; lineOffset+=line.length+1;
             var t=line.trim();
             if(!t){ // blank line -> small spacer
                 var sp=document.createElement('div'); sp.style.height='0.4rem'; chordPreviewBox.appendChild(sp); return;
@@ -3538,7 +3591,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     chordPreviewBox.appendChild(h2); return;
                 }
             }
-            chordPreviewBox.appendChild(parseChordLine(line));
+            chordPreviewBox.appendChild(parseChordLine(line, thisOff));
         });
     }
 
@@ -3549,6 +3602,106 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if(flds.lyrics) flds.lyrics.addEventListener('input', scheduleChordPreview);
     if(chordPreviewToggle) chordPreviewToggle.addEventListener('change', renderChordPreview);
+
+    /* ---- QUICK CHORD INSERT + CHORD EDITOR ---- */
+    var DEFAULT_CHORD='E';
+    var CH_ROOTS=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+    var CH_QUALS=[['','Major'],['m','m'],['7','7'],['maj7','maj7'],['m7','m7'],['sus2','sus2'],['sus4','sus4'],['5','5'],['6','6'],['add9','add9'],['dim','dim']];
+    // Rewrite the lyrics box WITHOUT it (or the page) jumping. Assigning .value resets the
+    // textarea's scroll (Safari sends it to the bottom) and focus() can scroll the page, so
+    // capture both positions first and put them back, now and again after the browser settles.
+    function setLyricsKeepScroll(newVal, selStart, selEnd, focusIt){
+        var ta=flds.lyrics, pageX=window.scrollX, pageY=window.scrollY, taTop=ta.scrollTop;
+        function restore(){ ta.scrollTop=taTop; if(window.scrollY!==pageY || window.scrollX!==pageX) window.scrollTo(pageX,pageY); }
+        ta.value=newVal;
+        if(focusIt){
+            try{ ta.focus({preventScroll:true}); }catch(e){ ta.focus(); }
+            try{ ta.setSelectionRange(selStart, selEnd); }catch(e){}
+        }
+        restore();
+        if(window.requestAnimationFrame) requestAnimationFrame(function(){ restore(); setTimeout(restore, 60); });
+    }
+    function insertQuickChord(){
+        var ta=flds.lyrics; if(!ta) return;
+        var val=ta.value;
+        var pos=(typeof ta.selectionStart==='number') ? ta.selectionStart : val.length;
+        // the "E" ends up selected: just type to replace it
+        setLyricsKeepScroll(val.slice(0,pos)+'['+DEFAULT_CHORD+']'+val.slice(pos), pos+1, pos+1+DEFAULT_CHORD.length, true);
+        ta.dispatchEvent(new Event('input',{bubbles:true}));
+        renderChordPreview();
+    }
+    var quickChordBtn=document.getElementById('quickChordBtn');
+    if(quickChordBtn) quickChordBtn.addEventListener('click', insertQuickChord);
+
+    var chordPop=null;
+    function closeChordPop(){ if(chordPop){ chordPop.remove(); chordPop=null; } }
+    function openChordEditor(off, len){
+        var ta=flds.lyrics;
+        var m=ta.value.substr(off,len).match(/^\[([^\]]*)\]$/);
+        if(!m){ renderChordPreview(); return; }
+        closeChordPop();
+        var st={off:off, len:len, chord:m[1]};
+        var back=document.createElement('div'); back.className='chord-pop-backdrop';
+        var pop=document.createElement('div'); pop.className='chord-pop';
+        back.appendChild(pop); document.body.appendChild(back); chordPop=back;
+        back.addEventListener('click', function(e){ if(e.target===back) closeChordPop(); });
+
+        function parts(){
+            var mm=st.chord.match(/^([A-G][#b]?)([^\/]*)(\/.*)?$/);
+            return mm ? {root:mm[1], qual:mm[2]||'', bass:mm[3]||''} : {root:'', qual:'', bass:''};
+        }
+        function apply(newChord){
+            if(ta.value.substr(st.off,st.len)!=='['+st.chord+']'){ closeChordPop(); renderChordPreview(); return; }
+            setLyricsKeepScroll(ta.value.slice(0,st.off)+'['+newChord+']'+ta.value.slice(st.off+st.len));
+            st.chord=newChord; st.len=newChord.length+2;
+            ta.dispatchEvent(new Event('input',{bubbles:true}));
+            renderChordPreview(); draw();
+        }
+        function remove(){
+            if(ta.value.substr(st.off,st.len)==='['+st.chord+']'){
+                setLyricsKeepScroll(ta.value.slice(0,st.off)+ta.value.slice(st.off+st.len));
+                ta.dispatchEvent(new Event('input',{bubbles:true}));
+            }
+            closeChordPop(); renderChordPreview();
+        }
+        function draw(){
+            var p=parts();
+            pop.innerHTML='<h4><span>Change chord</span><span class="cp-cur"></span></h4>'+
+                '<div class="cp-label">Note</div><div class="cp-grid" data-k="root"></div>'+
+                '<div class="cp-label">Type</div><div class="cp-grid" data-k="qual"></div>'+
+                '<div class="cp-label">Or type it</div>'+
+                '<div class="cp-row"><input type="text" class="cp-custom" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chord text">'+
+                '<button type="button" class="btn btn-success cp-set">Set</button></div>'+
+                '<div class="cp-row" style="justify-content:space-between;">'+
+                '<button type="button" class="btn btn-danger cp-del">Delete chord</button>'+
+                '<button type="button" class="btn btn-secondary cp-done">Done</button></div>';
+            pop.querySelector('.cp-cur').textContent=st.chord||'(empty)';
+            var customIn=pop.querySelector('.cp-custom'); customIn.value=st.chord;
+            var rg=pop.querySelector('[data-k="root"]');
+            CH_ROOTS.forEach(function(r){
+                var b=document.createElement('button'); b.type='button'; b.textContent=r; if(r===p.root) b.className='on';
+                b.addEventListener('click', function(){ apply(r+p.qual+p.bass); });
+                rg.appendChild(b);
+            });
+            var qg=pop.querySelector('[data-k="qual"]');
+            CH_QUALS.forEach(function(q){
+                var b=document.createElement('button'); b.type='button'; b.textContent=q[1]; if(q[0]===p.qual && p.root) b.className='on';
+                b.addEventListener('click', function(){ apply((p.root||DEFAULT_CHORD)+q[0]+p.bass); });
+                qg.appendChild(b);
+            });
+            function setCustom(){ var v=customIn.value.trim().replace(/[\[\]]/g,''); if(v) apply(v); }
+            pop.querySelector('.cp-set').addEventListener('click', setCustom);
+            customIn.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); setCustom(); } });
+            pop.querySelector('.cp-del').addEventListener('click', remove);
+            pop.querySelector('.cp-done').addEventListener('click', closeChordPop);
+        }
+        draw();
+    }
+    if(chordPreviewBox) chordPreviewBox.addEventListener('click', function(e){
+        var el=e.target.closest ? e.target.closest('.chord-wrapper[data-off]') : null;
+        if(el) openChordEditor(parseInt(el.dataset.off,10), parseInt(el.dataset.len,10));
+    });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeChordPop(); });
 
     function insertSectionAtCursor(label, bars){
         var ta=flds.lyrics;
@@ -4916,6 +5069,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     window.addEventListener('resize', refitAudienceIfOpen);
     window.addEventListener('orientationchange', function(){ setTimeout(refitAudienceIfOpen,250); });
+
+    /* ---- HIDE / SHOW CHORDS in performance mode (saved per device) ---- */
+    var K_HIDECH='song_manager_hide_chords';
+    var chordToggleBtn=document.getElementById('chordToggleBtn');
+    function syncChordBtn(){
+        if(!chordToggleBtn) return;
+        var hidden=document.body.classList.contains('hide-chords');
+        chordToggleBtn.classList.toggle('off', hidden);
+        chordToggleBtn.innerHTML = hidden ? 'Chords &#10005;' : 'Chords &#10003;';
+        chordToggleBtn.setAttribute('aria-pressed', hidden ? 'false' : 'true');
+        chordToggleBtn.title = hidden ? 'Chords are hidden on this device. Tap to show them.' : 'Chords are showing. Tap to hide them on this device.';
+    }
+    function setChordsHidden(hide){
+        // Remember which line is at the reading line so hiding the chord rows doesn't lose your place.
+        var anchorEl=null, before=null;
+        try{
+            if(typeof document.elementFromPoint==='function'){
+                var r=rnd.content.getBoundingClientRect();
+                var hit=document.elementFromPoint(r.left+30, window.innerHeight*READ_FRACTION);
+                anchorEl = hit && hit.closest ? hit.closest('.song-line,.perf-section-heading,.pause-marker') : null;
+                if(anchorEl) before=anchorEl.getBoundingClientRect().top;
+            }
+        }catch(e){ anchorEl=null; }
+        document.body.classList.toggle('hide-chords', !!hide);
+        try{ localStorage.setItem(K_HIDECH, hide?'1':'0'); }catch(e){}
+        if(anchorEl && before!==null && !(scrolling && useTimeline)){
+            var d=anchorEl.getBoundingClientRect().top-before; if(d) window.scrollBy(0,d);
+        }
+        relayoutWhileScrolling();
+        syncChordBtn();
+    }
+    try{ if(localStorage.getItem(K_HIDECH)==='1') document.body.classList.add('hide-chords'); }catch(e){}
+    syncChordBtn();
+    if(chordToggleBtn) chordToggleBtn.addEventListener('click', function(){
+        setChordsHidden(!document.body.classList.contains('hide-chords'));
+    });
 
     // Best-effort screen wake lock (supported on modern mobile browsers).
     var _wakeLock=null;
