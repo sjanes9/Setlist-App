@@ -2541,11 +2541,20 @@ document.addEventListener('DOMContentLoaded', function() {
     var pauseUntil  = 0;      // timestamp when current pause ends
     var activePause = null;
     // User-input tracking so the auto-scroll never fights a finger/wheel.
-    var touching=false, touchMoved=false, lastUserMoveTs=-1e9;
+    var touching=false, touchMoved=false, lastUserMoveTs=-1e9, lastTouchMoveTs=-1e9;
+    // A finger only counts as "dragging the page" while touchmove events are actually
+    // arriving. Touch-end / cancel events do get lost on iPads (palm touches, multitasking
+    // gestures, edge swipes); the engine must never sit frozen waiting for one.
+    function fingerDragging(now){ return touching && touchMoved && (now - lastTouchMoveTs) < 250; }
     window.addEventListener('touchstart', function(){ touching=true; touchMoved=false; }, {passive:true});
-    window.addEventListener('touchmove',  function(){ touchMoved=true; }, {passive:true});
-    window.addEventListener('touchend',    function(){ touching=false; }, {passive:true});
-    window.addEventListener('touchcancel', function(){ touching=false; }, {passive:true});
+    window.addEventListener('touchmove',  function(){ touchMoved=true; lastTouchMoveTs=performance.now(); }, {passive:true});
+    function touchEnded(e){ touching = !!(e && e.touches && e.touches.length>0); }
+    window.addEventListener('touchend',    touchEnded, {passive:true});
+    window.addEventListener('touchcancel', touchEnded, {passive:true});
+    window.addEventListener('blur',      function(){ touching=false; });
+    window.addEventListener('pagehide',  function(){ touching=false; });
+    window.addEventListener('orientationchange', function(){ touching=false; });
+    document.addEventListener('visibilitychange', function(){ touching=false; });
     window.addEventListener('wheel', function(){ lastUserMoveTs=performance.now(); }, {passive:true});
 
     function countWords(str){
@@ -2741,7 +2750,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // The user is dragging / flinging the page: let go of the wheel, adopt
         // wherever they put it, and carry on from there once they let go.
-        if((touching && touchMoved) || (ts - lastUserMoveTs) < 160){
+        if(fingerDragging(ts) || (ts - lastUserMoveTs) < 160){
             curScrollY = window.scrollY; lastEngineY = curScrollY;
             if(useTimeline && timelineAnchors && timelineAnchors.length){
                 songElapsedMs = timeAtScrollY(curScrollY, timelineAnchors) * 1000;
@@ -2802,8 +2811,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var userDelta = Math.abs(window.scrollY - lastEngineY);
         // Any scroll while a finger is dragging is the user's; otherwise treat a
         // jump bigger than rounding noise as the user's (momentum / wheel).
-        if((touching && touchMoved) || userDelta > 1.5){
-            lastUserMoveTs = performance.now();
+        var nowMs = performance.now();
+        if(fingerDragging(nowMs) || userDelta > 3){
+            lastUserMoveTs = nowMs;
             curScrollY  = window.scrollY;
             lastEngineY = window.scrollY;
             lastTs      = null;   // reset so there's no velocity jump next frame
